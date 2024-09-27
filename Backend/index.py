@@ -1,17 +1,14 @@
-<<<<<<< Updated upstream
 from flask import Flask,jsonify
 from flask_restful import Resource, Api
 from flask import g
-import os
-import sqlite3
-DATABASE = 'Backend/data.sqlite'
-=======
-import requests,urllib.parse,pytz
-from flask import Flask,jsonify
 from flask.views import MethodView
 from datetime import datetime
+import os
+import sqlite3
+import requests,urllib.parse,pytz
 
->>>>>>> Stashed changes
+DATABASE = 'Backend/data.sqlite'
+
 app = Flask(__name__)
 api = Api(app)
 
