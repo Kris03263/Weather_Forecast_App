@@ -1,10 +1,9 @@
 from flask import Flask,jsonify
-from flask_restful import Resource, Api
-from flask import g
+from flask_restful import Api
 from flask.views import MethodView
 from datetime import datetime
-import os
-import sqlite3
+from userControl.userControl import userControl_blueprint
+from userControl.Models import userDataResult
 import requests,urllib.parse,pytz
 
 DATABASE = 'Backend/data.sqlite'
@@ -60,7 +59,8 @@ def getAllWeatherData():
     return None
 
 app.add_url_rule('/test_api/', view_func=API_Test.as_view('test_api'))
+app.register_blueprint(userControl_blueprint, url_prefix='/users')
 
 if __name__ == '__main__':
     app.debug = True
-    app.run()
+    app.run(port=8000)
