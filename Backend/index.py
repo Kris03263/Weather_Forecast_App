@@ -1,10 +1,7 @@
-from flask import Flask,jsonify
+from flask import Flask
 from flask_restful import Api
-from flask.views import MethodView
-from datetime import datetime
 from userControl.userControl import userControl_blueprint
 from WeatherDataControl.WeatherControl import weatherControl_blueprint
-from userControl.Models import userDataResult
 
 DATABASE = 'Backend/data.sqlite'
 
