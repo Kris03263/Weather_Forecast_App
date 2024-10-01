@@ -1,124 +1,207 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, Image, Platform } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+} from "react-native";
 
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import { ParallaxScrollView } from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+export default function SettingsScreen() {
+  const [modalVisible, setModalVisible] = useState(false);
 
-export default function TabTwoScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <Ionicons size={310} name="code-slash" style={styles.headerImage} />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>
-        This app includes example code to help you get started.
-      </ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          and{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{" "}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the
-          web version, press <ThemedText type="defaultSemiBold">w</ThemedText>{" "}
-          in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the{" "}
-          <ThemedText type="defaultSemiBold">@2x</ThemedText> and{" "}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to
-          provide files for different screen densities
-        </ThemedText>
-        <Image
-          source={require("@/assets/images/react-logo.png")}
-          style={{ alignSelf: "center" }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText>{" "}
-          to see how to load{" "}
-          <ThemedText style={{ fontFamily: "SpaceMono" }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{" "}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook
-          lets you inspect what the user's current color scheme is, and so you
-          can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{" "}
-          <ThemedText type="defaultSemiBold">
-            components/HelloWave.tsx
-          </ThemedText>{" "}
-          component uses the powerful{" "}
-          <ThemedText type="defaultSemiBold">
-            react-native-reanimated
-          </ThemedText>{" "}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The{" "}
-              <ThemedText type="defaultSemiBold">
-                components/ParallaxScrollView.tsx
-              </ThemedText>{" "}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>設定</Text>
+        <View style={styles.avatar}></View>
+      </View>
+
+      {/* 天氣偏好區塊 */}
+      <View style={styles.preferenceBox}>
+        <Text style={styles.boxTitle}>天氣偏好</Text>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>溫度偏好:</Text>
+          <TextInput style={styles.input} placeholder="輸入溫度(°C)" />
+        </View>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>濕度偏好:</Text>
+          <TextInput style={styles.input} placeholder="輸入濕度" />
+        </View>
+      </View>
+
+      {/* 活動偏好區塊 */}
+      <View style={styles.preferenceBox}>
+        <Text style={styles.boxTitle}>活動偏好</Text>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>運動偏好:</Text>
+          <TouchableOpacity
+            style={styles.interactButton}
+            onPress={() => setModalVisible(true)}
+          >
+            <Text style={styles.interactText}>選擇運動</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>交通方式:</Text>
+          <TouchableOpacity style={styles.interactButton}>
+            <Text style={styles.interactText}>選擇交通方式</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>興趣偏好:</Text>
+          <TouchableOpacity style={styles.interactButton}>
+            <Text style={styles.interactText}>選擇嗜好</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      {/*Modal*/}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>選擇運動</Text>
+            <TouchableOpacity
+              style={[styles.modalbutton, styles.modalbuttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={styles.textStyle}>關閉</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
+  container: {
+    flex: 1,
+    backgroundColor: "#1a2738",
+    padding: 20,
   },
-  titleContainer: {
+  header: {
     flexDirection: "row",
-    gap: 8,
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  headerText: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#ccc",
+  },
+  preferenceBox: {
+    backgroundColor: "#d3d3d3",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+  },
+  boxTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 16,
+    width: 100,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    borderColor: "#ccc",
+    borderWidth: 1,
+  },
+  iconButton: {
+    width: 30,
+    height: 30,
+    marginLeft: 10,
+    backgroundColor: "#f0c14b",
+    borderRadius: 15,
+  },
+  saveButton: {
+    backgroundColor: "#4f8ef7",
+    borderRadius: 5,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  interactButton: {
+    backgroundColor: "#4f8ef7",
+    flex: 1,
+    borderRadius: 5,
+    alignItems: "center",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  interactText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    alignContent: "center",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalbutton: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  modalbuttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
   },
 });
