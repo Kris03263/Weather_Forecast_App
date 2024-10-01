@@ -24,7 +24,7 @@ nowsuburb = location.raw['address']['suburb']
 
 
 #匯入城市及精確度代號
-with open('./cityCode.json') as f:
+with open('Backend/cityCode.json') as f:
     city = json.load(f)# 更改編碼
 
 #天氣因子
@@ -47,6 +47,9 @@ resultElement = {
     "rainRate":weatherData[5]["time"][0]["elementValue"][0]["value"],
     "wind":weatherData[6]["time"][0]["elementValue"][0]["value"]
 } 
+
+def getData():
+    return resultElement
 
 
 
