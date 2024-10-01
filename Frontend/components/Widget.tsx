@@ -18,5 +18,7 @@ const styles = StyleSheet.create({
     minHeight: 200,
     backgroundColor: "#FFFFFF20",
     borderRadius: 15,
+    padding: 20,
+    gap: 20,
   },
 });
