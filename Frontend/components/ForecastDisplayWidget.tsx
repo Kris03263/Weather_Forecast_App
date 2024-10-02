@@ -9,15 +9,41 @@ import {
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function ForecastDisplayWidget() {
-  const [region, setRegion] = useState(["Taipei, Taiwan", "New York, USA"]);
-  let timeInterval_type = 0;
+  const [region, setRegion] = useState([
+    { id: 0, name: "土城區, 新北市" },
+    { id: 1, name: "大安區, 台北市" },
+  ]);
+  const [timeInterval_type, setTimeInterval] = useState(0);
+  const [currentTime, setCurrentTime] = useState("");
 
-  const HandleAddRegion = () => {
+  const GetCurrentTime = () => {
+    const date = new Date().toLocaleDateString();
+    setCurrentTime(date);
+  };
+
+  // 每次页面加载时更新时间
+  useEffect(() => {
+    setRegion([
+      { id: 0, name: "土城區, 新北市" },
+      { id: 1, name: "大安區, 台北市" },
+    ]);
+    GetCurrentTime();
+  }, []);
+
+  const HandleAddRegion = (name: string) => {
+    // Check if region is empty
+    name = name ? name : "{district}, {region}";
+
     // Add new region
-    setRegion([...region, "New Region, Country"]);
+    setRegion([...region, { id: region.length, name: name }]);
+  };
+
+  const HandleSetTimeInterval = (type: number) => {
+    // Set time interval type
+    setTimeInterval(type);
   };
 
   return (
@@ -26,31 +52,37 @@ export function ForecastDisplayWidget() {
         <SvgImage style={{ width: 30, height: 30 }} name="weather" />
         <Text style={styles.title}>Forecast</Text>
       </View>
-      {region.map((cityName, index) => (
-        <CityView
-          cityName={cityName}
-          date="09/27"
+      {region.map((region, index) => (
+        <Region
+          key={region.id}
+          name={region.name}
+          date={currentTime}
           timeInterval_type={timeInterval_type}
-        ></CityView>
+        ></Region>
       ))}
-      <TouchableOpacity style={styles.addButton} onPress={HandleAddRegion}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => HandleAddRegion("")}
+      >
         <SvgImage style={{ width: 40, height: 40 }} name="plus" />
       </TouchableOpacity>
     </Widget>
   );
 }
 
-interface CityViewProps {
-  cityName: string;
+interface RegionProps {
+  key: number;
+  name: string;
   date: string;
   timeInterval_type?: number; // 0 -> 3h | 1 -> 1D
 }
 
-export function CityView({
-  cityName,
+export function Region({
+  key,
+  name,
   date,
   timeInterval_type = 0,
-}: CityViewProps) {
+}: RegionProps) {
   const timeInterval_map = [
     [
       "00:00",
@@ -69,7 +101,7 @@ export function CityView({
   return (
     <View style={styles.cityView}>
       <Text style={styles.subTitle}>
-        {cityName} ({date})
+        {name} ({date})
       </Text>
       <ScrollView horizontal style={styles.weatherScroll}>
         {timeInterval_map[timeInterval_type].map((time, index) => (
