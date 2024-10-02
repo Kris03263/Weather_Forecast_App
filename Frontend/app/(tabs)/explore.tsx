@@ -8,8 +8,42 @@ import {
   StyleSheet,
 } from "react-native";
 
+interface RadioButtonProps {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}
+const RadioButton: React.FC<RadioButtonProps> = ({
+  label,
+  selected,
+  onPress,
+}) => (
+  <TouchableOpacity style={styles.radioButton} onPress={onPress}>
+    <View
+      style={[styles.radioCircle, selected && styles.selectedRadioCircle]}
+    />
+    <Text style={styles.radioLabel}>{label}</Text>
+  </TouchableOpacity>
+);
+
 export default function SettingsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [secondModalVisible, setSecondModalVisible] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [selectedTransportOptions, setSelectedTransportOptions] = useState<
+    string[]
+  >([]);
+
+  const toggleOption = (
+    option: string,
+    setSelected: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    setSelected((prevSelectedOptions) =>
+      prevSelectedOptions.includes(option)
+        ? prevSelectedOptions.filter((item) => item !== option)
+        : [...prevSelectedOptions, option]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -45,19 +79,17 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.inputRow}>
-          <Text style={styles.label}>交通方式:</Text>
-          <TouchableOpacity style={styles.interactButton}>
-            <Text style={styles.interactText}>選擇交通方式</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.inputRow}>
           <Text style={styles.label}>興趣偏好:</Text>
-          <TouchableOpacity style={styles.interactButton}>
+          <TouchableOpacity
+            style={styles.interactButton}
+            onPress={() => setSecondModalVisible(true)}
+          >
             <Text style={styles.interactText}>選擇嗜好</Text>
           </TouchableOpacity>
         </View>
       </View>
-      {/*Modal*/}
+
+      {/*選擇運動Modal*/}
       <Modal
         animationType="fade"
         transparent={true}
@@ -69,9 +101,57 @@ export default function SettingsScreen() {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>選擇運動</Text>
+            <View style={styles.radioGroup}>
+              {["運動1", "運動2", "運動3", "運動4", "運動5", "運動6"].map(
+                (option, index) => (
+                  <RadioButton
+                    key={index}
+                    label={option}
+                    selected={selectedOptions.includes(option)}
+                    onPress={() => toggleOption(option, setSelectedOptions)}
+                  />
+                )
+              )}
+            </View>
             <TouchableOpacity
               style={[styles.modalbutton, styles.modalbuttonClose]}
               onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={styles.textStyle}>關閉</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/*交通方式Modal*/}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={secondModalVisible}
+        onRequestClose={() => {
+          setSecondModalVisible(!secondModalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>選擇交通方式</Text>
+            <View style={styles.radioGroup}>
+              {["嗜好1", "嗜好2", "嗜好3", "嗜好4", "嗜好5", "嗜好6"].map(
+                (option, index) => (
+                  <RadioButton
+                    key={index}
+                    label={option}
+                    selected={selectedTransportOptions.includes(option)}
+                    onPress={() =>
+                      toggleOption(option, setSelectedTransportOptions)
+                    }
+                  />
+                )
+              )}
+            </View>
+            <TouchableOpacity
+              style={[styles.modalbutton, styles.modalbuttonClose]}
+              onPress={() => setSecondModalVisible(!secondModalVisible)}
             >
               <Text style={styles.textStyle}>關閉</Text>
             </TouchableOpacity>
@@ -203,5 +283,29 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center",
+  },
+  radioButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 10,
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "gray",
+    marginRight: 10,
+  },
+  selectedRadioCircle: {
+    backgroundColor: "blue",
+  },
+  radioLabel: {
+    fontSize: 16,
+  },
+  radioGroup: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
   },
 });
