@@ -36,7 +36,8 @@ def city():
         citycode = json.load(f)# 更改編碼
     return citycode
 
-def url(ft,nowCity,nowSuburb,nowTime): return f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-0{city()[nowCity+ft]}?Authorization=CWA-3D385D45-EFD5-4BD3-9677-9100AD39A4A2&locationName={nowSuburb}&elementName=T,Wx,RH,WS,WD,AT,MaxAT,MinAT,{"PoP6h"if ft=='3h'else"PoP12h"},WeatherDescription&sort=time&timeFrom={nowTime}"
+def url(ft,nowCity,nowSuburb,nowTime): 
+    return f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-0{city()[nowCity+ft]}?Authorization=CWA-3D385D45-EFD5-4BD3-9677-9100AD39A4A2&locationName={nowSuburb}&elementName=T,Wx,RH,WS,WD,AT,MaxAT,MinAT,{'PoP6h'if ft=='3h'else'PoP12h'},WeatherDescription&sort=time&timeFrom={nowTime}"
 
 def get3hData(lat,lon,nowTime):
     loc = setLocate(lat,lon)# 引入地理編碼
