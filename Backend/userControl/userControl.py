@@ -85,7 +85,7 @@ def register():
 @userControl_blueprint.route('/UserHabits',methods=['GET','POST'])
 def habits():
     if request.method == "GET":
-        id = request.args.get('id')
+        id = request.args.get('ID')
         cursor.execute("Select * from users where id =?",[id])
         counter = cursor.fetchall()
         habits = []
@@ -103,11 +103,32 @@ def habits():
             habit = Habit(i[0],i[1])
             habits.append(habit.to_dict())
         return jsonify(habits)
+    if request.method == "POST":
+        '''
+        {
+        "userID : "id"
+        "habitIDs" : "habitsIDList"
+        }
+        '''
+        data = request.get_json();
+        userID = data.get('userID')
+        habbitIdList = data.get('habitIDs')
+        cursor.execute("DELETE From usersAndHabits where userID = ?",(userID))
+        conn.commit()
+        for i in habbitIdList:
+            cursor.execute("INSERT INTO usersAndHabits VALUES(?,?)",(userID,i))
+        conn.commit()
+        result = {
+            "Stats" : "Update Successful !"
+        }
+        return jsonify(result)
+            
+            
 #獲取對應使用者運動/上傳運動
 @userControl_blueprint.route('/UserSports',methods=['GET','POST'])
 def sports():
     if request.method == "GET":
-        id = request.args.get('id')
+        id = request.args.get('ID')
         cursor.execute("Select * from users where id =?",[id])
         counter = cursor.fetchall()
         sports = []
@@ -125,6 +146,26 @@ def sports():
             sport = Sport(i[0],i[1])
             sports.append(sport.to_dict())
         return jsonify(sports)
+    if request.method == "POST":
+        '''
+        {
+        "userID : "id"
+        "sportIDs" : "sportsIDList"
+        }
+        '''
+        data = request.get_json();
+        userID = data.get('userID')
+        sportIdList = data.get('sportIDs')
+        cursor.execute("DELETE From usersAndSports where userID = ?",(userID))
+        conn.commit()
+        for i in sportIdList:
+            cursor.execute("INSERT INTO usersAndSports VALUES(?,?)",(userID,i))
+        conn.commit()
+        result = {
+            "Stats" : "Update Successful !"
+        }
+        return jsonify(result)
+    
             
             
     

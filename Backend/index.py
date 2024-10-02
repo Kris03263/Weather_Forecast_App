@@ -17,8 +17,8 @@ def index():
 def getAllWeatherData():
     return None
 
-app.register_blueprint(userControl_blueprint, url_prefix='/users')
-app.register_blueprint(weatherControl_blueprint, url_prefix='/weather')
+app.register_blueprint(userControl_blueprint, url_prefix='/Users')
+app.register_blueprint(weatherControl_blueprint, url_prefix='/Weather')
 
 if __name__ == '__main__':
     app.debug = True

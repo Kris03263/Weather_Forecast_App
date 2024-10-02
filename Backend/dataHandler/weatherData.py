@@ -32,7 +32,7 @@ def getTime(t): return (t - timedelta(minutes=90)).strftime("%Y-%m-%dT%H:%M:%S")
 
 def city():
     citycode = None
-    with open('/Users/weiyouen/Documents/GitHub/WFA/Backend/cityCode.json') as f:# 路徑需再修正
+    with open('Backend/cityCode.json') as f:# 路徑需再修正
         citycode = json.load(f)# 更改編碼
     return citycode
 
@@ -88,7 +88,7 @@ def get12hData(lat,lon,nowTime):
     return resultElement
 
 current_time = datetime.now()
-print(get12hData(25.06715187342581,121.66248756678424,current_time))
+#print(get12hData(25.06715187342581,121.66248756678424,current_time))
 
 
 
