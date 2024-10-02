@@ -134,7 +134,7 @@ export default function SettingsScreen() {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>選擇交通方式</Text>
+            <Text style={styles.modalText}>選擇嗜好</Text>
             <View style={styles.radioGroup}>
               {["嗜好1", "嗜好2", "嗜好3", "嗜好4", "嗜好5", "嗜好6"].map(
                 (option, index) => (
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22,
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalView: {
     margin: 20,
@@ -268,9 +268,8 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalbutton: {
-    borderRadius: 20,
+    borderRadius: 10,
     padding: 10,
-    elevation: 2,
   },
   modalbuttonClose: {
     backgroundColor: "#2196F3",
