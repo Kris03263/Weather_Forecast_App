@@ -9,26 +9,31 @@ import {
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
+import { useState } from "react";
 
 export function ForecastDisplayWidget() {
+  const [region, setRegion] = useState(["Taipei, Taiwan", "New York, USA"]);
+  let timeInterval_type = 0;
+
+  const HandleAddRegion = () => {
+    // Add new region
+    setRegion([...region, "New Region, Country"]);
+  };
+
   return (
     <Widget style={styles.customWidgetStyle}>
       <View style={styles.titleDisplay}>
         <SvgImage style={{ width: 30, height: 30 }} name="weather" />
         <Text style={styles.title}>Forecast</Text>
       </View>
-      <CityView cityName="Taipei, Taiwan" date="09/27"></CityView>
-      <CityView
-        cityName="New York, USA"
-        date="10/01"
-        timeInterval_type={0}
-      ></CityView>
-      <CityView
-        cityName="Taipei, Taiwan"
-        date="09/27"
-        timeInterval_type={0}
-      ></CityView>
-      <TouchableOpacity style={styles.addButton}>
+      {region.map((cityName, index) => (
+        <CityView
+          cityName={cityName}
+          date="09/27"
+          timeInterval_type={timeInterval_type}
+        ></CityView>
+      ))}
+      <TouchableOpacity style={styles.addButton} onPress={HandleAddRegion}>
         <SvgImage style={{ width: 40, height: 40 }} name="plus" />
       </TouchableOpacity>
     </Widget>
