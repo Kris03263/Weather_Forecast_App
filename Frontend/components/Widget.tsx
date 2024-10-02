@@ -6,7 +6,7 @@ interface WidgetProps {
   style?: object;
 }
 
-export function Widget({ children, style = {} }: WidgetProps) {
+export function Widget({ children = null, style = {} }: WidgetProps) {
   return <View style={[styles.emptyWidget, style]}>{children}</View>;
 }
 

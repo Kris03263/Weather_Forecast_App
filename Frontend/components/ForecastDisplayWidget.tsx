@@ -8,18 +8,13 @@ import {
 } from "react-native";
 
 import { Widget } from "@/components/Widget";
-import { Svg } from "./Svg";
-
-const [weatherIcon, plusIcon] = [
-  "/assets/svgs/weather-icon.svg",
-  "/assets/svgs/plus-icon.svg",
-];
+import { SvgImage } from "@/components/Svg";
 
 export function ForecastDisplayWidget() {
   return (
-    <Widget style={styles.forecastDisplayWidget}>
+    <Widget style={styles.customWidgetStyle}>
       <View style={styles.titleDisplay}>
-        <Svg style={{ width: 30, height: 30 }} src={weatherIcon}></Svg>
+        <SvgImage style={{ width: 30, height: 30 }} name="weather" />
         <Text style={styles.title}>Forecast</Text>
       </View>
       <CityView cityName="Taipei, Taiwan" date="09/27"></CityView>
@@ -34,7 +29,7 @@ export function ForecastDisplayWidget() {
         timeInterval_type={0}
       ></CityView>
       <TouchableOpacity style={styles.addButton}>
-        <Svg style={{ width: 40, height: 40 }} src={plusIcon}></Svg>
+        <SvgImage style={{ width: 40, height: 40 }} name="plus" />
       </TouchableOpacity>
     </Widget>
   );
@@ -73,13 +68,13 @@ export function CityView({
       </Text>
       <ScrollView horizontal style={styles.weatherScroll}>
         {timeInterval_map[timeInterval_type].map((time, index) => (
-          <View key={index} style={styles.weatherCard}>
+          <TouchableOpacity key={index} style={styles.weatherCard}>
             <Image
               // source={require("./cloud.png")} // require weather image
               style={styles.weatherIcon}
             />
             <Text style={styles.weatherTime}>{time}</Text>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
@@ -88,7 +83,7 @@ export function CityView({
 
 // Default Style
 const styles = StyleSheet.create({
-  forecastDisplayWidget: {
+  customWidgetStyle: {
     minHeight: "auto",
     justifyContent: "center",
     alignItems: "center",
@@ -96,6 +91,7 @@ const styles = StyleSheet.create({
   cityView: {
     width: "100%",
     overflow: "hidden",
+    alignItems: "center",
   },
   titleDisplay: {
     width: "100%",
@@ -105,12 +101,12 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   title: {
-    color: "black",
+    color: "white",
     fontSize: 24,
     textAlign: "left",
   },
   subTitle: {
-    color: "black",
+    color: "white",
     fontSize: 16,
     marginBottom: 10,
     fontWeight: "bold",
@@ -121,7 +117,7 @@ const styles = StyleSheet.create({
   weatherCard: {
     width: 60,
     height: 80,
-    backgroundColor: "#EAEAEA",
+    backgroundColor: "#EAEAEA30",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 8,
@@ -133,6 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   weatherTime: {
+    color: "white",
     fontSize: 12,
     fontWeight: "bold",
   },

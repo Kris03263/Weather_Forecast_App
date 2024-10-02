@@ -7,13 +7,12 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { ReactSVG } from "react-svg";
 
-import { Widget } from "@/components/Widget";
-import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
-import { HumidityDisplayWidget } from "@/components/HumidityDisplayWidget";
-import { WindDisplayWidget } from "@/components/WindDisplayWidget";
 import { WeatherDisplay } from "@/components/WeatherDisplay";
+import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
+import { IndicatorsDisplayWidget_single } from "@/components/IndicatorsDisplayWidget_single";
+import { IndicatorsDisplayWidget_double } from "@/components/IndicatorsDisplayWidget_double";
+import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 
 export default function HomeScreen() {
   return (
@@ -28,12 +27,29 @@ export default function HomeScreen() {
         <View style={{ gap: 20 }}>
           <ForecastDisplayWidget />
 
-          <View style={styles.horizontalWidget}>
-            <HumidityDisplayWidget />
-            <Widget />
+          <View style={styles.row}>
+            <IndicatorsDisplayWidget_single type="humidity" />
+            <IndicatorsDisplayWidget_single type="rain-rate" />
           </View>
 
-          <WindDisplayWidget />
+          <IndicatorsDisplayWidget_double
+            type1="wind-speed"
+            type2="wind-direction"
+          />
+
+          <View style={styles.row}>
+            <SuggestionDisplayWidget type="dressing" />
+            <SuggestionDisplayWidget type="health" />
+          </View>
+
+          <View style={styles.row}>
+            <SuggestionDisplayWidget type="sport" />
+            <SuggestionDisplayWidget type="transportation" />
+          </View>
+
+          <View style={styles.row}>
+            <SuggestionDisplayWidget type="activity" />
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -51,11 +67,11 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   bodySection: {
-    backgroundColor: "#FFFFFFAA",
+    backgroundColor: "#FFFFFF01",
     height: "70%",
     padding: "3%",
   },
-  horizontalWidget: {
+  row: {
     minWidth: "100%",
     flexDirection: "row",
     alignItems: "center",
