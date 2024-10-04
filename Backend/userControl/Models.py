@@ -29,3 +29,12 @@ class Sport():
             "id": self.id,
             "sportName" : self.sportName
         }
+class SportsSuggestion():
+    def __init__ (self,sportName,sportSuggestion):
+        self.sportName = sportName
+        self.sportSuggestion = sportSuggestion
+    def to_dict(self):
+        return {
+                "sportName": self.sportName,
+                "sportSuggestion" : self.sportSuggestion
+            }
