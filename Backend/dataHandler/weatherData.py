@@ -28,7 +28,7 @@ def getTime(t): return (t - timedelta(minutes=90)).strftime("%Y-%m-%dT%H:%M:%S")
 # 匯入城市及精確度代號
 def city():
     citycode = None
-    with open('Backend/cityCode.json') as f:# 路徑需再修正
+    with open('cityCode.json') as f:# 路徑需再修正
         citycode = json.load(f)# 更改編碼
     return citycode
 
