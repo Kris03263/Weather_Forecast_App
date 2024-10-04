@@ -1,12 +1,14 @@
 from flask import Flask
 from flask_restful import Api
+from flask_cors import CORS
 from userControl.userControl import userControl_blueprint
 from WeatherDataControl.WeatherControl import weatherControl_blueprint
 
-DATABASE = 'Backend/data.sqlite'
+DATABASE = 'data.sqlite'
 
 app = Flask(__name__)
 api = Api(app)
+CORS(app)
 
     
 
