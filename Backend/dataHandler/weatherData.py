@@ -57,7 +57,11 @@ def get3hData(lon,lat):
             "time":          weatherData[0]["time"][time]["startTime"],
             "city":          loc["city"],
             "district":      loc["district"]
-        },**(airData if time==0 else {})})
+        },**(airData if time==0 else {
+            "sitename": None,
+            "aqi":      None,
+            "pm2.5":    None
+        })})
 
     return resultElement
 
@@ -71,7 +75,8 @@ def get12hData(lon,lat):
     lastRainRate = ""
     
     for time in range(0,len(weatherData[0]["time"])-dayOffset,2):
-        if(weatherData[0]["time"][time+dayOffset]["elementValue"][0]["value"] != " "):lastRainRate = weatherData[0]["time"][time+dayOffset]["elementValue"][0]["value"]
+        rainRateDataNow = weatherData[0]["time"][time+dayOffset]["elementValue"][0]["value"]
+        if(rainRateDataNow != " "):lastRainRate = rainRateDataNow
         resultElement.append({
                 "weatherText":   weatherData[5]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "weatherCode":   weatherData[5]["time"][time+dayOffset]["elementValue"][1]["value"],
@@ -79,16 +84,18 @@ def get12hData(lon,lat):
                 "temp":          weatherData[1]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "wet":           weatherData[2]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "weatherDes":    weatherData[6]["time"][time+dayOffset]["elementValue"][0]["value"],
-                "rainRate":      weatherData[0]["time"][time+dayOffset]["elementValue"][0]["value"] if weatherData[0]["time"][time+dayOffset]["elementValue"][0]["value"]!= " " else lastRainRate,
+                "rainRate":      lastRainRate,
                 "windSpeed":     weatherData[4]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "windDirection": weatherData[8]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "time":          weatherData[0]["time"][time+dayOffset]["startTime"],
                 "city":          loc["city"],
-                "district":      loc["district"]
+                "district":      loc["district"],
+                "sitename": None,
+                "aqi":      None,
+                "pm2.5":    None
         })# 體感溫度以最大與最小取平均值,降雨量無較遠資料
 
     return resultElement
-
 # 121.66248756678424121,25.06715187342581
 # 已知問題 
 # 1.一週天氣若於白天請求，無法求取當天白天資料 解決辦法：以現時之天氣取代
