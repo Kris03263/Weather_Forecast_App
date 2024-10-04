@@ -84,7 +84,7 @@ def login():
 @userControl_blueprint.route('/',methods=['GET','POST','DELETE'])
 def register():
     if request.method == 'GET':
-        id = request.args.get('id')
+        id = request.args.get('ID')
         cursor.execute("Select * from users where id =?",[id])
         user = cursor.fetchall()
         if len(user) < 1:
@@ -124,11 +124,11 @@ def register():
     if request.method == 'DELETE':
         '''
         {
-        "id" : "userid"
+        "userID" : "userid"
         }
         '''
         data = request.get_json()
-        id = data.get('id')
+        id = data.get('userID')
         cursor.execute("UPDATE users SET deleted = 1 where id =?",[id])
         conn.commit()
         result ={
@@ -216,7 +216,7 @@ def sports():
         data = request.get_json();
         userID = data.get('userID')
         sportIdList = data.get('sportIDs')
-        cursor.execute("DELETE From usersAndSports where userID = ?",(userID))
+        cursor.execute("DELETE From usersAndSports where userID = ?",[userID])
         conn.commit()
         for i in sportIdList:
             cursor.execute("INSERT INTO usersAndSports VALUES(?,?)",(userID,i))
@@ -230,7 +230,7 @@ def sports():
 @userControl_blueprint.route('/GetDailySportsSuggestion',methods=['POST'])
 def getDailySportsSuggestion():
     requestData = request.get_json()
-    id = int(requestData.get('ID'))
+    id = int(requestData.get('userID'))
     longtitude = float(requestData.get('longitude'))
     latitude = float(requestData.get('latitude'))
     cursor.execute("Select * from users where id =?",[id])
