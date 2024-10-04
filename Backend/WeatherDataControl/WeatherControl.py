@@ -24,7 +24,7 @@ def Get3hData():
     }
     '''
     data = request.get_json()
-    longtitude = data.get('longitude')
-    latitude = data.get('latitude')
+    longtitude = float(data.get('longitude'))
+    latitude = float(data.get('latitude'))
     a = dataHandler.weatherData.get3hData(longtitude,latitude)
     return jsonify(a)
