@@ -15,7 +15,7 @@ def Get12hData():
     longtitude = data.get('longitude')
     latitude = data.get('latitude')
     nowTime = datetime.now()
-    a = dataHandler.weatherData.get12hData(latitude,longtitude,nowTime)
+    a = dataHandler.weatherData.get12hData(latitude,longtitude)
     return jsonify(a)
 @weatherControl_blueprint.route('/Get3hData',methods=['POST'])
 def Get3hData():
@@ -29,5 +29,5 @@ def Get3hData():
     longtitude = data.get('longitude')
     latitude = data.get('latitude')
     nowTime = datetime.now()
-    a = dataHandler.weatherData.get3hData(latitude,longtitude,nowTime)
+    a = dataHandler.weatherData.get3hData(latitude,longtitude)
     return jsonify(a)
