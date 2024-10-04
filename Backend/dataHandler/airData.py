@@ -1,13 +1,19 @@
 from datetime import datetime
-import requests,pytz
+import requests,math
 
-dataset = "/aqx_p_432" 
-offset = 0
-limit = 10
-api_key = "7fcc7250-55c6-497a-aa44-cfba6d8f2c83"
-nowTime = datetime.now(pytz.timezone('Asia/Taipei')).strftime("%Y-%m-%d %H:%M:%S")#取得符合取得資料格式的時間
-
-url = f"https://data.moenv.gov.tw/api/v2{dataset}?format=json&offset={offset}&limit={limit}&api_key={api_key}&filters=publishtime,LE,{nowTime}"
-AQIData = requests.get(url).json()
-
-print(AQIData["records"][0]["sitename"])
+def getAirData(lon,lat): 
+    nowTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")#取得符合取得資料格式的時間
+    url = f"https://data.moenv.gov.tw/api/v2/aqx_p_432?&api_key=7fcc7250-55c6-497a-aa44-cfba6d8f2c83&filters=publishtime,LE,{nowTime}&fields=sitename,aqi,pm2.5,longitude,latitude"
+    AQIData = requests.get(url).json()["records"]
+    distant = float(100)
+    siteName = None
+    for site in range(len(AQIData)):
+        distant_temp = math.pow((math.pow((float(AQIData[site]["longitude"])-lon),2)+math.pow((float(AQIData[site]["latitude"])-lat),2)),0.5)
+        if distant_temp < distant :
+            distant = distant_temp
+            siteName = AQIData[site]
+    return {
+        "sitename": siteName["sitename"],
+        "aqi":      siteName["aqi"],
+        "pm2.5":    siteName["pm2.5"]
+    }
