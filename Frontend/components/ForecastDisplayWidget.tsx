@@ -140,6 +140,40 @@ export function ForecastDisplayWidget() {
   const HandleUpdateTimeInterval = async (type: number) => {
     // Update time interval type
     setTimeInterval(type);
+
+    // Update weather data
+    HandleUpdateWeatherDataList();
+  };
+
+  const HandleUpdateWeatherDataList = () => {
+    const weatherDataList: WeatherDataList = {};
+
+    // Fetch weather data for each region
+    regions?.map(async (region) => {
+      const latitude = region.latitude;
+      const longitude = region.longitude;
+      const weatherData = await HandleGetWeatherData(latitude, longitude);
+      if (weatherData) {
+        weatherDataList[region.id] = weatherData;
+      }
+    });
+
+    // Update weather data
+    setWeatherDataList(weatherDataList);
+  };
+
+  const HandleGetTimeFormat = (_time: string) => {
+    // Format time based on time interval type
+    // Time example: 2024-10-04 12:00:00
+    const time = _time.split(" ");
+    switch (timeInterval_type) {
+      case 0: // Day View (3h)\
+        return `${time[1].split(":")[0]}:00`;
+        break;
+      case 1: // Weak View (1d)
+        return `${time[0].split("-")[1]}/${time[0].split("-")[2]}`;
+        break;
+    }
   };
 
   const HandleGetGeoPosition = async (): Promise<GeoPosition> => {
