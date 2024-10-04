@@ -34,7 +34,7 @@ def getSportsSuggestion(nowWeatherData):
         badmintonSuggestion = "Today is suitable for playing badminton no matter outdoor or indoor!"
         volleyballSuggestion = "Today is suitable for playing volleyball no matter outdoor or indoor!"
         tabletennisSuggestion = "Today is suitable for playing tabletennis!"
-    if int(nowAirQuality) > 100:
+    if nowAirQuality != None and int(nowAirQuality) > 100:
         runSuggestion = "Today is suitable for running or jogging due to the nice air quality!"
         bikeSuggestion = "Today is suitable for biking due to the nice air quality!"
     else:
