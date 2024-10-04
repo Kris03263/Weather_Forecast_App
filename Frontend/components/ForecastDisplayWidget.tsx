@@ -70,8 +70,8 @@ export function ForecastDisplayWidget() {
 
     // Add region based on location
     HandleAddRegion(
-      location ? location.coords.latitude.toString() : "123", // location : default location
-      location ? location.coords.longitude.toString() : "456"
+      location ? location.coords.latitude.toString() : "121.66248756678424", // location : default location
+      location ? location.coords.longitude.toString() : "25.06715187342581"
     );
   }, []);
 
@@ -147,11 +147,12 @@ export function ForecastDisplayWidget() {
     latitude: string,
     longitude: string
   ): Promise<WeatherData[] | null> => {
+    console.log(latitude, longitude);
     // Fetch API to get weather data
     switch (timeInterval_type) {
       case 0: // Day View (3h) // http://127.0.0.1:8000/Weather/Get3hData
         fetch(`http://127.0.0.1:8000/Weather/Get3hData`, {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -167,7 +168,7 @@ export function ForecastDisplayWidget() {
           });
       case 1: // Weak View (1d) // http://127.0.0.1:8000/Weather/Get12hData
         fetch(`http://127.0.0.1:8000/Weather/Get12hData`, {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
