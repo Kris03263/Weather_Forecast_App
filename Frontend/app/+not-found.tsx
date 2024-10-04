@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 import { Link, Stack } from "expo-router";
 import { StyleSheet } from "react-native";
 

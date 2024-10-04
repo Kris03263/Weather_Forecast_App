@@ -1,6 +1,6 @@
 import sqlite3
 #This file is created for creating dataTable
-conn = sqlite3.connect('Backend/data.sqlite')
+conn = sqlite3.connect('data.sqlite')
 sport_data = [
     [1,'籃球'],
     [2,'羽球'],

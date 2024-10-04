@@ -1,9 +1,9 @@
-from flask import Blueprint,request,jsonify
+from flask import Blueprint,request,jsonify,make_response
 import sqlite3
 from .Models import UserDataResult,Habit,Sport
 
 userControl_blueprint = Blueprint('userControl_blueprint', __name__)
-DATABASE = 'Backend/data.sqlite'
+DATABASE = 'data.sqlite'
 conn = sqlite3.connect(DATABASE,check_same_thread=False)
 
 cursor = conn.cursor()
@@ -24,11 +24,15 @@ def login():
     user = cursor.fetchall()
     if len(user) == 0:
         dt = UserDataResult("-1","","","no user")
+        response = make_response(jsonify(dt.to_dict()),404)
+        return response
     elif len(user) != 0 and user[0][3] == 1:
         dt = UserDataResult("-1","","","user was deleted")
+        response = make_response(jsonify(dt.to_dict()),404)
+        return response
     else:
         dt = UserDataResult(user[0][0],user[0][1],user[0][2],"successful")
-    return jsonify(dt.to_dict()) 
+        return jsonify(dt.to_dict()) 
 #獲取使用者資料 / 註冊 /刪除
 @userControl_blueprint.route('/',methods=['GET','POST','DELETE'])
 def register():
@@ -38,7 +42,8 @@ def register():
         user = cursor.fetchall()
         if len(user) < 1:
             dt = UserDataResult("-1","","","no user")
-            return jsonify(dt.to_dict())
+            response = make_response(jsonify(dt.to_dict()),404)
+            return response
         dt = UserDataResult(user[0][0],user[0][1],user[0][2],"successful")
         return jsonify(dt.to_dict())
         
@@ -56,14 +61,16 @@ def register():
         user = cursor.fetchall()
         if len(user) > 0:
             dt = UserDataResult("-1","","","Account have been used")
-            return jsonify(dt.to_dict())
+            response = make_response(jsonify(dt.to_dict()),404)
+            return jsonify(404)
         cursor.execute("INSERT INTO users(account,password,deleted) VALUES(?,?,?)",(userAccount,password,0))
         conn.commit()
         cursor.execute("SELECT * FROM users WHERE account =? and password =?",(userAccount,password))
         user = cursor.fetchall()
         if(len(user) != 0):
             dt = UserDataResult(user[0][0],user[0][1],user[0][2],"Register Successful")
-            return jsonify(dt.to_dict())
+            response = make_response(jsonify(dt.to_dict()),201)
+            return jsonify(response)
         else:
             dt = UserDataResult("-1","","","Register Error")
             return jsonify(dt.to_dict())
@@ -80,7 +87,8 @@ def register():
         result ={
             "status" : "Successful"
         }
-        return jsonify(result)
+        response = make_response(jsonify(result),200)
+        return response
 #獲取對應使用者嗜好/上傳嗜好
 @userControl_blueprint.route('/UserHabits',methods=['GET','POST'])
 def habits():
@@ -92,7 +100,8 @@ def habits():
         if len(counter) < 1:
             habit = Habit(-1,"Undefine User")
             habits.append(habit.to_dict())
-            return jsonify(habits)
+            response = make_response(jsonify(habits),404)
+            return response
         sql_query = """
         SELECT * FROM habits where habits.id in 
         (select habitID from usersAndHabits where userID=?)
@@ -102,7 +111,8 @@ def habits():
         for i in data:
             habit = Habit(i[0],i[1])
             habits.append(habit.to_dict())
-        return jsonify(habits)
+        response = make_response(jsonify(habits),200)
+        return response
     if request.method == "POST":
         '''
         {
@@ -121,7 +131,8 @@ def habits():
         result = {
             "Stats" : "Update Successful !"
         }
-        return jsonify(result)
+        response = make_response(jsonify(result),201)
+        return response
             
             
 #獲取對應使用者運動/上傳運動
@@ -135,7 +146,8 @@ def sports():
         if len(counter) < 1:
             sport = Sport(-1,"Undefine User")
             sports.append(sport.to_dict())
-            return jsonify(sports)
+            response = make_response(jsonify(sports),404)
+            return response
         sql_query = """
         SELECT * FROM sports where sports.id in 
         (select sportID from usersAndSports where userID=?)
@@ -145,7 +157,8 @@ def sports():
         for i in data:
             sport = Sport(i[0],i[1])
             sports.append(sport.to_dict())
-        return jsonify(sports)
+        response = make_response(jsonify(sports),404)
+        return response
     if request.method == "POST":
         '''
         {
@@ -164,7 +177,8 @@ def sports():
         result = {
             "Stats" : "Update Successful !"
         }
-        return jsonify(result)
+        response = make_response(jsonify(result),201)
+        return response
     
             
             
