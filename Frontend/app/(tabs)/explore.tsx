@@ -1,5 +1,6 @@
-import React ,{ useState,useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity,Modal ,StyleSheet } from 'react-native';
+import React ,{ useState,useEffect,useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity,Modal ,StyleSheet,Alert } from 'react-native';
+import { SvgImage } from "@/components/Svg";
 
 
 interface RadioButtonProps {
@@ -14,12 +15,13 @@ const RadioButton: React.FC<RadioButtonProps> = ({ label, selected, onPress }) =
   </TouchableOpacity>
 );
 
+//Modal's visiblility control
 export default function SettingsScreen() {
 const [modalVisible, setModalVisible] = useState(false);
 const [secondModalVisible, setSecondModalVisible] = useState(false);
 const [userModalVisible, setUserModalVisible] = useState(false);
-const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-const [selectedTransportOptions, setSelectedTransportOptions] = useState<string[]>([]);
+const [selectedHabitsOptions, setSelectedHabitsOptions] = useState<string[]>([]);
+const [selectedSportOptions, setSelectedSportOptions] = useState<string[]>([]);
 const [userSettingsVisible, setUserSettingsVisible] = useState(false);
 const [userLoggingVisible, setUserLoggingVisible] = useState(false);
 
@@ -30,7 +32,14 @@ const [response, setResponse] = useState(null);
 const [accountStatus, setAccountStatus] = useState("");
 const [userID, setUserID] = useState(1);
 
-//POST userLogin
+//define ref(element ID)
+const usernameInputRef = useRef<TextInput>(null);
+const passwordInputRef = useRef<TextInput>(null);
+
+const usernameInput = usernameInputRef.current;
+const passwordInput = passwordInputRef.current;
+
+//POST userRegister
 const handleRegister = ()=>{
   fetch('http://127.0.0.1:8000/Users',{
     method:'POST',
@@ -40,10 +49,19 @@ const handleRegister = ()=>{
     }),
   })
   .then((response)=>response.json())
-  .then((data)=>setResponse(data))
+  .then((data)=>{
+    setUserID(data.id);
+    if(userID !== -1){
+      Alert.alert("註冊成功");
+    }
+    else{
+      Alert.alert("註冊失敗，註冊失敗");
+    }
+  })
   .catch((error)=>console.error('Error:',error));
 }
 
+//POST userLogin
 const handleLogin = ()=>{
   fetch('http://127.0.0.1:8000/Users/Login',{
     method:'POST',
@@ -55,39 +73,112 @@ const handleLogin = ()=>{
   .then((response)=>response.json())
   .then((data)=>{
     setAccountStatus(data.status);
-    if(accountStatus === "Success"){
+    if(accountStatus === "Successful"){
       setUserID(data.id);
+      Alert.alert("登入成功");
+      handleGetUserHabits();
+    }
+    else{
+      Alert.alert("登入失敗，請檢查帳號密碼是否有誤");
     }
   })
   .catch((error)=>console.error('Error:',error));
 }
 
-//GET API
-const handleGet = ()=>{
-  fetch('http://127.0.0.1:8000/Users?id='+userID,{
-    method:'GET',
-    headers:{
-      'Content-Type':'application/json',
-    },
+//POST userHabit API
+const handlePostUserHabits = () => {
+  fetch('http://127.0.0.1:8000/Users/UserHabits',{
+    method:'POST',
+    body:JSON.stringify({
+      userID:userID,
+      habitsID:habitIndexes,
+    }),
   })
-  .then((response)=>{return response.json()})
-  .then((data)=>setResponse(data))
+  .then((response)=>response.json())
+  .then((data)=>{
+    if(data.Status === "Update Successful !"){
+      Alert.alert("嗜好更新成功");
+    }
+    else{
+      Alert.alert("嗜好更新失敗");
+    }
+  })
   .catch((error)=>console.error('Error:',error));
-}
+  }
 
-const toggleOption = (option: string, setSelected: React.Dispatch<React.SetStateAction<string[]>>) => {
-  setSelected((prevSelectedOptions) =>
-    prevSelectedOptions.includes(option)
-      ? prevSelectedOptions.filter((item) => item !== option)
-      : [...prevSelectedOptions, option]
-  );
+  //POST userSport API
+  const handlePostUserSports = () => {
+    fetch('http://127.0.0.1:8000/Users/UserSports',{
+      method:'POST',
+      body:JSON.stringify({
+        userID:userID,
+        sportsID:sportIndexes,
+      }),
+    })
+    .then((response)=>response.json())
+    .then((data)=>{
+      if(data.Status === "Update Successful !"){
+        Alert.alert("運動更新成功");
+      }
+      else{
+        Alert.alert("運動更新失敗");
+      }
+    })
+  }
+
+//GET UserData API
+  const handleGetUserData = ()=>{
+    fetch('http://127.0.0.1:8000/Users?id='+userID,{
+      method:'GET',
+      headers:{
+        'Content-Type':'application/json',
+      },
+    })
+    .then((response)=>{return response.json()})
+    .then((data)=>setResponse(data))
+    .catch((error)=>console.error('Error:',error));
+  }
+
+  // GET userHabit API
+  const handleGetUserHabits = () =>{
+    fetch('http://127.0.0.1:8000/Users/UserHabits?='+userID,{
+      method:'GET',
+      headers:{
+        'Content-Type':'application/json',
+      },
+    })
+    .then((response)=>{return response.json()})
+    .then((data)=>{
+      setSelectedHabitsOptions(data.habitName);
+    })
+    .catch((error)=>console.error('Error:',error));
+  }
+
+  const toggleOption = (option: string, setSelected: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setSelected((prevSelectedOptions) =>
+      prevSelectedOptions.includes(option)
+        ? prevSelectedOptions.filter((item) => item !== option)
+        : [...prevSelectedOptions, option]
+    );
+  };
+
+//find the index of selectedHabitsOptions
+const findHabitsOptionIndexes = (selectedOptions: string[], allHabitsOptions: string[]): number[] => {
+  return selectedOptions.map(option => allHabitsOptions.indexOf(option));
 };
+const allHabitsOptions = ['做甜點', '健行', '登山', '玩遊戲', '出遊', '閱讀'];
+const habitIndexes = findHabitsOptionIndexes(selectedHabitsOptions, allHabitsOptions);
 
-  useEffect(()=>{
-    if(userModalVisible){
-      handleGet();
-    }
-  },[userModalVisible]);
+//find the index of selectedSportOptions
+const findSportOptionIndexes = (selectedOptions: string[], allSportOptions: string[]): number[] => {
+  return selectedOptions.map(option => allSportOptions.indexOf(option));
+};
+const allSportOptions = ['籃球', '羽球', '排球', '游泳', '桌球', '慢跑','公路車'];
+const sportIndexes = findSportOptionIndexes(selectedSportOptions, allSportOptions);
+
+useEffect(()=>{
+  handleGetUserHabits();
+},[userID]);
 
   return (
     <View style={styles.container}>
@@ -145,21 +236,24 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
                 <RadioButton
                   key={index}
                   label={option}
-                  selected={selectedOptions.includes(option)}
-                  onPress={() => toggleOption(option, setSelectedOptions)}
+                  selected={selectedSportOptions.includes(option)}
+                  onPress={() => toggleOption(option, setSelectedSportOptions)}
                 />
               ))}
             </View>
             <TouchableOpacity
               style={[styles.modalbutton, styles.modalbuttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>關閉</Text>
+              onPress={() => {
+                setModalVisible(!modalVisible)
+                handlePostUserSports();
+                }}>
+              <Text style={styles.textStyle}>儲存&關閉</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/*交通方式Modal*/}
+      {/*選擇嗜好Modal*/}
       <Modal
         animationType="fade"
         transparent={true}
@@ -175,15 +269,18 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
                 <RadioButton
                   key={index}
                   label={option}
-                  selected={selectedTransportOptions.includes(option)}
-                  onPress={() => toggleOption(option, setSelectedTransportOptions)}
+                  selected={selectedHabitsOptions.includes(option)}
+                  onPress={() => toggleOption(option, setSelectedHabitsOptions)}
                 />
               ))}
             </View>
             <TouchableOpacity
               style={[styles.modalbutton, styles.modalbuttonClose]}
-              onPress={() => setSecondModalVisible(!secondModalVisible)}>
-              <Text style={styles.textStyle}>關閉</Text>
+              onPress={() => {
+                setSecondModalVisible(!secondModalVisible)
+                handlePostUserHabits();
+              }}>
+              <Text style={styles.textStyle}>儲存&關閉</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -202,30 +299,44 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
               <Text style = {styles.modalText}>登入</Text>
               <View style={{gap : 10}}>
                 <View style = {styles.inputRow}>
-                  <Text style = {styles.label}>使用者名稱:</Text>
-                  <TextInput style = {styles.input} 
+                  <Text style = {styles.label}>
+                    <SvgImage style={{ width: 30, height: 30 }} name="userAccount" />
+                    使用者名稱:
+                    </Text>
+                </View>
+                <TextInput style = {styles.input} 
+                  ref = {usernameInputRef}
                   placeholder = "輸入名稱"
                   onChangeText={setUsername}
                   />
-                </View>
                 <View style = {styles.inputRow}>
-                  <Text style = {styles.label}>使用者密碼:</Text>
-                  <TextInput style = {styles.input} 
+                  <Text style = {styles.label}>
+                    <SvgImage style={{ width: 30, height: 30}} name="userPassword" />
+                    使用者密碼:
+                  </Text>                  
+                </View>
+                <TextInput style = {styles.input} 
+                  ref = {passwordInputRef}
                   placeholder = "輸入密碼"
                   secureTextEntry = {true}
                   onChangeText={setPassword}
                   />
-                </View>
               </View>
               <TouchableOpacity 
-              style = {[styles.modalbutton,styles.modalbuttonClose]}
-              onPress = {()=>handleLogin()}>
+                style = {[styles.modalbutton,styles.modalbuttonClose]}
+                onPress = {()=>{
+                  handleLogin();
+                  usernameInput?.clear();
+                  passwordInput?.clear();
+                }
+              }>
                 <Text style = {styles.textStyle}>登入</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.linkButton}
                 onPress={() => {
                   setUserSettingsVisible(true);
+                  setUserLoggingVisible(!userLoggingVisible);
                 }}>
                 <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
               </TouchableOpacity>
@@ -270,7 +381,7 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
           </View>
         </Modal>
 
-        {/*使用者設定modal*/}
+        {/*使用者註冊modal*/}
         <Modal
         animationType="fade"
         transparent={true}
@@ -280,29 +391,36 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
         }}>
           <View style = {styles.centeredView}>
             <View style = {styles.modalView}>
-              <Text style = {styles.modalText}>使用者</Text>
+              <Text style = {styles.modalText}>註冊</Text>
               <View style={{gap : 10}}>
                 <View style = {styles.inputRow}>
-                  <Text style = {styles.label}>使用者名稱:</Text>
-                  <TextInput style = {styles.input} 
+                  <Text style = {styles.label}>
+                    <SvgImage style={{ width: 30, height: 30 }} name="userAccount" />
+                    使用者名稱:
+                    </Text>
+                </View>
+                <TextInput style = {styles.input} 
                   placeholder = "輸入名稱"
                   value={username}
                   onChangeText={setUsername}
                   />
-                </View>
                 <View style = {styles.inputRow}>
-                  <Text style = {styles.label}>使用者密碼:</Text>
-                  <TextInput style = {styles.input} 
+                  <Text style = {styles.label}>
+                    <SvgImage style={{ width: 30, height: 30}} name="userPassword" />
+                    使用者密碼:
+                    </Text>
+                </View>
+                <TextInput style = {styles.input} 
                   placeholder = "輸入密碼"
-                  secureTextEntry = {true}
                   value={userPassword}
                   onChangeText={setPassword}
                   />
-                </View>
               </View>
               <TouchableOpacity 
               style = {[styles.modalbutton,styles.modalbuttonClose]}
-              onPress = {()=>handleRegister()}>
+              onPress = {()=>{
+                handleRegister();
+              }}>
                 <Text style = {styles.textStyle}>提交</Text>
               </TouchableOpacity>
               <TouchableOpacity 
@@ -362,11 +480,12 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   label: {
     fontSize: 16,
-    width: 100,
+    width: "auto",
+    marginRight: 10,
   },
   input: {
     flex: 1,
