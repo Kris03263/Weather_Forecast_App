@@ -21,51 +21,56 @@ const [userModalVisible, setUserModalVisible] = useState(false);
 const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 const [selectedTransportOptions, setSelectedTransportOptions] = useState<string[]>([]);
 const [userSettingsVisible, setUserSettingsVisible] = useState(false);
+const [userLoggingVisible, setUserLoggingVisible] = useState(false);
 
 //userData
 const [username, setUsername] = useState("");
 const [userPassword, setPassword] = useState("");
 const [response, setResponse] = useState(null);
+const [accountStatus, setAccountStatus] = useState("");
+const [userID, setUserID] = useState(1);
 
-//POST API
-const handleSubmit = ()=>{
+//POST userLogin
+const handleRegister = ()=>{
   fetch('http://127.0.0.1:8000/Users',{
     method:'POST',
     body:JSON.stringify({
       userAccount:username,
       password:userPassword,
     }),
-    redirect:'follow',
   })
-  .then((response)=>{
-    if(response.redirected){
-      window.location.href = response.url;
-    }
-    else{
-      return response.json();
-    }
-  })
+  .then((response)=>response.json())
   .then((data)=>setResponse(data))
+  .catch((error)=>console.error('Error:',error));
+}
+
+const handleLogin = ()=>{
+  fetch('http://127.0.0.1:8000/Users/Login',{
+    method:'POST',
+    body:JSON.stringify({
+      userAccount:username,
+      password:userPassword,
+    }),
+  })
+  .then((response)=>response.json())
+  .then((data)=>{
+    setAccountStatus(data.status);
+    if(accountStatus === "Success"){
+      setUserID(data.id);
+    }
+  })
   .catch((error)=>console.error('Error:',error));
 }
 
 //GET API
 const handleGet = ()=>{
-  fetch('http://127.0.0.1:8000/Users?id=1',{
+  fetch('http://127.0.0.1:8000/Users?id='+userID,{
     method:'GET',
     headers:{
       'Content-Type':'application/json',
     },
-    redirect:'follow',
   })
-  .then((response)=>{
-    if(response.redirected){
-      window.location.href = response.url;
-    }
-    else{
-      return response.json();
-    }
-  })
+  .then((response)=>{return response.json()})
   .then((data)=>setResponse(data))
   .catch((error)=>console.error('Error:',error));
 }
@@ -90,7 +95,7 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
       <View style={styles.header}>
         <Text style={styles.headerText}>設定</Text>
         <View>
-          <TouchableOpacity style = {styles.avatar} onPress={()=>setUserModalVisible(true)}></TouchableOpacity>
+          <TouchableOpacity style = {styles.avatar} onPress={()=>setUserLoggingVisible(true)}></TouchableOpacity>
         </View>
       </View>
 
@@ -184,6 +189,56 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
         </View>
         </Modal>
 
+        {/*登入UI*/}
+        <Modal
+        animationType="fade"
+        transparent={true}
+        visible={userLoggingVisible}
+        onRequestClose={() => {
+          setUserLoggingVisible(!userLoggingVisible);
+        }}>
+          <View style = {styles.centeredView}>
+            <View style = {styles.modalView}>
+              <Text style = {styles.modalText}>登入</Text>
+              <View style={{gap : 10}}>
+                <View style = {styles.inputRow}>
+                  <Text style = {styles.label}>使用者名稱:</Text>
+                  <TextInput style = {styles.input} 
+                  placeholder = "輸入名稱"
+                  onChangeText={setUsername}
+                  />
+                </View>
+                <View style = {styles.inputRow}>
+                  <Text style = {styles.label}>使用者密碼:</Text>
+                  <TextInput style = {styles.input} 
+                  placeholder = "輸入密碼"
+                  secureTextEntry = {true}
+                  onChangeText={setPassword}
+                  />
+                </View>
+              </View>
+              <TouchableOpacity 
+              style = {[styles.modalbutton,styles.modalbuttonClose]}
+              onPress = {()=>handleLogin()}>
+                <Text style = {styles.textStyle}>登入</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.linkButton}
+                onPress={() => {
+                  setUserSettingsVisible(true);
+                }}>
+                <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+              style = {[styles.modalbutton,styles.modalbuttonClose]} 
+              onPress = {()=>setUserLoggingVisible(!userLoggingVisible)}>
+                <Text style = {styles.textStyle}>關閉</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+
         {/*使用者顯示modal*/}
         <Modal
         animationType="fade"
@@ -205,11 +260,7 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
                   <Text style = {styles.label}>{userPassword}</Text>
                 </View>
               </View>
-              <TouchableOpacity
-              style = {[styles.modalbutton,styles.modalbuttonClose]}
-              onPress = {()=>setUserSettingsVisible(!userSettingsVisible)}>
-                <Text style = {styles.textStyle}>註冊帳號</Text>
-              </TouchableOpacity>
+
               <TouchableOpacity 
               style = {[styles.modalbutton,styles.modalbuttonClose]} 
               onPress = {()=>setUserModalVisible(!userModalVisible)}>
@@ -218,6 +269,7 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
             </View>
           </View>
         </Modal>
+
         {/*使用者設定modal*/}
         <Modal
         animationType="fade"
@@ -250,7 +302,7 @@ const toggleOption = (option: string, setSelected: React.Dispatch<React.SetState
               </View>
               <TouchableOpacity 
               style = {[styles.modalbutton,styles.modalbuttonClose]}
-              onPress = {()=>handleSubmit()}>
+              onPress = {()=>handleRegister()}>
                 <Text style = {styles.textStyle}>提交</Text>
               </TouchableOpacity>
               <TouchableOpacity 
@@ -403,6 +455,13 @@ const styles = StyleSheet.create({
      flexDirection: 'row', 
      flexWrap: 'wrap', 
      justifyContent: 'space-around', 
+  },
+  linkButton: {
+    marginVertical: 10,
+  },
+  linkText: {
+    color: 'gray',
+    textDecorationLine: 'underline',
   },
 });
 
