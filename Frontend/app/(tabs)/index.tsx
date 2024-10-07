@@ -32,10 +32,12 @@ export default function HomeScreen() {
             <IndicatorsDisplayWidget_single type="rain-rate" />
           </View>
 
-          <IndicatorsDisplayWidget_double
-            type1="wind-speed"
-            type2="wind-direction"
-          />
+          <View style={styles.row}>
+            <IndicatorsDisplayWidget_double
+              type1="wind-speed"
+              type2="wind-direction"
+            />
+          </View>
 
           <View style={styles.row}>
             <SuggestionDisplayWidget type="dressing" />
