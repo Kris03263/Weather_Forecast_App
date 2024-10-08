@@ -29,7 +29,6 @@ const RadioButton: React.FC<RadioButtonProps> = ({
 );
 
 //Modal's visiblility control
-//Modal's visiblility control
 export default function SettingsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [secondModalVisible, setSecondModalVisible] = useState(false);
@@ -62,9 +61,36 @@ export default function SettingsScreen() {
   const passwordRegisterInput = passwordRegisterInputRef.current;
 
   //POST userRegister
-  const handleRegister = async () => {
-    await fetch("https://weather-2-9.onrender.com/Users", {
+  const handleRegister = () => {
+    fetch("https://weather-2-10.onrender.com/Users/", {
+      headers: {
+        "Content-Type": "application/json",
+      },
       method: "POST",
+      body: JSON.stringify({
+        userAccount: username,
+        password: userPassword,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setUserID(data.id);
+        if (data.id !== "-1") {
+          Alert.alert("註冊成功");
+        } else {
+          Alert.alert("註冊失敗，請檢查帳號是否已被註冊");
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+  };
+
+  //POST userLogin
+  const handleLogin = () => {
+    fetch("https://weather-2-10.onrender.com/Users/Login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         userAccount: username,
         password: userPassword,
@@ -73,34 +99,12 @@ export default function SettingsScreen() {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setUserID(data.id);
-        if (userID !== -1) {
-          Alert.alert("註冊成功");
-        } else {
-          Alert.alert("註冊失敗，註冊失敗");
-        }
-      })
-      .catch((error) => console.error("Error:", error));
-  };
-
-  //POST userLogin
-  const handleLogin = () => {
-    fetch("https://weather-2-9.onrender.com/Login", {
-      method: "POST",
-      body: JSON.stringify({
-        userAccount: username,
-        password: userPassword,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
         setAccountStatus(data.status);
-        if (accountStatus === "Successful") {
+        if (data.status === "successful") {
           setUserID(data.id);
-          Alert.alert("登入成功");
-          handleGetUserHabits();
+          alert("登入成功");
         } else {
-          Alert.alert("登入失敗，請檢查帳號密碼是否有誤");
+          alert("登入失敗，請檢查帳號密碼是否有誤");
         }
       })
       .catch((error) => console.error("Error:", error));
@@ -108,8 +112,11 @@ export default function SettingsScreen() {
 
   //POST userHabit API
   const handlePostUserHabits = () => {
-    fetch("https://weather-2-9.onrender.com/Users/UserHabits", {
+    fetch("https://weather-2-10.onrender.com/Users/UserHabits", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         userID: userID,
         habitsID: habitIndexes,
@@ -128,7 +135,10 @@ export default function SettingsScreen() {
 
   //POST userSport API
   const handlePostUserSports = () => {
-    fetch("https://weather-2-9.onrender.com/Users/UserSports", {
+    fetch("https://weather-2-10.onrender.com/Users/UserSports", {
+      headers: {
+        "Content-Type": "application/json",
+      },
       method: "POST",
       body: JSON.stringify({
         userID: userID,
@@ -147,7 +157,10 @@ export default function SettingsScreen() {
 
   //DELETE user API
   const handleDeleteUser = () => {
-    fetch("https://weather-2-9.onrender.com/Users", {
+    fetch("https://weather-2-10.onrender.com/Users/", {
+      headers: {
+        "Content-Type": "application/json",
+      },
       method: "DELETE",
       body: JSON.stringify({
         userID: userID,
@@ -162,11 +175,11 @@ export default function SettingsScreen() {
         }
       })
       .catch((error) => console.error("Error:", error));
-  }
+  };
 
   //GET UserData API
   const handleGetUserData = () => {
-    fetch(`https://weather-2-9.onrender.com/Users?id=${userID}`, {
+    fetch(`https://weather-2-10.onrender.com/Users?id=${userID}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -178,10 +191,9 @@ export default function SettingsScreen() {
       .then((data) => setResponse(data))
       .catch((error) => console.error("Error:", error));
   };
-
-  // GET userHabit API
-  const handleGetUserHabits = () => {
-    fetch("https://weather-2-9.onrender.com/Users/UserHabits?=" + userID, {
+  // GET userSport API
+  const handleGetUserSports = () => {
+    fetch(`https://weather-2-10.onrender.com/Users/UserSports?ID=${userID}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -191,7 +203,31 @@ export default function SettingsScreen() {
         return response.json();
       })
       .then((data) => {
-        setSelectedHabitsOptions(data.habitName);
+        console.log(data);
+        const sportsNames = data.map(
+          (sport: { sportName: string }) => sport.sportName
+        );
+        setSelectedSportOptions(sportsNames);
+      })
+      .catch((error) => console.error("Error:", error));
+  };
+  // GET userHabit API
+  const handleGetUserHabits = () => {
+    fetch(`https://weather-2-10.onrender.com/Users/UserHabits?ID=${userID}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        const habitsNames = data.map(
+          (habit: { habitName: string }) => habit.habitName
+        );
+        setSelectedHabitsOptions(habitsNames);
       })
       .catch((error) => console.error("Error:", error));
   };
@@ -240,6 +276,11 @@ export default function SettingsScreen() {
     selectedSportOptions,
     allSportOptions
   );
+
+  useEffect(() => {
+    handleGetUserSports();
+    handleGetUserHabits();
+  }, [userID]);
 
   return (
     <View style={styles.container}>
@@ -427,13 +468,19 @@ export default function SettingsScreen() {
               style={[styles.modalbutton, styles.modalbuttonClose]}
               onPress={() => {
                 handleLogin();
+                setUserLoggingVisible(!userLoggingVisible);
                 usernameInput?.clear();
                 passwordInput?.clear();
               }}
             >
               <Text style={styles.textStyle}>登入</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleDeleteUser} style = {[styles.modalbutton, styles.modalbuttonClose]}>
+            <TouchableOpacity
+              onPress={() => {
+                handleDeleteUser();
+              }}
+              style={[styles.modalbutton, styles.modalbuttonClose]}
+            >
               <Text style={styles.textStyle}>刪除使用者</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -505,7 +552,7 @@ export default function SettingsScreen() {
                 style={styles.input}
                 placeholder="輸入名稱"
                 onChangeText={setUsername}
-                ref = {usernameRegisterInputRef}
+                ref={usernameRegisterInputRef}
               />
               <View style={styles.inputRow}>
                 <Text style={styles.label}>
@@ -519,7 +566,7 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="輸入密碼"
-                ref = {passwordRegisterInputRef}
+                ref={passwordRegisterInputRef}
                 onChangeText={setPassword}
                 secureTextEntry={true}
               />
