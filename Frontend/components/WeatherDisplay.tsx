@@ -7,13 +7,51 @@ import {
   Image,
 } from "react-native";
 
+import store from "@/redux/store";
+import { useSelector } from "react-redux";
+
+import { Region } from "@/app/(tabs)/index";
+import { WeatherDataList } from "@/app/(tabs)/index";
+import { indicatorsDictionary } from "@/app/(tabs)/index";
+
 export function WeatherDisplay() {
+  const region = useSelector((state: { region: Region[] }) => state.region);
+  const weatherDataList = useSelector(
+    (state: { weatherData: WeatherDataList }) => state.weatherData
+  );
+  const timeInterval = useSelector(
+    (state: { timeInterval: number }) => state.timeInterval
+  );
+  const temp =
+    indicatorsDictionary["temp" as keyof typeof indicatorsDictionary];
+  const bodyTemp =
+    indicatorsDictionary["bodyTemp" as keyof typeof indicatorsDictionary];
+
+  if (Object.keys(weatherDataList).length === 0) {
+    return (
+      <View style={styles.layout}>
+        <Text style={styles.cityName}>--, --</Text>
+        <View style={styles.temperatureDisplay}>
+          <Text style={styles.temperature}>--°C</Text>
+          <Text style={styles.body_temperature}>| --°C </Text>
+        </View>
+        <View style={styles.weatherIcon} />
+      </View>
+    );
+  }
+
+  temp.value = weatherDataList?.[region[0].id]?.[timeInterval]?.[0]?.temp ?? "";
+  bodyTemp.value =
+    weatherDataList?.[region[0].id]?.[timeInterval]?.[0]?.bodyTemp ?? "";
+
   return (
     <View style={styles.layout}>
-      <Text style={styles.cityName}>TAIPEI, TAIWAN</Text>
+      <Text style={styles.cityName}>{region[0].id}</Text>
       <View style={styles.temperatureDisplay}>
-        <Text style={styles.temperature}>20°C</Text>
-        <Text style={styles.body_temperature}>| 20°C </Text>
+        <Text style={styles.temperature}>{temp.value + temp.unit}</Text>
+        <Text style={styles.body_temperature}>
+          {"| " + bodyTemp.value + bodyTemp.unit}
+        </Text>
       </View>
       <View style={styles.weatherIcon} />
     </View>

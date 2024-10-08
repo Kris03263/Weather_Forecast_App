@@ -10,6 +10,13 @@ import {
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 
+import store from "@/redux/store";
+import { useSelector } from "react-redux";
+
+import { WeatherDataList } from "@/app/(tabs)/index";
+import { Region } from "@/app/(tabs)/index";
+import { indicatorsDictionary } from "@/app/(tabs)/index";
+
 interface IndicatorsDisplayWidgetProps_double {
   type1: string;
   type2: string;
@@ -19,35 +26,64 @@ export function IndicatorsDisplayWidget_double({
   type1,
   type2,
 }: IndicatorsDisplayWidgetProps_double) {
-  const [title1, title2] = [
-    type1
-      .split("-")
-      .map((str) => str.charAt(0).toUpperCase() + str.slice(1))
-      .join(" "),
-    type2
-      .split("-")
-      .map((str) => str.charAt(0).toUpperCase() + str.slice(1))
-      .join(" "),
-  ];
-  const [value1, value2] = ["North", "5km/h"]; // require API
+  const region = useSelector((state: { region: Region[] }) => state.region);
+  const weatherDataList = useSelector(
+    (state: { weatherData: WeatherDataList }) => state.weatherData
+  );
+  const timeInterval = useSelector(
+    (state: { timeInterval: number }) => state.timeInterval
+  );
+  const indicator1 =
+    indicatorsDictionary[type1 as keyof typeof indicatorsDictionary];
+  const indicator2 =
+    indicatorsDictionary[type2 as keyof typeof indicatorsDictionary];
+
+  if (Object.keys(weatherDataList).length === 0) {
+    return (
+      <TouchableOpacity style={{ flex: 1, width: "100%" }}>
+        <Widget style={styles.customWidgetStyle}>
+          <View style={styles.layout}>
+            <View style={styles.titleDisplay}>
+              <SvgImage style={styles.svgImage} name={type1} />
+              <Text style={styles.title}>{indicator1.title}</Text>
+            </View>
+            <Text style={styles.value}>--</Text>
+          </View>
+
+          <View style={styles.layout}>
+            <View style={styles.titleDisplay}>
+              <SvgImage style={styles.svgImage} name={type2} />
+              <Text style={styles.title}>{indicator2.title}</Text>
+            </View>
+            <Text style={styles.value}>--</Text>
+          </View>
+        </Widget>
+      </TouchableOpacity>
+    );
+  }
+
+  indicator1.value =
+    weatherDataList?.[region[0].id]?.[timeInterval]?.[0]?.[type1] ?? ""; // region - timeInterval - index
+  indicator2.value =
+    weatherDataList?.[region[0].id]?.[timeInterval]?.[0]?.[type2] ?? "";
 
   return (
     <TouchableOpacity style={{ flex: 1, width: "100%" }}>
       <Widget style={styles.customWidgetStyle}>
         <View style={styles.layout}>
           <View style={styles.titleDisplay}>
-            <SvgImage style={{ width: 30, height: 30 }} name={type1} />
-            <Text style={styles.title}>{title1}</Text>
+            <SvgImage style={styles.svgImage} name={type1} />
+            <Text style={styles.title}>{indicator1.title}</Text>
           </View>
-          <Text style={styles.value}>{value1}</Text>
+          <Text style={styles.value}>{indicator1.value + indicator1.unit}</Text>
         </View>
 
         <View style={styles.layout}>
           <View style={styles.titleDisplay}>
-            <SvgImage style={{ width: 30, height: 30 }} name={type2} />
-            <Text style={styles.title}>{title2}</Text>
+            <SvgImage style={styles.svgImage} name={type2} />
+            <Text style={styles.title}>{indicator2.title}</Text>
           </View>
-          <Text style={styles.value}>{value2}</Text>
+          <Text style={styles.value}>{indicator2.value + indicator2.unit}</Text>
         </View>
       </Widget>
     </TouchableOpacity>
@@ -57,7 +93,7 @@ export function IndicatorsDisplayWidget_double({
 // Default Style
 const styles = StyleSheet.create({
   customWidgetStyle: {
-    paddingHorizontal: "10%",
+    paddingHorizontal: "5%",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -77,13 +113,17 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "white",
-    fontSize: 24,
+    fontSize: 18,
     textAlign: "left",
   },
   value: {
     color: "white",
-    fontSize: 36,
+    fontSize: 20,
     fontWeight: "bold",
     textAlign: "left",
+  },
+  svgImage: {
+    width: 20,
+    height: 20,
   },
 });

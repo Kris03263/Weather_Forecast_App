@@ -61,12 +61,10 @@ export default function SettingsScreen() {
   const passwordRegisterInput = passwordRegisterInputRef.current;
 
   //POST userRegister
-  const handleRegister = () => {
-    fetch("https://weather-2-10.onrender.com/Users/", {
-      headers: {
-        "Content-Type": "application/json",
-      },
+  const handleRegister = async () => {
+    await fetch("https://weather-2-9.onrender.com/Users/", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userAccount: username,
         password: userPassword,
@@ -75,10 +73,11 @@ export default function SettingsScreen() {
       .then((response) => response.json())
       .then((data) => {
         setUserID(data.id);
-        if (data.id !== "-1") {
+        // 使用 data.id 而非 userID 來判斷註冊是否成功
+        if (data.id !== -1) {
           Alert.alert("註冊成功");
         } else {
-          Alert.alert("註冊失敗，請檢查帳號是否已被註冊");
+          Alert.alert("註冊失敗");
         }
       })
       .catch((error) => console.error("Error:", error));

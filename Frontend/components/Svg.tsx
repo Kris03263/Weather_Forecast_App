@@ -1,9 +1,9 @@
 import { StyleSheet, View } from "react-native";
 
-import HumidityIcon from "@/assets/svgs/humidity-icon.svg";
-import RainRateIcon from "@/assets/svgs/rain-rate-icon.svg";
-import WindSpeedIcon from "@/assets/svgs/wind-speed-icon.svg";
-import WindDirectionIcon from "@/assets/svgs/wind-direction-icon.svg";
+import wetIcon from "@/assets/svgs/wet-icon.svg";
+import RainRateIcon from "@/assets/svgs/rainRate-icon.svg";
+import WindSpeedIcon from "@/assets/svgs/windSpeed-icon.svg";
+import WindDirectionIcon from "@/assets/svgs/windDirection-icon.svg";
 import DressingIcon from "@/assets/svgs/dressing-icon.svg";
 import HealthIcon from "@/assets/svgs/health-icon.svg";
 import SportIcon from "@/assets/svgs/sport-icon.svg";
@@ -21,10 +21,10 @@ interface SvgProps {
 
 export function SvgImage({ style = {}, name = "" }: SvgProps) {
   const Icon = {
-    humidity: HumidityIcon,
-    "rain-rate": RainRateIcon,
-    "wind-speed": WindSpeedIcon,
-    "wind-direction": WindDirectionIcon,
+    wet: wetIcon,
+    rainRate: RainRateIcon,
+    windSpeed: WindSpeedIcon,
+    windDirection: WindDirectionIcon,
     dressing: DressingIcon,
     health: HealthIcon,
     sport: SportIcon,
