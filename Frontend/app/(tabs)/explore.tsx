@@ -51,11 +51,15 @@ export default function SettingsScreen() {
   const [userID, setUserID] = useState(1);
 
   //define ref(element ID)
-  const usernameInputRef = useRef<TextInput>(null);
-  const passwordInputRef = useRef<TextInput>(null);
+  const usernameLoginInputRef = useRef<TextInput>(null);
+  const passwordLoginInputRef = useRef<TextInput>(null);
+  const usernameRegisterInputRef = useRef<TextInput>(null);
+  const passwordRegisterInputRef = useRef<TextInput>(null);
 
-  const usernameInput = usernameInputRef.current;
-  const passwordInput = passwordInputRef.current;
+  const usernameInput = usernameLoginInputRef.current;
+  const passwordInput = passwordLoginInputRef.current;
+  const usernameRegisterInput = usernameRegisterInputRef.current;
+  const passwordRegisterInput = passwordRegisterInputRef.current;
 
   //POST userRegister
   const handleRegister = async () => {
@@ -389,7 +393,7 @@ export default function SettingsScreen() {
               </View>
               <TextInput
                 style={styles.input}
-                ref={usernameInputRef}
+                ref={usernameLoginInputRef}
                 placeholder="輸入名稱"
                 onChangeText={setUsername}
               />
@@ -404,12 +408,21 @@ export default function SettingsScreen() {
               </View>
               <TextInput
                 style={styles.input}
-                ref={passwordInputRef}
+                ref={passwordLoginInputRef}
                 placeholder="輸入密碼"
                 secureTextEntry={true}
                 onChangeText={setPassword}
               />
             </View>
+            <TouchableOpacity
+              style={styles.linkButton}
+              onPress={() => {
+                setUserSettingsVisible(true);
+                setUserLoggingVisible(!userLoggingVisible);
+              }}
+            >
+              <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.modalbutton, styles.modalbuttonClose]}
               onPress={() => {
@@ -419,15 +432,6 @@ export default function SettingsScreen() {
               }}
             >
               <Text style={styles.textStyle}>登入</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.linkButton}
-              onPress={() => {
-                setUserSettingsVisible(true);
-                setUserLoggingVisible(!userLoggingVisible);
-              }}
-            >
-              <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleDeleteUser} style = {[styles.modalbutton, styles.modalbuttonClose]}>
               <Text style={styles.textStyle}>刪除使用者</Text>
@@ -500,8 +504,8 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="輸入名稱"
-                value={username}
                 onChangeText={setUsername}
+                ref = {usernameRegisterInputRef}
               />
               <View style={styles.inputRow}>
                 <Text style={styles.label}>
@@ -515,14 +519,17 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="輸入密碼"
-                value={userPassword}
+                ref = {passwordRegisterInputRef}
                 onChangeText={setPassword}
+                secureTextEntry={true}
               />
             </View>
             <TouchableOpacity
               style={[styles.modalbutton, styles.modalbuttonClose]}
               onPress={() => {
                 handleRegister();
+                usernameRegisterInput?.clear();
+                passwordRegisterInput?.clear();
               }}
             >
               <Text style={styles.textStyle}>提交</Text>
