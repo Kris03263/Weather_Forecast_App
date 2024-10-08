@@ -141,6 +141,25 @@ export default function SettingsScreen() {
       });
   };
 
+  //DELETE user API
+  const handleDeleteUser = () => {
+    fetch("https://weather-2-9.onrender.com/Users", {
+      method: "DELETE",
+      body: JSON.stringify({
+        userID: userID,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.Status === "Delete Successful !") {
+          Alert.alert("使用者刪除成功");
+        } else {
+          Alert.alert("使用者刪除失敗");
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+  }
+
   //GET UserData API
   const handleGetUserData = () => {
     fetch(`https://weather-2-9.onrender.com/Users?id=${userID}`, {
@@ -409,6 +428,9 @@ export default function SettingsScreen() {
               }}
             >
               <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDeleteUser} style = {[styles.modalbutton, styles.modalbuttonClose]}>
+              <Text style={styles.textStyle}>刪除使用者</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.modalbutton, styles.modalbuttonClose]}
