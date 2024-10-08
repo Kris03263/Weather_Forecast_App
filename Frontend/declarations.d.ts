@@ -23,3 +23,11 @@ declare module "react-native-modal-dropdown" {
 
   export default class ModalDropdown extends Component<ModalDropdownProps> {}
 }
+
+declare const require: {
+  context: (
+    directory: string,
+    useSubdirectories?: boolean,
+    regExp?: RegExp
+  ) => __WebpackModuleApi.RequireContext;
+};

@@ -9,20 +9,31 @@ import {
   PermissionsAndroid,
   Platform,
 } from "react-native";
-import { EffectCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import ModalDropdown from "react-native-modal-dropdown";
 import Geolocation, { GeoPosition } from "react-native-geolocation-service";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
+import { DynamicImage } from "@/components/DynamicImage";
+
+// TODO list:
+// - [V] Add weather data API
+// - [V] Add weather image
+// - [ ] Fix muti-day weather forecast view
+// - [ ] Switch to use region name to fetch weather data
+// - [ ] Switch to use Redux for global state management
+// - [ ] Move weatherDataList, region, currentTime to index.tsx
+
+///////////////
+// Interface //
+///////////////
 
 interface WeatherDataList {
-  // Define weather data list structure
   [key: string]: WeatherData[];
 }
 
 interface WeatherData {
-  // Define weather data structure
   aqi?: string;
   bodyTemp: string;
   city: string;
@@ -41,25 +52,18 @@ interface WeatherData {
 }
 
 interface Region {
-  // Define region structure
   id: string;
   name: string;
   longitude: string;
   latitude: string;
 }
 
-// TODO list:
-// - [V] Add weather data API
-// - [ ] Add weather image
-// - [ ] Add longtitute and latitude to region document
-// - [ ] Move weatherDataList, location, currentTime to index.tsx and make it global
-
 export function ForecastDisplayWidget() {
   const [weatherDataList, setWeatherDataList] =
     useState<WeatherDataList | null>(null);
   const [regions, setRegions] = useState<Region[] | null>(null);
-  const [timeInterval_type, setTimeInterval] = useState<number | null>(0);
-  const [currentTime, setCurrentTime] = useState<string | null>("");
+  const [timeInterval, setTimeInterval] = useState<number | null>(0);
+  const [time, setTime] = useState<string | null>("");
   const [isLoading, setLoading] = useState<boolean | null>(true);
 
   ////////////////
@@ -73,12 +77,12 @@ export function ForecastDisplayWidget() {
         console.log("Updating region data......");
 
         // Update current location
-        await HandleUpdateRegion();
+        await HandleUpdateRegion(0);
 
         // Upadate current time
-        HandleUpdateCurrentTime();
+        HandleUpdateTime();
 
-        console.log("Region data update completed! region: " + regions);
+        console.log("Region data update completed!");
       } catch (error) {
         console.error("Region data update failed! " + error);
       }
@@ -120,144 +124,22 @@ export function ForecastDisplayWidget() {
     };
 
     UpdateWeatherDataList();
-  }, [regions, timeInterval_type]);
+  }, [regions, timeInterval]);
 
   //////////////////////
   // Define functions //
   //////////////////////
 
-  const HandleUpdateCurrentTime = () => {
+  const HandleUpdateTime = () => {
     const date = new Date().toLocaleDateString();
 
     // Update current time
-    setCurrentTime(date);
+    setTime(date);
   };
 
   const HandleUpdateTimeInterval = async (type: number) => {
     // Update time interval type
     setTimeInterval(type);
-
-    // Update weather data
-    HandleUpdateWeatherDataList();
-  };
-
-  const HandleUpdateWeatherDataList = () => {
-    const weatherDataList: WeatherDataList = {};
-
-    // Fetch weather data for each region
-    regions?.map(async (region) => {
-      const latitude = region.latitude;
-      const longitude = region.longitude;
-      const weatherData = await HandleGetWeatherData(latitude, longitude);
-      if (weatherData) {
-        weatherDataList[region.id] = weatherData;
-      }
-    });
-
-    // Update weather data
-    setWeatherDataList(weatherDataList);
-  };
-
-  const HandleGetTimeFormat = (_time: string) => {
-    // Format time based on time interval type
-    // Time example: 2024-10-04 12:00:00
-    const time = _time.split(" ");
-    switch (timeInterval_type) {
-      case 0: // Day View (3h)\
-        return `${time[1].split(":")[0]}:00`;
-        break;
-      case 1: // Weak View (1d)
-        return `${time[0].split("-")[1]}/${time[0].split("-")[2]}`;
-        break;
-    }
-  };
-
-  const HandleUpdateWeatherDataList = async () => {
-    const weatherDataList: WeatherDataList = {};
-
-    // Fetch weather data for each region
-    for (const region of regions || []) {
-      const latitude = region.latitude;
-      const longitude = region.longitude;
-      const weatherData = await HandleGetWeatherData(latitude, longitude);
-
-      weatherDataList[region.id] = weatherData;
-    }
-
-    // Update weather data
-    setWeatherDataList(weatherDataList);
-  };
-
-  const HandleUpdateRegion = async () => {
-    const regions_ = regions || [];
-    const currentLocation = await HandleGetGeoPosition();
-    const latitude = currentLocation?.coords.latitude.toString();
-    const longitude = currentLocation?.coords.longitude.toString();
-    const weatherData = await HandleGetWeatherData(latitude, longitude);
-    const region = {
-      id: `${weatherData[0].district}, ${weatherData[0].city}`,
-      name: `${weatherData[0].district}, ${weatherData[0].city}`,
-      latitude: latitude,
-      longitude: longitude,
-    };
-
-    // Check if region already exists // Need to move to AddRegion function
-    if (regions?.find((_region) => _region.id === region.id)) {
-      throw new Error("Region already exists");
-    }
-
-    regions_[0] = region;
-
-    setRegions(regions_);
-  };
-
-  const HandleGetWeatherData = async (
-    latitude: string,
-    longitude: string
-  ): Promise<WeatherData[]> => {
-    let weatherData: WeatherData[] | null = null;
-
-    // Fetch API to get weather data
-    switch (timeInterval_type) {
-      case 0: // Day View (3h) // https://weather-2-9.onrender.com/Weather/Get3hData
-        weatherData = await fetch(`http://127.0.0.1:8000/Weather/Get3hData`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ longitude: longitude, latitude: latitude }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            return data;
-          })
-          .catch((error) => {
-            throw new Error(error);
-          });
-        break;
-      case 1: // Weak View (1d) // https://weather-2-9.onrender.com/Weather/Get12hData
-        weatherData = await fetch(`http://127.0.0.1:8000/Weather/Get12hData`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ longitude: longitude, latitude: latitude }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            return data;
-          })
-          .catch((error) => {
-            throw new Error(error);
-          });
-        break;
-    }
-
-    if (weatherData) {
-      return weatherData;
-    } else {
-      throw new Error("weatherData is null");
-    }
   };
 
   const HandleGetGeoPosition = async (): Promise<GeoPosition> => {
@@ -287,13 +169,11 @@ export function ForecastDisplayWidget() {
     };
 
     // Get current location
-    const getCurrentLocation = async () => {
+    const getCurrentLocation = async (): Promise<GeoPosition> => {
       return new Promise((resolve, reject) => {
         Geolocation.getCurrentPosition(
           (pos) => {
             // Update location
-            console.log(pos);
-            positionData = pos;
             resolve(pos);
           },
           (error) => {
@@ -305,7 +185,7 @@ export function ForecastDisplayWidget() {
     };
 
     if (await requestLocationPermission()) {
-      await getCurrentLocation();
+      positionData = await getCurrentLocation();
     } else {
       throw new Error("Location permission denied");
     }
@@ -317,16 +197,141 @@ export function ForecastDisplayWidget() {
     }
   };
 
-  const FormatTime = (_time: string) => {
+  const HandleGetWeatherData = async (
+    latitude: string,
+    longitude: string
+  ): Promise<WeatherData[]> => {
+    let weatherData: WeatherData[] | null = null;
+
+    // Fetch API to get weather data
+    switch (timeInterval) {
+      case 0: // Day View (3h) // https://weather-2-9.onrender.com/Weather/Get3hData
+        weatherData = await fetch(
+          `https://weather-2-9.onrender.com/Weather/Get3hData`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ longitude: longitude, latitude: latitude }),
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            return data;
+          })
+          .catch((error) => {
+            throw new Error(error);
+          });
+        break;
+      case 1: // Weak View (1d) // https://weather-2-9.onrender.com/Weather/Get12hData
+        weatherData = await fetch(
+          `https://weather-2-9.onrender.com/Weather/Get12hData`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ longitude: longitude, latitude: latitude }),
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            return data;
+          })
+          .catch((error) => {
+            throw new Error(error);
+          });
+        break;
+    }
+
+    if (weatherData) {
+      return weatherData;
+    } else {
+      throw new Error("weatherData is null");
+    }
+  };
+
+  const HandleUpdateWeatherDataList = async () => {
+    const weatherDataList: WeatherDataList = {};
+
+    // Fetch weather data for each region
+    for (const region of regions || []) {
+      const latitude = region.latitude;
+      const longitude = region.longitude;
+      const weatherData = await HandleGetWeatherData(latitude, longitude);
+
+      weatherDataList[region.id] = weatherData;
+    }
+
+    // Update weather data
+    setWeatherDataList(weatherDataList);
+  };
+
+  const HandleGetRegion = async (
+    latitude: string,
+    longitude: string
+  ): Promise<Region> => {
+    // Fetch API to get region data
+    const weatherData = await HandleGetWeatherData(latitude, longitude);
+    const region = {
+      id: `${weatherData[0].district}, ${weatherData[0].city}`,
+      name: `${weatherData[0].district}, ${weatherData[0].city}`,
+      latitude: latitude,
+      longitude: longitude,
+    };
+
+    return region;
+  };
+
+  const HandleRemoveRegion = async (region: Region) => {
+    let regions_ = regions || [];
+
+    // Check if region exists
+    if (!regions_?.find((reg) => reg.id === region.id)) {
+      throw new Error("Region does not exist");
+    }
+
+    // Filter out the region and update
+    setRegions([...regions_.filter((reg) => reg.id !== region.id)]);
+  };
+
+  const HandleAddRegion = async (region: Region) => {
+    const regions_ = regions || [];
+
+    // Check if region already exists
+    if (regions_?.find((reg) => reg.id === region.id)) {
+      throw new Error("Region already exists");
+    }
+
+    // Update regions
+    setRegions([...regions_, region]);
+  };
+
+  const HandleUpdateRegion = async (index: number) => {
+    const regions_ = regions || [];
+    const currentLocation = await HandleGetGeoPosition();
+    const latitude = currentLocation?.coords.latitude.toString();
+    const longitude = currentLocation?.coords.longitude.toString();
+    const region = await HandleGetRegion(latitude, longitude);
+
+    regions_[index] = region;
+
+    // Update regions
+    setRegions([...regions_]);
+  };
+
+  const FormatTime = (_time: string): string => {
     // Format time based on time interval type
     // Time example: 2024-10-04 12:00:00
     const time = _time.split(" ");
-    switch (timeInterval_type) {
+    switch (timeInterval) {
       case 0: // Day View (3h)\
         return `${time[1].split(":")[0]}:00`;
       case 1: // Weak View (1d)
         return `${time[0].split("-")[1]}/${time[0].split("-")[2]}`;
     }
+    return "";
   };
 
   if (!isLoading) {
@@ -343,7 +348,7 @@ export function ForecastDisplayWidget() {
           renderItem={({ item }) => (
             <View style={styles.cityView}>
               <Text style={styles.subTitle}>
-                {item.name} ({currentTime})
+                {item.name} ({time})
               </Text>
 
               <FlatList
@@ -352,9 +357,13 @@ export function ForecastDisplayWidget() {
                 data={weatherDataList ? weatherDataList[item.id] : []}
                 renderItem={({ item }) => (
                   <TouchableOpacity style={styles.weatherCard}>
-                    <Image
-                      // source={require("./cloud.png")} // require weather image
+                    <DynamicImage
                       style={styles.weatherIcon}
+                      path={
+                        FormatTime(item.time) < "12:00"
+                          ? `day/${item.weatherCode}.png`
+                          : `night/${item.weatherCode}.png`
+                      }
                     />
                     <Text style={styles.weatherTime}>
                       {FormatTime(item.time)}
@@ -371,7 +380,11 @@ export function ForecastDisplayWidget() {
         <View style={styles.row}>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => HandleUpdateRegion()}
+            onPress={async () =>
+              await HandleAddRegion(
+                await HandleGetRegion("25.06715187342581", "121.51697063446045")
+              )
+            }
           >
             <SvgImage style={{ width: 40, height: 40 }} name="plus" />
           </TouchableOpacity>
@@ -446,8 +459,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   weatherIcon: {
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
     marginBottom: 5,
   },
   weatherTime: {

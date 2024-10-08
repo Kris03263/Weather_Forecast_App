@@ -13,6 +13,23 @@ import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
 import { IndicatorsDisplayWidget_single } from "@/components/IndicatorsDisplayWidget_single";
 import { IndicatorsDisplayWidget_double } from "@/components/IndicatorsDisplayWidget_double";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
+import { isLoaded, isLoading } from "expo-font";
+
+// 定義初始狀態
+const initialState = {
+  user: { id: 0, name: "" },
+  weatherData: {},
+  regions: [],
+  isLoading: true,
+  timeInterval: 0,
+};
+
+interface User {
+  id: number;
+  account: string;
+  password: string;
+  status: string;
+}
 
 export default function HomeScreen() {
   return (
