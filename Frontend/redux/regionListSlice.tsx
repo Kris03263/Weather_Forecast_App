@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { Region } from "@/app/(tabs)/index";
+import { Region } from "@/app/(tabs)";
 
 const regionListSlice = createSlice({
   name: "regionList",

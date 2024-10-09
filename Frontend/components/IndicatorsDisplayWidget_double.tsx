@@ -18,7 +18,7 @@ import {
   WeatherDataList,
   Region,
   indicatorsDictionary,
-} from "@/app/(tabs)/index";
+} from "@/app/(tabs)";
 
 interface IndicatorsDisplayWidgetProps_double {
   type1: string;

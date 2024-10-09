@@ -15,7 +15,7 @@ import {
   selecter,
   WeatherDataList,
   indicatorsDictionary,
-} from "@/app/(tabs)/index";
+} from "@/app/(tabs)";
 
 import { SvgImage } from "./Svg";
 import { DynamicImage } from "./DynamicImage";

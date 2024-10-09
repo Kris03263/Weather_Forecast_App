@@ -13,7 +13,7 @@ import { DynamicImage } from "@/components/DynamicImage";
 import store from "@/redux/store";
 import { useSelector } from "react-redux";
 
-import { Region, WeatherDataList, selecter } from "@/app/(tabs)/index";
+import { Region, WeatherDataList, selecter } from "@/app/(tabs)";
 
 export function ForecastDisplayWidget() {
   const region = useSelector((state: { region: Region[] }) => state.region);

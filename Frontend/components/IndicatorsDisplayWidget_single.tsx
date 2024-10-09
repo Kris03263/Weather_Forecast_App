@@ -18,7 +18,7 @@ import {
   selecter,
   Region,
   indicatorsDictionary,
-} from "@/app/(tabs)/index";
+} from "@/app/(tabs)";
 
 interface IndicatorsDisplayWidgetProps_single {
   type: string;

@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { selecter } from "@/app/(tabs)/index";
+import { selecter } from "@/app/(tabs)";
 
 const selecterSlice = createSlice({
   name: "selecter",

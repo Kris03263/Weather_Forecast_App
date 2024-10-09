@@ -27,29 +27,24 @@ import {
 } from "@/redux/weatherDataSlice";
 import { setRegion } from "@/redux/regionListSlice";
 import { updateTimeInterval, updateRegion } from "@/redux/selecterSlice";
+import { setUser } from "@/redux/userSlice";
+import { setUserSettings } from "@/redux/userSettingsSlice";
 
 // TODO list:
 // - [V] Add weather data API
 // - [V] Add weather image
-// - [ ] Fix muti-day weather forecast view
+// - [X] Fix muti-day weather forecast view (Cancel)
 // - [ ] Switch to use region name to fetch weather data
 // - [V] Switch to use Redux for global state management
 // - [V] Move weatherDataList, region, currentTime to index.tsx
 
-export interface State {
-  user: User;
-  weatherData: WeatherDataList;
-  regions: Region[];
-  isLoading: boolean;
-  timeInterval: number;
-}
-
-export interface User {
-  id: number;
-  account: string;
-  password: string;
-  status: string;
-}
+// export interface State {
+//   user: User;
+//   weatherData: WeatherDataList;
+//   regions: Region[];
+//   isLoading: boolean;
+//   timeInterval: number;
+// }
 
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
@@ -132,23 +127,485 @@ export interface selecter {
   timeInterval: number;
 }
 
-export default function HomeScreen() {
-  ////////////////
-  // Use effect //
-  ////////////////
+export interface User {
+  account: string;
+  password: string;
+  id: number;
+  status: string;
+}
 
+export interface Sport {
+  sportName: string;
+  id: number;
+}
+
+export interface Habit {
+  habitName: string;
+  id: number;
+}
+
+export interface UserSettings {
+  sport: Sport[];
+  habit: Habit[];
+}
+
+//////////////////////
+// Define functions //
+//////////////////////
+
+export const userLogin = async (_account: string, _password: string) => {
+  try {
+    const user = await HandleUserLogin(_account, _password);
+    if(!user){
+      throw new Error("Failed to login");
+    }
+
+    const userSettings = {"sport": await HandleGetUserSports(user.id), "habit": await HandleGetUserHabits(user.id)};
+
+    AsyncStorage.setItem("userID", JSON.stringify(user.id));
+    store.dispatch(setUser(user));
+    store.dispatch(setUserSettings(userSettings));
+
+    console.log("Login success");
+  } catch (error) {
+    console.error("Login fail: " + error);
+  }
+}
+
+export const userLogout = async () => {
+  try {
+    AsyncStorage.removeItem("userID");
+    store.dispatch(setUser({account: "", password: "", id: -1, status: ""}));
+    store.dispatch(setUserSettings({sport: [], habit: []}));
+
+    console.log("Logout success");
+  } catch (error) {
+    console.error("Logout fail: " + error);
+  }
+}
+
+export const userDelete = async () => {
+  try {
+    const userID = store.getState().user.id;
+    const response = await HandleDeleteUser(userID);
+
+    if(!response){
+      throw new Error("Failed to delete user");
+    }
+
+    AsyncStorage.removeItem("userID");
+    store.dispatch(setUser({account: "", password: "", id: -1, status: ""}));
+    store.dispatch(setUserSettings({sport: [], habit: []}));
+
+    console.log("Delete success");
+  } catch (error) {
+    console.error("Delete fail: " + error);
+  }
+}
+
+export const userRegister = async (_account: string, _password: string) => {
+  try {
+    const user = await HandleSetUser(_account, _password);
+    if(!user){
+      throw new Error("Failed to set user");
+    }
+
+    const response = await HandleSetUserSports(user.id, []) && await HandleSetUserHabits(user.id, [])
+    if(!response){
+      throw new Error("Failed to set user settings");
+    }
+
+    const userSettings = {"sport": await HandleGetUserSports(user.id), "habit":  await HandleGetUserHabits(user.id)};
+
+    AsyncStorage.setItem("userID", JSON.stringify(user.id));
+    store.dispatch(setUser(user));
+    store.dispatch(setUserSettings(userSettings));
+
+    console.log("Register success");
+  } catch (error) {
+    console.error("Register fail: " + error);
+  }
+}
+
+export const userSetSports = async (_sportIDs: number[]) => {
+  try {
+    const userID = store.getState().user.id;
+    const response = await HandleSetUserSports(userID, _sportIDs);
+
+    if(response){
+      throw new Error("Failed to set sports");
+    }
+
+    const sports = await HandleGetUserSports(userID);
+    console.log("Get sports: ", sports);
+
+    store.dispatch(setUserSettings({sport: sports, habit: store.getState().userSettings.habit}));
+
+    console.log("Set sports success");
+  } catch (error) {
+    console.error("Set sports fail: " + error);
+  }
+}
+
+export const userSetHabits = async (_habitIDs: number[]) => {
+  try {
+    const userID = store.getState().user.id;
+    const response = await HandleSetUserHabits(userID, _habitIDs);
+
+    if(response){
+      throw new Error("Failed to set habits");
+    }
+
+    const habits = await HandleGetUserHabits(userID);
+      
+    store.dispatch(setUserSettings({sport: store.getState().userSettings.sport, habit: habits}));
+
+    console.log("Set habits success");
+  } catch (error) {
+    console.error("Set habits fail: " + error);
+  }
+}
+
+//////////////////
+// API fetching //
+//////////////////
+
+const HandleSetUser = async (_account: string, _password: string): Promise<User> => {
+  const data = await fetch("https://weather-2-10.onrender.com/Users/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userAccount: _account,
+      password: _password,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data as User;
+    })
+    .catch((error) => console.error("Error:", error));
+
+  if (!data || data.id === -1) { 
+    throw new Error(data?.status ?? "Data is empty");
+  }
+
+  return data;
+};
+
+const HandleGetUser = async (_userID: number): Promise<User> => {
+  console.log("User ID: ", _userID);
+  const data = await fetch(`https://weather-2-10.onrender.com/Users/?id=${_userID}`, {
+    method: "GET",
+    headers: {
+      // "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Raw Data: ", data);
+      return data as User;
+    })
+    .catch((error) => console.error("Error:", error));
+
+    console.log("Final Data: ", data);
+
+    if (!data || data.id === -1) { 
+      throw new Error(data?.status ?? "Data is empty");
+    }
+
+    return data;
+};
+
+const HandleDeleteUser = async (_userID: number) => {
+    const response = await fetch("https://weather-2-10.onrender.com/Users/", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "DELETE",
+      body: JSON.stringify({
+        userID: _userID,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "Successful") {
+          return true;
+        } else {
+          return false;
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+
+      return !(!response);
+  };
+
+const HandleUserLogin = async (_account: string, _password: string): Promise<User> => {
+  const data = await fetch("https://weather-2-10.onrender.com/Users/Login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userAccount: _account,
+      password: _password,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data as User;
+    })
+    .catch((error) => console.error("Error:", error));
+
+    if (!data || data.id === -1) { 
+      throw new Error(data?.status ?? "Data is empty");
+    }
+
+  return data;
+};
+
+const HandleSetUserSports = async (_userID: number, _sportIDs: number[]) => {
+  const response = await fetch("https://weather-2-10.onrender.com/Users/UserSports", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      userID: _userID,
+      sportIDs: _sportIDs.map((index) => index + 1),
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === "Update Successful !") {
+        return true;
+      } else {
+        return false;
+      }
+    })
+    .catch((error) => console.error("Error:", error));
+
+    return !(!response);
+};
+
+const HandleGetUserSports = async (_userID: number): Promise<Sport[] | []> => {
+  const data = await fetch(`https://weather-2-10.onrender.com/Users/UserSports?ID=${_userID}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data as Sport[];
+    })
+    .catch((error) => console.error("Error:", error));
+
+    if (!Array.isArray(data) || data.length === 0) {
+      return [];
+    }
+
+    if (data[0].id === -1) { 
+      throw new Error(data?.[0]?.sportName ?? "Data is empty");
+    }
+
+    return data;
+};
+
+
+
+const HandleSetUserHabits = async (_userID: number, _habitIDs: number[]) => {
+  const response = await fetch("https://weather-2-10.onrender.com/Users/UserHabits", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      userID: _userID,
+      habitIDs: _habitIDs.map((index) => index + 1),
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === "successful") {
+        return true;
+      } else {
+        return false;
+      }
+    })
+    .catch((error) => console.error("Error:", error));
+
+    return !(!response);
+};
+
+
+const HandleGetUserHabits = async (_userID: number): Promise<Habit[]> => {
+  const data = await fetch(`https://weather-2-10.onrender.com/Users/UserHabits?ID=${_userID}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      return data as Habit[];
+    })
+    .catch((error) => console.error("Error:", error));
+
+    if (!Array.isArray(data) || data.length === 0) {
+      return [];
+    }
+
+    if (data[0].id === -1) { 
+      throw new Error(data?.[0]?.habitName ?? "Data is empty");
+    }
+
+    return data;
+};
+
+const HandleGetLocal = async (): Promise<Region> => {
+  // Request location permission
+  const requestLocationPermission = async () => {
+    if (Platform.OS === "android") {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: "Location Permission",
+          message: "We need access to your location",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } else {
+      return true;
+    }
+  };
+
+  // Get current location
+  const getCurrentLocation = async (): Promise<GeoPosition> => {
+    return new Promise((resolve, reject) => {
+      Geolocation.getCurrentPosition(
+        (pos) => {
+          resolve(pos);
+        },
+        (error) => {
+          reject(new Error(error.message));
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      );
+    });
+  };
+
+  if (!(await requestLocationPermission())) {
+    throw new Error("Location permission denied");
+  }
+
+  const position = await getCurrentLocation();
+
+  if (!position) {
+    throw new Error("Failed to get location");
+  }
+
+  const weatherData = await HandleGetWeatherData3h(
+    position.coords.latitude.toString(),
+    position.coords.longitude.toString()
+  );
+
+  if (!weatherData) {
+    throw new Error("Failed to get weather data");
+  }
+
+  const region: Region = {
+    id: `${weatherData[0].city}, ${weatherData[0].district}`,
+    name: `${weatherData[0].city}, ${weatherData[0].district}`,
+    longitude: position.coords.longitude.toString(),
+    latitude: position.coords.latitude.toString(),
+  };
+
+  return region;
+};
+
+const HandleGetWeatherData3h = async (
+  latitude: string,
+  longitude: string
+): Promise<WeatherData[]> => {
+  const weatherData3h = await fetch(
+    `https://weather-2-9.onrender.com/Weather/Get3hData`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ longitude: longitude, latitude: latitude }),
+    }
+  )
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      throw new Error(error);
+    });
+
+  if (!weatherData3h) {
+    throw new Error("Weather data (3h) is empty");
+  }
+
+  return weatherData3h;
+};
+
+const HandleGetWeatherData12h = async (
+  latitude: string,
+  longitude: string
+): Promise<WeatherData[]> => {
+  const weatherData12h = await fetch(
+    `https://weather-2-9.onrender.com/Weather/Get12hData`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ longitude: longitude, latitude: latitude }),
+    }
+  )
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      throw new Error(error);
+    });
+
+  if (!weatherData12h) {
+    throw new Error("Weather data (12h) is empty");
+  }
+
+  return weatherData12h;
+};
+
+export default function HomeScreen() {
   useEffect(() => {
     // Update current location and current time every minute
     const Update = async () => {
       try {
         console.log("Updating data......");
 
+        let userID: number;
+        let user: User = {} as User;
+        let userSettings: UserSettings = {} as UserSettings;
         let regions: Region[] = [];
         let region: Region | null = null;
 
         // Get regions from local storage
         regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
         console.log("Complete get regions from local storage");
+
+        // Get user id from local storage
+        userID = parseInt(JSON.parse((await AsyncStorage.getItem("userID")) || "-1"));
+        console.log("Complete get userID from local storage");
 
         // Get current location
         try {
@@ -158,9 +615,26 @@ export default function HomeScreen() {
           console.error("Failed to get current location: " + error);
         }
 
+        // Get user data
+        try {
+          user = await HandleGetUser(userID);
+          console.log("Complete get user data");
+        } catch (error) {
+          console.error("Failed to get user data: " + error);
+        }
+
+        // Get user settings data
+        try {
+          userSettings = {"sport": await HandleGetUserSports(userID), "habit": await HandleGetUserHabits(userID)};
+          console.log("Complete get user settings data");
+        } catch (error) {
+          console.error("Failed to get user settings data: " + error);
+        }
+
         // Set regions[0] to current location
         if (region) {
           regions[0] = region;
+          await AsyncStorage.setItem("regions", JSON.stringify(regions));
           console.log("Complete set regions[0] to current location");
         } else {
           console.log(
@@ -168,11 +642,14 @@ export default function HomeScreen() {
           );
         }
 
-        // Save regions to localstorage
-        await AsyncStorage.setItem("regions", JSON.stringify(regions));
+        console.log(userSettings)
+
+        // Set store data
         store.dispatch(setRegion(regions));
         store.dispatch(updateRegion(regions[0].id));
-        console.log("Complete save regions to local storage");
+        store.dispatch(setUser(user));
+        store.dispatch(setUserSettings(userSettings));
+        console.log("Complete set store data");
 
         // Update time
         let time = new Date().toLocaleDateString();
@@ -207,7 +684,13 @@ export default function HomeScreen() {
           store.getState().region,
           "\n",
           "weatherData: ",
-          store.getState().weatherData
+          store.getState().weatherData,
+          "\n",
+          "user: ",
+          store.getState().user,
+          "\n",
+          "userSettings: ",
+          store.getState().userSettings
         );
       } catch (error) {
         console.error("Data update failed! " + error);
@@ -223,134 +706,7 @@ export default function HomeScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  //////////////////////
-  // Define functions //
-  //////////////////////
-
-  const HandleGetLocal = async (): Promise<Region> => {
-    // Request location permission
-    const requestLocationPermission = async () => {
-      if (Platform.OS === "android") {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: "Location Permission",
-            message: "We need access to your location",
-            buttonNeutral: "Ask Me Later",
-            buttonNegative: "Cancel",
-            buttonPositive: "OK",
-          }
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } else {
-        return true;
-      }
-    };
-
-    // Get current location
-    const getCurrentLocation = async (): Promise<GeoPosition> => {
-      return new Promise((resolve, reject) => {
-        Geolocation.getCurrentPosition(
-          (pos) => {
-            resolve(pos);
-          },
-          (error) => {
-            reject(new Error(error.message));
-          },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-        );
-      });
-    };
-
-    if (!(await requestLocationPermission())) {
-      throw new Error("Location permission denied");
-    }
-
-    const position = await getCurrentLocation();
-
-    if (!position) {
-      throw new Error("Failed to get location");
-    }
-
-    const weatherData = await HandleGetWeatherData3h(
-      position.coords.latitude.toString(),
-      position.coords.longitude.toString()
-    );
-
-    if (!weatherData) {
-      throw new Error("Failed to get weather data");
-    }
-
-    const region: Region = {
-      id: `${weatherData[0].city}, ${weatherData[0].district}`,
-      name: `${weatherData[0].city}, ${weatherData[0].district}`,
-      longitude: position.coords.longitude.toString(),
-      latitude: position.coords.latitude.toString(),
-    };
-
-    return region;
-  };
-
-  const HandleGetWeatherData3h = async (
-    latitude: string,
-    longitude: string
-  ): Promise<WeatherData[]> => {
-    const weatherData3h = await fetch(
-      `https://weather-2-9.onrender.com/Weather/Get3hData`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ longitude: longitude, latitude: latitude }),
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        return data;
-      })
-      .catch((error) => {
-        throw new Error(error);
-      });
-
-    if (!weatherData3h) {
-      throw new Error("Failed to get weather data (3h)");
-    }
-
-    return weatherData3h;
-  };
-
-  const HandleGetWeatherData12h = async (
-    latitude: string,
-    longitude: string
-  ): Promise<WeatherData[]> => {
-    const weatherData12h = await fetch(
-      `https://weather-2-9.onrender.com/Weather/Get12hData`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ longitude: longitude, latitude: latitude }),
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        return data;
-      })
-      .catch((error) => {
-        throw new Error(error);
-      });
-
-    if (!weatherData12h) {
-      throw new Error("Failed to get weather data (3h)");
-    }
-
-    return weatherData12h;
-  };
-
   return (
-    <Provider store={store}>
       <View style={styles.container}>
         {/* Top Section */}
         <View style={styles.topSection}>
@@ -401,7 +757,6 @@ export default function HomeScreen() {
           </View>
         </ScrollView>
       </View>
-    </Provider>
   );
 }
 
