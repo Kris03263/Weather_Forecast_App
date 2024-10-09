@@ -61,8 +61,9 @@ export default function SettingsScreen() {
   const passwordRegisterInput = passwordRegisterInputRef.current;
 
   //POST userRegister
-  const handleRegister = async () => {
-    await fetch("https://weather-2-9.onrender.com/Users/", {
+  const handleRegister = () => {
+    console.log(JSON.stringify({ userAccount: username, password: userPassword }));
+    fetch("https://weather-2-10.onrender.com/Users/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -73,11 +74,12 @@ export default function SettingsScreen() {
       .then((response) => response.json())
       .then((data) => {
         setUserID(data.id);
-        // 使用 data.id 而非 userID 來判斷註冊是否成功
-        if (data.id !== -1) {
-          Alert.alert("註冊成功");
+        console.log(data);
+        if (data.id !== "-1") {
+          alert("註冊成功");
         } else {
-          Alert.alert("註冊失敗");
+          setUserID(-1);
+          alert("註冊失敗");
         }
       })
       .catch((error) => console.error("Error:", error));
@@ -85,6 +87,7 @@ export default function SettingsScreen() {
 
   //POST userLogin
   const handleLogin = () => {
+    console.log(JSON.stringify({ userAccount: username, password: userPassword }));
     fetch("https://weather-2-10.onrender.com/Users/Login", {
       method: "POST",
       headers: {
@@ -100,6 +103,8 @@ export default function SettingsScreen() {
         console.log(data);
         setAccountStatus(data.status);
         if (data.status === "successful") {
+          setUsername(data.account);
+          setPassword(data.password);
           setUserID(data.id);
           alert("登入成功");
         } else {
@@ -177,15 +182,16 @@ export default function SettingsScreen() {
       },
       method: "DELETE",
       body: JSON.stringify({
-        userID: userID,
+        userID: `${userID}`,
       }),
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.Status === "Delete Successful !") {
-          Alert.alert("使用者刪除成功");
+        console.log(data);
+        if (data.status === "Successful") {
+          alert("使用者刪除成功");
         } else {
-          Alert.alert("使用者刪除失敗");
+          alert("使用者刪除失敗");
         }
       })
       .catch((error) => console.error("Error:", error));
@@ -202,7 +208,11 @@ export default function SettingsScreen() {
       .then((response) => {
         return response.json();
       })
-      .then((data) => setResponse(data))
+      .then((data) => {
+        setUsername(data.userAccount);
+        setPassword(data.password);
+        setUserID(data.id);
+      })
       .catch((error) => console.error("Error:", error));
   };
 
@@ -246,6 +256,23 @@ export default function SettingsScreen() {
       })
       .catch((error) => console.error("Error:", error));
   };
+
+const showUserModal = () =>{
+  if(userID !==1 && userID !==-1){
+    setUserModalVisible(true);
+  }
+  else{
+    setUserLoggingVisible(true);
+  }
+}
+
+const userLogout = () =>{
+  setUserModalVisible(!userModalVisible);
+  setUsername("");
+  setPassword("");
+  setUserID(1);
+  alert("登出成功");
+}
 
   const toggleOption = (
     option: string,
@@ -305,7 +332,7 @@ export default function SettingsScreen() {
         <View>
           <TouchableOpacity
             style={styles.avatar}
-            onPress={() => setUserLoggingVisible(true)}
+            onPress={() => showUserModal()}
           ></TouchableOpacity>
         </View>
       </View>
@@ -491,14 +518,6 @@ export default function SettingsScreen() {
               <Text style={styles.textStyle}>登入</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => {
-                handleDeleteUser();
-              }}
-              style={[styles.modalbutton, styles.modalbuttonClose]}
-            >
-              <Text style={styles.textStyle}>刪除使用者</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
               style={[styles.modalbutton, styles.modalbuttonClose]}
               onPress={() => setUserLoggingVisible(!userLoggingVisible)}
             >
@@ -530,7 +549,24 @@ export default function SettingsScreen() {
                 <Text style={styles.label}>{userPassword}</Text>
               </View>
             </View>
-
+            <TouchableOpacity
+              onPress={() => {
+                handleDeleteUser();
+                userLogout();
+                setUserModalVisible(!userModalVisible);
+              }}
+              style={[styles.modalbutton, styles.modalbuttonClose]}
+            >
+              <Text style={styles.textStyle}>刪除使用者</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                userLogout();
+              }}
+              style={[styles.modalbutton, styles.modalbuttonClose]}
+            >
+              <Text style={styles.textStyle}>登出</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.modalbutton, styles.modalbuttonClose]}
               onPress={() => setUserModalVisible(!userModalVisible)}
@@ -592,6 +628,7 @@ export default function SettingsScreen() {
                 handleRegister();
                 usernameRegisterInput?.clear();
                 passwordRegisterInput?.clear();
+                setUserSettingsVisible(!userSettingsVisible)
               }}
             >
               <Text style={styles.textStyle}>提交</Text>
