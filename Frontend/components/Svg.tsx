@@ -13,6 +13,7 @@ import PlusIcon from "@/assets/svgs/plus-icon.svg";
 import WeatherIcon from "@/assets/svgs/weather-icon.svg";
 import UserAccountIcon from "@/assets/svgs/userAccount-icon.svg";
 import UserPasswordIcon from "@/assets/svgs/userPassword-icon.svg";
+import ListIcon from "@/assets/svgs/list-icon.svg";
 
 interface SvgProps {
   style?: object;
@@ -34,6 +35,7 @@ export function SvgImage({ style = {}, name = "" }: SvgProps) {
     weather: WeatherIcon,
     userAccount: UserAccountIcon,
     userPassword: UserPasswordIcon,
+    list: ListIcon,
   }[name];
 
   return <View>{Icon ? <Icon style={style} /> : null}</View>;

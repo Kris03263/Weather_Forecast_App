@@ -16,9 +16,10 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     paddingVertical: 20,
+    paddingHorizontal: "5%",
     backgroundColor: "#FFFFFF20",
     borderRadius: 15,
     padding: 10,
-    gap: 20,
+    gap: 10,
   },
 });

@@ -26,7 +26,7 @@ import {
   updateWeatherData12h,
 } from "@/redux/weatherDataSlice";
 import { setRegion } from "@/redux/regionListSlice";
-import { updateTimeInterval } from "@/redux/timeIntervalSlice";
+import { updateTimeInterval, updateRegion } from "@/redux/selecterSlice";
 
 // TODO list:
 // - [V] Add weather data API
@@ -79,42 +79,42 @@ export interface WeatherData {
 
 export const indicatorsDictionary = {
   aqi: {
-    title: "AQI",
+    title: "空氣品質",
     unit: "",
     value: "",
   },
   bodyTemp: {
-    title: "Body Temp",
+    title: "體感溫度",
     unit: "°C",
     value: "",
   },
   "pm2.5": {
-    title: "PM2.5",
+    title: "PM2.5指標",
     unit: "μg/m³",
     value: "",
   },
   rainRate: {
-    title: "Rain Rate",
-    unit: "mm/hr",
+    title: "降雨機率",
+    unit: "%",
     value: "",
   },
   temp: {
-    title: "Temp",
+    title: "溫度",
     unit: "°C",
     value: "",
   },
   wet: {
-    title: "Humidity",
+    title: "濕度",
     unit: "%",
     value: "",
   },
   windDirection: {
-    title: "Wind Direction",
+    title: "風向",
     unit: "",
     value: "",
   },
   windSpeed: {
-    title: "Wind Speed",
+    title: "風速",
     unit: "m/s",
     value: "",
   },
@@ -125,6 +125,11 @@ export interface Region {
   name: string;
   longitude: string;
   latitude: string;
+}
+
+export interface selecter {
+  region: string;
+  timeInterval: number;
 }
 
 export default function HomeScreen() {
@@ -154,12 +159,19 @@ export default function HomeScreen() {
         }
 
         // Set regions[0] to current location
-        regions[0] = region || regions[0];
-        console.log("Complete set regions[0] to current location");
+        if (region) {
+          regions[0] = region;
+          console.log("Complete set regions[0] to current location");
+        } else {
+          console.log(
+            "Failed to set regions[0] to current location, use local storage location instead"
+          );
+        }
 
         // Save regions to localstorage
         await AsyncStorage.setItem("regions", JSON.stringify(regions));
         store.dispatch(setRegion(regions));
+        store.dispatch(updateRegion(regions[0].id));
         console.log("Complete save regions to local storage");
 
         // Update time
@@ -202,6 +214,7 @@ export default function HomeScreen() {
       }
     };
     Update();
+    store.dispatch(updateTimeInterval(0));
 
     const interval = setInterval(async () => {
       await Update();
@@ -342,7 +355,7 @@ export default function HomeScreen() {
         {/* Top Section */}
         <View style={styles.topSection}>
           <WeatherDisplay />
-          <ModalDropdown
+          {/* <ModalDropdown
             options={["Day View (3h)", "Weak View (1d)"]}
             onSelect={(index, value) => {
               store.dispatch(updateTimeInterval(parseInt(index)));
@@ -350,7 +363,9 @@ export default function HomeScreen() {
             defaultValue="Select Interval..."
             textStyle={styles.dropdown}
             dropdownStyle={styles.dropdownBox}
-          />
+            dropdownTextStyle={styles.dropdownText}
+            dropdownTextHighlightStyle={styles.dropdownHightlight}
+          /> */}
         </View>
 
         {/* Body Section */}
@@ -399,6 +414,7 @@ const styles = StyleSheet.create({
     height: "30%",
     justifyContent: "center",
     position: "relative",
+    padding: "3%",
   },
   bodySection: {
     backgroundColor: "#FFFFFF01",
@@ -416,16 +432,33 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     width: 150,
     height: 32,
-    color: "white",
     fontSize: 16,
     padding: 4,
+    color: "white",
     backgroundColor: "none",
     borderRadius: 8,
     borderWidth: 2,
     borderColor: "white",
   },
   dropdownBox: {
-    width: 200,
-    height: 200,
+    marginTop: 10,
+    marginLeft: 20,
+    width: 150,
+    height: "auto",
+    color: "none",
+    backgroundColor: "none",
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "white",
+  },
+  dropdownText: {
+    padding: 4,
+    fontSize: 16,
+    color: "white",
+    backgroundColor: "none",
+  },
+  dropdownHightlight: {
+    backgroundColor: "pink",
+    fontWeight: "bold",
   },
 });

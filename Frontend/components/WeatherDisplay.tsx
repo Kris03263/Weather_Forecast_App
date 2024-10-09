@@ -10,17 +10,23 @@ import {
 import store from "@/redux/store";
 import { useSelector } from "react-redux";
 
-import { Region } from "@/app/(tabs)/index";
-import { WeatherDataList } from "@/app/(tabs)/index";
-import { indicatorsDictionary } from "@/app/(tabs)/index";
+import {
+  Region,
+  selecter,
+  WeatherDataList,
+  indicatorsDictionary,
+} from "@/app/(tabs)/index";
+
+import { SvgImage } from "./Svg";
+import { DynamicImage } from "./DynamicImage";
 
 export function WeatherDisplay() {
   const region = useSelector((state: { region: Region[] }) => state.region);
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
-  const timeInterval = useSelector(
-    (state: { timeInterval: number }) => state.timeInterval
+  const selecter = useSelector(
+    (state: { selecter: selecter }) => state.selecter
   );
   const temp =
     indicatorsDictionary["temp" as keyof typeof indicatorsDictionary];
@@ -30,30 +36,43 @@ export function WeatherDisplay() {
   if (Object.keys(weatherDataList).length === 0) {
     return (
       <View style={styles.layout}>
-        <Text style={styles.cityName}>--, --</Text>
+        <View style={styles.cityNameDisplay}>
+          <Text style={styles.cityName}>--, --</Text>
+        </View>
         <View style={styles.temperatureDisplay}>
           <Text style={styles.temperature}>--°C</Text>
-          <Text style={styles.body_temperature}>| --°C </Text>
         </View>
-        <View style={styles.weatherIcon} />
+        <Text style={styles.body_temperature}>| --°C </Text>
       </View>
     );
   }
-
-  temp.value = weatherDataList?.[region[0].id]?.[timeInterval]?.[0]?.temp ?? "";
-  bodyTemp.value =
-    weatherDataList?.[region[0].id]?.[timeInterval]?.[0]?.bodyTemp ?? "";
+  temp.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.temp ?? "";
+  bodyTemp.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.bodyTemp ?? "";
 
   return (
     <View style={styles.layout}>
-      <Text style={styles.cityName}>{region[0].id}</Text>
+      <View style={styles.cityNameDisplay}>
+        <Text style={styles.cityName}>{selecter.region} </Text>
+        <TouchableOpacity>
+          <SvgImage style={{ width: 25, height: 25 }} name="list" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.temperatureDisplay}>
         <Text style={styles.temperature}>{temp.value + temp.unit}</Text>
-        <Text style={styles.body_temperature}>
-          {"| " + bodyTemp.value + bodyTemp.unit}
-        </Text>
+        <DynamicImage
+          style={styles.weatherIcon}
+          path={
+            weatherDataList[selecter.region][0][0].time > "12:00"
+              ? `day/${weatherDataList[selecter.region][0][0].weatherCode}.png`
+              : `night/${
+                  weatherDataList[selecter.region][0][0].weatherCode
+                }.png`
+          }
+        />
       </View>
-      <View style={styles.weatherIcon} />
+      <Text style={styles.body_temperature}>
+        {"| " + bodyTemp.value + bodyTemp.unit}
+      </Text>
     </View>
   );
 }
@@ -70,35 +89,37 @@ const styles = StyleSheet.create({
   },
   cityName: {
     color: "white",
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
     textAlign: "left",
   },
+  cityNameDisplay: {
+    alignItems: "center",
+    minWidth: "100%",
+    flexDirection: "row",
+  },
   temperatureDisplay: {
+    gap: 10,
+    height: 75,
     flexDirection: "row",
     justifyContent: "flex-start",
-    alignItems: "baseline",
+    alignItems: "flex-end",
   },
   temperature: {
     color: "white",
-    fontSize: 48,
+    fontSize: 64,
     fontWeight: "bold",
     textAlign: "left",
   },
   body_temperature: {
+    marginBottom: 2,
     color: "white",
-    marginLeft: 10,
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "left",
   },
   weatherIcon: {
-    position: "absolute",
-    right: -50,
-    top: "50%",
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: "#FFE27D",
+    height: "100%",
+    marginRight: 10,
   },
 });

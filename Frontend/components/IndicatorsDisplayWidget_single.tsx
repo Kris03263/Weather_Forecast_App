@@ -13,9 +13,12 @@ import { SvgImage } from "@/components/Svg";
 import store from "@/redux/store";
 import { useSelector } from "react-redux";
 
-import { WeatherDataList } from "@/app/(tabs)/index";
-import { Region } from "@/app/(tabs)/index";
-import { indicatorsDictionary } from "@/app/(tabs)/index";
+import {
+  WeatherDataList,
+  selecter,
+  Region,
+  indicatorsDictionary,
+} from "@/app/(tabs)/index";
 
 interface IndicatorsDisplayWidgetProps_single {
   type: string;
@@ -28,8 +31,8 @@ export function IndicatorsDisplayWidget_single({
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
-  const timeInterval = useSelector(
-    (state: { timeInterval: number }) => state.timeInterval
+  const selecter = useSelector(
+    (state: { selecter: selecter }) => state.selecter
   );
   const indicator =
     indicatorsDictionary[type as keyof typeof indicatorsDictionary];
@@ -50,8 +53,7 @@ export function IndicatorsDisplayWidget_single({
     );
   }
 
-  indicator.value =
-    weatherDataList?.[region[0].id]?.[timeInterval]?.[0]?.[type] ?? ""; // region - timeInterval - index
+  indicator.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.[type] ?? ""; // region - timeInterval - index
 
   return (
     <TouchableOpacity style={{ flex: 1, width: "100%" }}>

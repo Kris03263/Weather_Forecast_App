@@ -11,5 +11,5 @@ interface DynamicImageProps {
 
 export const DynamicImage = ({ style, path }: DynamicImageProps) => {
   const imagePath = images(`./${path}`);
-  return <Image style={style} source={imagePath} />;
+  return <Image resizeMode="contain" style={style} source={imagePath} />;
 };
