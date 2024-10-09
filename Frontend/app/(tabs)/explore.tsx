@@ -112,14 +112,20 @@ export default function SettingsScreen() {
 
   //POST userHabit API
   const handlePostUserHabits = () => {
+    console.log(
+      JSON.stringify({
+        userID: userID,
+        habitIDs: habitIndexes,
+      })
+    );
     fetch("https://weather-2-10.onrender.com/Users/UserHabits", {
-      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      method: "POST",
       body: JSON.stringify({
         userID: userID,
-        habitsID: habitIndexes,
+        habitIDs: habitIndexes.map((index) => index + 1),
       }),
     })
       .then((response) => response.json())
@@ -135,6 +141,14 @@ export default function SettingsScreen() {
 
   //POST userSport API
   const handlePostUserSports = () => {
+    console.log(sportIndexes);
+    console.log(userID);
+    console.log(
+      JSON.stringify({
+        userID: userID,
+        sportIDs: sportIndexes,
+      })
+    );
     fetch("https://weather-2-10.onrender.com/Users/UserSports", {
       headers: {
         "Content-Type": "application/json",
@@ -142,7 +156,7 @@ export default function SettingsScreen() {
       method: "POST",
       body: JSON.stringify({
         userID: userID,
-        sportsID: sportIndexes,
+        sportIDs: sportIndexes.map((index) => index + 1),
       }),
     })
       .then((response) => response.json())
@@ -152,7 +166,8 @@ export default function SettingsScreen() {
         } else {
           Alert.alert("運動更新失敗");
         }
-      });
+      })
+      .catch((error) => console.error("Error:", error));
   };
 
   //DELETE user API
@@ -191,6 +206,7 @@ export default function SettingsScreen() {
       .then((data) => setResponse(data))
       .catch((error) => console.error("Error:", error));
   };
+
   // GET userSport API
   const handleGetUserSports = () => {
     fetch(`https://weather-2-10.onrender.com/Users/UserSports?ID=${userID}`, {
