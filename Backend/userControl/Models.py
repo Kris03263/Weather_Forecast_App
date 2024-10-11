@@ -38,3 +38,13 @@ class SportsSuggestion():
                 "sportName": self.sportName,
                 "sportSuggestion" : self.sportSuggestion
             }
+    
+class HabitsSuggestion():
+    def __init__(self,habitName,habitSuggestion):
+        self.habitName = habitName
+        self.habitSuggestion = habitSuggestion
+    def to_dict(self):
+        return {
+                "habitName": self.habitName,
+                "habitSuggestion" : self.habitSuggestion
+                }
