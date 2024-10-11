@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { UserSettings, Sport, Habit } from "@/app/(tabs)";
-import { setUser } from "./userSlice";
+import { UserSettings, Sport, Habit } from "@/app/(tabs)/_layout";
 
 const userSettingsSlice = createSlice({
   name: "userSettingsSlice",

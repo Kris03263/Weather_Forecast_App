@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Provider, useSelector } from "react-redux";
 
-import { SvgImage } from "@/components/Svg";
+import { SvgImage } from "../../components/Svg";
 
 import {
   User,
@@ -22,9 +22,9 @@ import {
   userLogout,
   userDelete,
   userRegister,
-} from "@/app/(tabs)";
+} from "./_layout";
 
-import store from "@/redux/store";
+import store from "../../redux/store";
 
 interface RadioButtonProps {
   label: string;

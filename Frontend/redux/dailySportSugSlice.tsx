@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { DailySportSug } from "@/app/(tabs)";
+import { DailySportSug } from "@/app/(tabs)/_layout";
 
 const dailySportSugSlice = createSlice({
   name: "dailySportSugSlice",

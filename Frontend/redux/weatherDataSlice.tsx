@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { WeatherDataList } from "@/app/(tabs)";
-import { WeatherData } from "@/app/(tabs)";
+import { WeatherDataList, WeatherData } from "@/app/(tabs)/_layout";
 
 const weatherDataSlice = createSlice({
   name: "weatherData",

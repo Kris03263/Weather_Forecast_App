@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { User } from "@/app/(tabs)";
+import { User } from "@/app/(tabs)/_layout";
 
 const userSlice = createSlice({
   name: "userSlice",
