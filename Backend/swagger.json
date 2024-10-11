@@ -40,8 +40,12 @@
       "description": "user sport"
     },
     {
-      "name": "sport suggest",
-      "description": "user sport suggest"
+      "name": "sport suggestion",
+      "description": "user sport suggestion"
+    },
+    {
+      "name": "habit suggestion",
+      "description": "user habit suggestion"
     }
   ],
   "paths": {
@@ -487,9 +491,59 @@
     "/Users/GetDailySportsSuggestion": {
       "post": {
         "tags": [
-          "sport suggest"
+          "sport suggesion"
         ],
-        "summary": "get sport suggest",
+        "summary": "get sport suggestion",
+        "description": "input your id longitude latitude",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userID": {
+                    "type": "string",
+                    "example": "1"
+                  },
+                  "longitude": {
+                    "type": "string",
+                    "example": "121.66248756678424"
+                  },
+                  "latitude": {
+                    "type": "string",
+                    "example": "25.06715187342581"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功回傳消息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid location supplied"
+          },
+          "404": {
+            "description": "Location not found"
+          }
+        }
+      }
+    },"/Users/GetDailyHabitsSuggestion": {
+      "post": {
+        "tags": [
+          "habit suggesion"
+        ],
+        "summary": "get habit suggestion",
         "description": "input your id longitude latitude",
         "requestBody": {
           "required": true,
@@ -535,5 +589,6 @@
         }
       }
     }
+
   }
 }

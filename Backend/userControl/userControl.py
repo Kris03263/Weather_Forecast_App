@@ -387,4 +387,32 @@ def getDailyHabitsSuggestion():
     response = make_response(jsonify(suggestionResult),200)
     return response
 
+@userControl_blueprint.route('/GetAllHabitsOption' , methods=['GET'])
+def getAllHabitsOption():
+    sql_query = """
+    select * from habits
+    """
+    cursor.execute(sql_query)
+    dataSet = cursor.fetchall()
+    result = []
+    for data in dataSet:
+        result.append(Habit(data[0],data[1]).to_dict())
+    response = make_response(jsonify(result),200)
+    return response
+
+@userControl_blueprint.route('/GetAllSportsOption' , methods=['GET'])
+def getAllSportsOption():
+    sql_query = """
+    select * from sports
+    """
+    cursor.execute(sql_query)
+    dataSet = cursor.fetchall()
+    result = []
+    for data in dataSet:
+        result.append(Sport(data[0],data[1]).to_dict())
+    response = make_response(jsonify(result),200)
+    return response
+
+
+
     
