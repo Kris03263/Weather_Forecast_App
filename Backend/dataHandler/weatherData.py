@@ -39,7 +39,7 @@ def get3hData(lon,lat,cusloc):
     loc = cusloc if cusloc else setLocate(lat,lon)# 引入地理編碼
     offsetTime = getTime(datetime.now())# 修正時間
     weatherData = requests.get(url('3h',loc["city"],loc["district"],offsetTime)).json()["records"]["locations"][0]["location"][0]["weatherElement"]
-    resultElement = []# 初始化陣列
+    resultElement = [] # 初始化陣列
     noData = 1 if datetime.strptime(weatherData[0]["time"][0]["startTime"],"%Y-%m-%d %H:%M:%S").hour%6!=0 else 0# 判斷是否處於降雨率無資料的情況
     airData = getAirData(lon,lat)
 
