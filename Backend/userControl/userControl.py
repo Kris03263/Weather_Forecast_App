@@ -241,7 +241,7 @@ def sports():
         if len(counter) < 1:
             sport = Sport(-1,"Undefine User")
             sports.append(sport.to_dict())
-            response = make_response(jsonify(sports),404)
+            response = make_response(jsonify(sports),200)
             return response
         sql_query = """
         SELECT * FROM sports where sports.id in 
