@@ -53,7 +53,9 @@ export function WeatherDisplay() {
     <View style={styles.layout}>
       <View style={styles.cityNameDisplay}>
         <Text style={styles.cityName}>{selecter.region} </Text>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => console.log(store.getState().dailySportSuggestions)}
+        >
           <SvgImage style={{ width: 25, height: 25 }} name="list" />
         </TouchableOpacity>
       </View>

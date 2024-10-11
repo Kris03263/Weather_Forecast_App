@@ -29,6 +29,7 @@ import { setRegion } from "@/redux/regionListSlice";
 import { updateTimeInterval, updateRegion } from "@/redux/selecterSlice";
 import { setUser } from "@/redux/userSlice";
 import { setUserSettings } from "@/redux/userSettingsSlice";
+import { updateDailySportSug } from "@/redux/dailySportSugSlice";
 
 // TODO list:
 // - [V] Add weather data API
@@ -53,24 +54,6 @@ export interface WeatherDataList {
 export interface WeatherData {
   [key: string]: string;
 }
-
-//    {
-//         "aqi": null,
-//         "bodyTemp": "29",
-//         "city": "新北市",
-//         "district": "汐止區",
-//         "pm2.5": null,
-//         "rainRate": "30",
-//         "sitename": null,
-//         "temp": "25",
-//         "time": "2024-10-05 00:00:00",
-//         "weatherCode": "11",
-//         "weatherDes": "陰短暫陣雨。降雨機率 30%。溫度攝氏24至25度。舒適。東南風 風速<= 1級(每秒1公尺)。相對濕度94%。",
-//         "weatherText": "陰短暫陣雨",
-//         "wet": "94",
-//         "windDirection": "東南風",
-//         "windSpeed": "29"
-//     }
 
 export const indicatorsDictionary = {
   aqi: {
@@ -130,7 +113,7 @@ export interface selecter {
 export interface User {
   account: string;
   password: string;
-  id: number;
+  id: string;
   status: string;
 }
 
@@ -149,6 +132,12 @@ export interface UserSettings {
   habit: Habit[];
 }
 
+export interface DailySportSug {
+  sportName: string;
+  id: number;
+  sportSuggestion: string;
+}
+
 //////////////////////
 // Define functions //
 //////////////////////
@@ -156,11 +145,15 @@ export interface UserSettings {
 export const userLogin = async (_account: string, _password: string) => {
   try {
     const user = await HandleUserLogin(_account, _password);
-    if(!user){
-      throw new Error("Failed to login");
+    console.log(user);
+    if (!user || user.id === "-1") {
+      throw new Error(user?.status ?? "User data is empty");
     }
 
-    const userSettings = {"sport": await HandleGetUserSports(user.id), "habit": await HandleGetUserHabits(user.id)};
+    const userSettings = {
+      sport: await HandleGetUserSports(user.id),
+      habit: await HandleGetUserHabits(user.id),
+    };
 
     AsyncStorage.setItem("userID", JSON.stringify(user.id));
     store.dispatch(setUser(user));
@@ -170,52 +163,61 @@ export const userLogin = async (_account: string, _password: string) => {
   } catch (error) {
     console.error("Login fail: " + error);
   }
-}
+};
 
 export const userLogout = async () => {
   try {
     AsyncStorage.removeItem("userID");
-    store.dispatch(setUser({account: "", password: "", id: -1, status: ""}));
-    store.dispatch(setUserSettings({sport: [], habit: []}));
+    store.dispatch(
+      setUser({ account: "", password: "", id: "-1", status: "" })
+    );
+    store.dispatch(setUserSettings({ sport: [], habit: [] }));
 
     console.log("Logout success");
   } catch (error) {
     console.error("Logout fail: " + error);
   }
-}
+};
 
 export const userDelete = async () => {
   try {
     const userID = store.getState().user.id;
     const response = await HandleDeleteUser(userID);
 
-    if(!response){
+    if (!response) {
       throw new Error("Failed to delete user");
     }
 
     AsyncStorage.removeItem("userID");
-    store.dispatch(setUser({account: "", password: "", id: -1, status: ""}));
-    store.dispatch(setUserSettings({sport: [], habit: []}));
+    store.dispatch(
+      setUser({ account: "", password: "", id: "-1", status: "" })
+    );
+    store.dispatch(setUserSettings({ sport: [], habit: [] }));
 
     console.log("Delete success");
   } catch (error) {
     console.error("Delete fail: " + error);
   }
-}
+};
 
 export const userRegister = async (_account: string, _password: string) => {
   try {
     const user = await HandleSetUser(_account, _password);
-    if(!user){
-      throw new Error("Failed to set user");
+    if (!user || user.id === "-1") {
+      throw new Error(user?.status ?? "User data is empty");
     }
 
-    const response = await HandleSetUserSports(user.id, []) && await HandleSetUserHabits(user.id, [])
-    if(!response){
+    const response =
+      (await HandleSetUserSports(user.id, [])) &&
+      (await HandleSetUserHabits(user.id, []));
+    if (!response) {
       throw new Error("Failed to set user settings");
     }
 
-    const userSettings = {"sport": await HandleGetUserSports(user.id), "habit":  await HandleGetUserHabits(user.id)};
+    const userSettings = {
+      sport: await HandleGetUserSports(user.id),
+      habit: await HandleGetUserHabits(user.id),
+    };
 
     AsyncStorage.setItem("userID", JSON.stringify(user.id));
     store.dispatch(setUser(user));
@@ -225,52 +227,67 @@ export const userRegister = async (_account: string, _password: string) => {
   } catch (error) {
     console.error("Register fail: " + error);
   }
-}
+};
 
 export const userSetSports = async (_sportIDs: number[]) => {
   try {
     const userID = store.getState().user.id;
-    const response = await HandleSetUserSports(userID, _sportIDs);
 
-    if(response){
+    const response = await HandleSetUserSports(userID, _sportIDs);
+    if (!response) {
       throw new Error("Failed to set sports");
     }
 
     const sports = await HandleGetUserSports(userID);
 
-    store.dispatch(setUserSettings({sport: sports, habit: store.getState().userSettings.habit}));
+    store.dispatch(
+      setUserSettings({
+        sport: sports,
+        habit: store.getState().userSettings.habit,
+      })
+    );
 
     console.log("Set sports success");
   } catch (error) {
     console.error("Set sports fail: " + error);
   }
-}
+};
 
 export const userSetHabits = async (_habitIDs: number[]) => {
   try {
     const userID = store.getState().user.id;
-    const response = await HandleSetUserHabits(userID, _habitIDs);
 
-    if(response){
+    const response = await HandleSetUserHabits(userID, _habitIDs);
+    if (!response) {
       throw new Error("Failed to set habits");
     }
 
     const habits = await HandleGetUserHabits(userID);
-      
-    store.dispatch(setUserSettings({sport: store.getState().userSettings.sport, habit: habits}));
+
+    store.dispatch(
+      setUserSettings({
+        sport: store.getState().userSettings.sport,
+        habit: habits,
+      })
+    );
 
     console.log("Set habits success");
   } catch (error) {
     console.error("Set habits fail: " + error);
   }
-}
+};
 
 //////////////////
 // API fetching //
 //////////////////
 
-const HandleSetUser = async (_account: string, _password: string): Promise<User> => {
-  const data = await fetch("https://weather-2-10.onrender.com/Users/", {
+const hostURL = "https://weather-2-9.onrender.com"; //`${hostURL}/`
+
+const HandleSetUser = async (
+  _account: string,
+  _password: string
+): Promise<User> => {
+  const data = await fetch(`${hostURL}/Users/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -284,15 +301,15 @@ const HandleSetUser = async (_account: string, _password: string): Promise<User>
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!data || data.id === -1) { 
+  if (!data || data.id === "-1") {
     throw new Error(data?.status ?? "Data is empty");
   }
 
   return data;
 };
 
-const HandleGetUser = async (_userID: number): Promise<User> => {
-  const data = await fetch(`https://weather-2-10.onrender.com/Users/?id=${_userID}`, {
+const HandleGetUser = async (_userID: string): Promise<User> => {
+  const data = await fetch(`${hostURL}/Users/?id=${_userID}`, {
     method: "GET",
     headers: {
       // "Content-Type": "application/json",
@@ -304,38 +321,41 @@ const HandleGetUser = async (_userID: number): Promise<User> => {
     })
     .catch((error) => console.error("Error:", error));
 
-    if (!data || data.id === -1) { 
-      throw new Error(data?.status ?? "Data is empty");
-    }
+  if (!data || data.id === "-1") {
+    throw new Error(data?.status ?? "Data is empty");
+  }
 
-    return data;
+  return data;
 };
 
-const HandleDeleteUser = async (_userID: number) => {
-    const response = await fetch("https://weather-2-10.onrender.com/Users/", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "DELETE",
-      body: JSON.stringify({
-        userID: _userID,
-      }),
+const HandleDeleteUser = async (_userID: string): Promise<boolean> => {
+  const response = await fetch(`${hostURL}/Users/`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "DELETE",
+    body: JSON.stringify({
+      userID: _userID,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === "Successful") {
+        return true;
+      } else {
+        return false;
+      }
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "Successful") {
-          return true;
-        } else {
-          return false;
-        }
-      })
-      .catch((error) => console.error("Error:", error));
+    .catch((error) => console.error("Error:", error));
 
-      return !(!response);
-  };
+  return !!response;
+};
 
-const HandleUserLogin = async (_account: string, _password: string): Promise<User> => {
-  const data = await fetch("https://weather-2-10.onrender.com/Users/Login", {
+const HandleUserLogin = async (
+  _account: string,
+  _password: string
+): Promise<User> => {
+  const data = await fetch(`${hostURL}/Users/Login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -347,19 +367,23 @@ const HandleUserLogin = async (_account: string, _password: string): Promise<Use
   })
     .then((response) => response.json())
     .then((data) => {
+      console.log(data);
       return data as User;
     })
     .catch((error) => console.error("Error:", error));
 
-    if (!data || data.id === -1) { 
-      throw new Error(data?.status ?? "Data is empty");
-    }
+  if (!data || data.id === "-1") {
+    throw new Error(data?.status ?? "Data is empty");
+  }
 
   return data;
 };
 
-const HandleSetUserSports = async (_userID: number, _sportIDs: number[]) => {
-  const response = await fetch("https://weather-2-10.onrender.com/Users/UserSports", {
+const HandleSetUserSports = async (
+  _userID: string,
+  _sportIDs: number[]
+): Promise<boolean> => {
+  const response = await fetch(`${hostURL}/Users/UserSports`, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -371,7 +395,8 @@ const HandleSetUserSports = async (_userID: number, _sportIDs: number[]) => {
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.status === "Update Successful !") {
+      console.log(data);
+      if (data.Stats === "Update Successful !") {
         return true;
       } else {
         return false;
@@ -379,11 +404,11 @@ const HandleSetUserSports = async (_userID: number, _sportIDs: number[]) => {
     })
     .catch((error) => console.error("Error:", error));
 
-    return !(!response);
+  return !!response;
 };
 
-const HandleGetUserSports = async (_userID: number): Promise<Sport[] | []> => {
-  const data = await fetch(`https://weather-2-10.onrender.com/Users/UserSports?ID=${_userID}`, {
+const HandleGetUserSports = async (_userID: string): Promise<Sport[]> => {
+  const data = await fetch(`${hostURL}/Users/UserSports?ID=${_userID}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -395,21 +420,26 @@ const HandleGetUserSports = async (_userID: number): Promise<Sport[] | []> => {
     })
     .catch((error) => console.error("Error:", error));
 
-    if (!Array.isArray(data) || data.length === 0) {
-      return [];
-    }
+  if (!Array.isArray(data) || data.length === 0) {
+    return [];
+  }
 
-    if (data[0].id === -1) { 
-      throw new Error(data?.[0]?.sportName ?? "Data is empty");
-    }
+  if (data[0].id === -1) {
+    throw new Error(data?.[0]?.sportName ?? "Data is empty");
+  }
 
-    return data;
+  return data;
 };
 
-
-
-const HandleSetUserHabits = async (_userID: number, _habitIDs: number[]) => {
-  const response = await fetch("https://weather-2-10.onrender.com/Users/UserHabits", {
+const HandleSetUserHabits = async (
+  _userID: string,
+  _habitIDs: number[]
+): Promise<boolean> => {
+  console.log({
+    userID: _userID,
+    habitIDs: _habitIDs,
+  });
+  const response = await fetch(`${hostURL}/Users/UserHabits`, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -421,7 +451,8 @@ const HandleSetUserHabits = async (_userID: number, _habitIDs: number[]) => {
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.status === "successful") {
+      console.log(data);
+      if (data.Stats === "Update Successful !") {
         return true;
       } else {
         return false;
@@ -429,12 +460,11 @@ const HandleSetUserHabits = async (_userID: number, _habitIDs: number[]) => {
     })
     .catch((error) => console.error("Error:", error));
 
-    return !(!response);
+  return !!response;
 };
 
-
-const HandleGetUserHabits = async (_userID: number): Promise<Habit[]> => {
-  const data = await fetch(`https://weather-2-10.onrender.com/Users/UserHabits?ID=${_userID}`, {
+const HandleGetUserHabits = async (_userID: string): Promise<Habit[]> => {
+  const data = await fetch(`${hostURL}/Users/UserHabits?ID=${_userID}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -448,15 +478,15 @@ const HandleGetUserHabits = async (_userID: number): Promise<Habit[]> => {
     })
     .catch((error) => console.error("Error:", error));
 
-    if (!Array.isArray(data) || data.length === 0) {
-      return [];
-    }
+  if (!Array.isArray(data) || data.length === 0) {
+    return [];
+  }
 
-    if (data[0].id === -1) { 
-      throw new Error(data?.[0]?.habitName ?? "Data is empty");
-    }
+  if (data[0].id === -1) {
+    throw new Error(data?.[0]?.habitName ?? "Data is empty");
+  }
 
-    return data;
+  return data;
 };
 
 const HandleGetLocal = async (): Promise<Region> => {
@@ -524,19 +554,16 @@ const HandleGetLocal = async (): Promise<Region> => {
 };
 
 const HandleGetWeatherData3h = async (
-  latitude: string,
-  longitude: string
+  _latitude: string,
+  _longitude: string
 ): Promise<WeatherData[]> => {
-  const weatherData3h = await fetch(
-    `https://weather-2-9.onrender.com/Weather/Get3hData`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ longitude: longitude, latitude: latitude }),
-    }
-  )
+  const weatherData3h = await fetch(`${hostURL}/Weather/Get3hData`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ longitude: _longitude, latitude: _latitude }),
+  })
     .then((response) => response.json())
     .then((data) => {
       return data;
@@ -553,19 +580,16 @@ const HandleGetWeatherData3h = async (
 };
 
 const HandleGetWeatherData12h = async (
-  latitude: string,
-  longitude: string
+  _latitude: string,
+  _longitude: string
 ): Promise<WeatherData[]> => {
-  const weatherData12h = await fetch(
-    `https://weather-2-9.onrender.com/Weather/Get12hData`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ longitude: longitude, latitude: latitude }),
-    }
-  )
+  const weatherData12h = await fetch(`${hostURL}/Weather/Get12hData`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ longitude: _longitude, latitude: _latitude }),
+  })
     .then((response) => response.json())
     .then((data) => {
       return data;
@@ -581,6 +605,46 @@ const HandleGetWeatherData12h = async (
   return weatherData12h;
 };
 
+const HandleGetDailySportSug = async (
+  _userID: string,
+  _latitude: string,
+  _longitude: string
+): Promise<DailySportSug[]> => {
+  console.log({
+    userID: _userID,
+    longitude: _longitude,
+    latitude: _latitude,
+  });
+  const data = await fetch(`${hostURL}/Users/GetDailySportsSuggestion`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userID: _userID,
+      longitude: _longitude,
+      latitude: _latitude,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data as DailySportSug[];
+    })
+    .catch((error) => {
+      throw new Error(error);
+    });
+
+  if (!Array.isArray(data) || data.length === 0) {
+    return [];
+  }
+
+  if (data[0].id === -1) {
+    throw new Error(data?.[0]?.sportName ?? "Daily sport suggestion is empty");
+  }
+
+  return data;
+};
+
 export default function HomeScreen() {
   useEffect(() => {
     // Update current location and current time every minute
@@ -588,18 +652,25 @@ export default function HomeScreen() {
       try {
         console.log("Updating data......");
 
-        let userID: number;
+        let userID: string = "-1";
         let user: User = {} as User;
         let userSettings: UserSettings = {} as UserSettings;
         let regions: Region[] = [];
         let region: Region | null = null;
+        let weatherData3h: WeatherData[] = [];
+        let weatherData12h: WeatherData[] = [];
+        let dailySportSuggestions: DailySportSug[] = [];
+
+        // Get time
+        let time = new Date().toLocaleDateString();
+        console.log("Complete get time");
 
         // Get regions from local storage
         regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
         console.log("Complete get regions from local storage");
 
         // Get user id from local storage
-        userID = parseInt(JSON.parse((await AsyncStorage.getItem("userID")) || "-1"));
+        userID = JSON.parse((await AsyncStorage.getItem("userID")) || "-1");
         console.log("Complete get userID from local storage");
 
         // Get current location
@@ -620,7 +691,10 @@ export default function HomeScreen() {
 
         // Get user settings data
         try {
-          userSettings = {"sport": await HandleGetUserSports(userID), "habit": await HandleGetUserHabits(userID)};
+          userSettings = {
+            sport: await HandleGetUserSports(userID),
+            habit: await HandleGetUserHabits(userID),
+          };
           console.log("Complete get user settings data");
         } catch (error) {
           console.error("Failed to get user settings data: " + error);
@@ -637,38 +711,44 @@ export default function HomeScreen() {
           );
         }
 
-        console.log(userSettings)
+        // Update weather data
+        try {
+          for (let i = 0; i < regions.length; i++) {
+            weatherData3h = await HandleGetWeatherData3h(
+              regions[i].latitude,
+              regions[i].longitude
+            );
+            weatherData12h = await HandleGetWeatherData12h(
+              regions[i].latitude,
+              regions[i].longitude
+            );
+          }
+          console.log("Complete update weather data");
+        } catch (error) {
+          console.error("Failed to update weather data: " + error);
+        }
+
+        // Update daily sport suggestion
+        try {
+          dailySportSuggestions = await HandleGetDailySportSug(
+            user.id,
+            regions[0].latitude,
+            regions[0].longitude
+          );
+          console.log("Complete update daily sport suggestion");
+        } catch (error) {
+          console.error("Failed to update daily sport suggestion: " + error);
+        }
 
         // Set store data
         store.dispatch(setRegion(regions));
         store.dispatch(updateRegion(regions[0].id));
         store.dispatch(setUser(user));
         store.dispatch(setUserSettings(userSettings));
+        store.dispatch(updateWeatherData3h(weatherData3h));
+        store.dispatch(updateWeatherData12h(weatherData12h));
+        store.dispatch(updateDailySportSug(dailySportSuggestions));
         console.log("Complete set store data");
-
-        // Update time
-        let time = new Date().toLocaleDateString();
-        console.log("Complete update time");
-
-        // Update weather data
-        try {
-          for (let i = 0; i < regions.length; i++) {
-            let weatherData3h = await HandleGetWeatherData3h(
-              regions[i].latitude,
-              regions[i].longitude
-            );
-            let weatherData12h = await HandleGetWeatherData12h(
-              regions[i].latitude,
-              regions[i].longitude
-            );
-
-            store.dispatch(updateWeatherData3h(weatherData3h));
-            store.dispatch(updateWeatherData12h(weatherData12h));
-          }
-          console.log("Complete update weather data");
-        } catch (error) {
-          console.error("Failed to update weather data: " + error);
-        }
 
         console.log(
           "Data update completed! \n",
@@ -702,56 +782,45 @@ export default function HomeScreen() {
   }, []);
 
   return (
-      <View style={styles.container}>
-        {/* Top Section */}
-        <View style={styles.topSection}>
-          <WeatherDisplay />
-          {/* <ModalDropdown
-            options={["Day View (3h)", "Weak View (1d)"]}
-            onSelect={(index, value) => {
-              store.dispatch(updateTimeInterval(parseInt(index)));
-            }}
-            defaultValue="Select Interval..."
-            textStyle={styles.dropdown}
-            dropdownStyle={styles.dropdownBox}
-            dropdownTextStyle={styles.dropdownText}
-            dropdownTextHighlightStyle={styles.dropdownHightlight}
-          /> */}
-        </View>
-
-        {/* Body Section */}
-        <ScrollView style={styles.bodySection}>
-          <View style={{ gap: 20 }}>
-            <ForecastDisplayWidget />
-
-            <View style={styles.row}>
-              <IndicatorsDisplayWidget_single type="wet" />
-              <IndicatorsDisplayWidget_single type="rainRate" />
-            </View>
-
-            <View style={styles.row}>
-              <IndicatorsDisplayWidget_double
-                type1="windSpeed"
-                type2="windDirection"
-              />
-            </View>
-
-            <View style={styles.row}>
-              <SuggestionDisplayWidget type="dressing" />
-              <SuggestionDisplayWidget type="health" />
-            </View>
-
-            <View style={styles.row}>
-              <SuggestionDisplayWidget type="sport" />
-              <SuggestionDisplayWidget type="transportation" />
-            </View>
-
-            <View style={styles.row}>
-              <SuggestionDisplayWidget type="activity" />
-            </View>
-          </View>
-        </ScrollView>
+    <View style={styles.container}>
+      {/* Top Section */}
+      <View style={styles.topSection}>
+        <WeatherDisplay />
       </View>
+
+      {/* Body Section */}
+      <ScrollView style={styles.bodySection}>
+        <View style={{ gap: 20 }}>
+          <ForecastDisplayWidget />
+
+          <View style={styles.row}>
+            <IndicatorsDisplayWidget_single type="wet" />
+            <IndicatorsDisplayWidget_single type="rainRate" />
+          </View>
+
+          <View style={styles.row}>
+            <IndicatorsDisplayWidget_double
+              type1="windSpeed"
+              type2="windDirection"
+            />
+          </View>
+
+          <View style={styles.row}>
+            <SuggestionDisplayWidget type="dressing" />
+            <SuggestionDisplayWidget type="health" />
+          </View>
+
+          <View style={styles.row}>
+            <SuggestionDisplayWidget type="sport" />
+            <SuggestionDisplayWidget type="transportation" />
+          </View>
+
+          <View style={styles.row}>
+            <SuggestionDisplayWidget type="activity" />
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 

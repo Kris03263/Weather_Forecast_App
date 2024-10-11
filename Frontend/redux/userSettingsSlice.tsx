@@ -15,10 +15,10 @@ const userSettingsSlice = createSlice({
     },
     setUserSettings: (state, action: { payload: UserSettings }) => {
       return action.payload;
-    }
+    },
   },
 });
 
 export const { updateSport, updateHabit, setUserSettings } =
-userSettingsSlice.actions;
+  userSettingsSlice.actions;
 export default userSettingsSlice.reducer;

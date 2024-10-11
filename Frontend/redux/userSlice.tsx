@@ -4,7 +4,7 @@ import { User } from "@/app/(tabs)";
 
 const userSlice = createSlice({
   name: "userSlice",
-  initialState: {id: -1, account: "", password: "", status: ""} as User,
+  initialState: { id: "-1", account: "", password: "", status: "" } as User,
   reducers: {
     updateUserAccount: (state, action: { payload: string }) => {
       state.account = action.payload;
@@ -14,10 +14,10 @@ const userSlice = createSlice({
     },
     setUser: (state, action: { payload: User }) => {
       return action.payload;
-    }
+    },
   },
 });
 
 export const { updateUserAccount, updateUserPassword, setUser } =
-userSlice.actions;
+  userSlice.actions;
 export default userSlice.reducer;

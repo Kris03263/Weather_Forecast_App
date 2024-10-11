@@ -5,6 +5,7 @@ import weatherDataSlice from "./weatherDataSlice";
 import selecterSlice from "./selecterSlice";
 import userSlice from "./userSlice";
 import userSettingsSlice from "./userSettingsSlice";
+import dailySportSugSlice from "./dailySportSugSlice";
 
 const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ const store = configureStore({
     selecter: selecterSlice,
     user: userSlice,
     userSettings: userSettingsSlice,
+    dailySportSuggestions: dailySportSugSlice,
   },
 });
 

@@ -12,11 +12,19 @@ import { Provider, useSelector } from "react-redux";
 
 import { SvgImage } from "@/components/Svg";
 
-import { User, Sport, Habit, userSetSports, userSetHabits, userLogin, userLogout, userDelete, userRegister } from "@/app/(tabs)";
+import {
+  User,
+  Sport,
+  Habit,
+  userSetSports,
+  userSetHabits,
+  userLogin,
+  userLogout,
+  userDelete,
+  userRegister,
+} from "@/app/(tabs)";
 
 import store from "@/redux/store";
-import { setUser } from "@/redux/userSlice";
-
 
 interface RadioButtonProps {
   label: string;
@@ -37,10 +45,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
   </TouchableOpacity>
 );
 
-
-
 export default function SettingsScreen() {
-
   // Modal's visiblility control
   const [modalVisible, setModalVisible] = useState(false);
   const [secondModalVisible, setSecondModalVisible] = useState(false);
@@ -48,8 +53,11 @@ export default function SettingsScreen() {
   const [userSettingsVisible, setUserSettingsVisible] = useState(false);
   const [userLoggingVisible, setUserLoggingVisible] = useState(false);
 
-  const user = useSelector( (state: { user: User }) => state.user);
-  const userSettings = useSelector( (state: { userSettings: { sport: Sport[], habit: Habit[] } }) => state.userSettings);
+  const user = useSelector((state: { user: User }) => state.user);
+  const userSettings = useSelector(
+    (state: { userSettings: { sport: Sport[]; habit: Habit[] } }) =>
+      state.userSettings
+  );
 
   // Temp data
   const [account, setAccount] = useState("");
@@ -58,9 +66,13 @@ export default function SettingsScreen() {
   const [habit, setHabit] = useState<number[]>([]); // Start from 1
 
   useEffect(() => {
-    setSport(store.getState().userSettings?.sport?.map((sport) => sport.id) ?? []); 
-    setHabit(store.getState().userSettings?.habit?.map((habit) => habit.id) ?? []);
-  }, [userSettings])
+    setSport(
+      store.getState().userSettings?.sport?.map((sport) => sport.id) ?? []
+    );
+    setHabit(
+      store.getState().userSettings?.habit?.map((habit) => habit.id) ?? []
+    );
+  }, [userSettings]);
 
   // Define ref (element ID)
   const usernameLoginInputRef = useRef<TextInput>(null);
@@ -73,44 +85,44 @@ export default function SettingsScreen() {
   const usernameRegisterInput = usernameRegisterInputRef.current;
   const passwordRegisterInput = passwordRegisterInputRef.current;
 
-const ShowUserModal = () =>{
-  if(user.id && user.id !== -1){
-    setUserModalVisible(true);
-  }
-  else{
-    setUserLoggingVisible(true);
-  }
-}
+  const ShowUserModal = () => {
+    if (user.id && user.id !== "-1") {
+      setUserModalVisible(true);
+    } else {
+      setUserLoggingVisible(true);
+    }
+  };
 
   const toggleOption = (
     option: number,
     setSelected: React.Dispatch<React.SetStateAction<number[]>>
   ) => {
-    setSelected((prevSelectedOptions) =>
-      prevSelectedOptions.includes(option)
-        ? prevSelectedOptions.filter((item) => item !== option) // Remove from list
-        : [...prevSelectedOptions, option] // Add to list
+    setSelected(
+      (prevSelectedOptions) =>
+        prevSelectedOptions.includes(option)
+          ? prevSelectedOptions.filter((item) => item !== option) // Remove from list
+          : [...prevSelectedOptions, option] // Add to list
     );
   };
 
   const habitList = {
-    "做甜點" : 1 ,
-    "健行" : 2 ,
-    "登山": 3 ,
-    "玩遊戲" : 4 ,
-    "出遊" : 5 ,
-    "閱讀" : 6
-  } 
+    做甜點: 1,
+    健行: 2,
+    登山: 3,
+    玩遊戲: 4,
+    出遊: 5,
+    閱讀: 6,
+  };
 
   const sportList = {
-    "籃球" : 1 ,
-    "羽球" : 2 ,
-    "排球": 3 ,
-    "游泳" : 4 ,
-    "桌球" : 5 ,
-    "慢跑" : 6 ,
-    "公路車" : 7
-  }
+    籃球: 1,
+    羽球: 2,
+    排球: 3,
+    游泳: 4,
+    桌球: 5,
+    慢跑: 6,
+    公路車: 7,
+  };
 
   return (
     <Provider store={store}>
@@ -181,9 +193,7 @@ const ShowUserModal = () =>{
                       key={index}
                       label={option}
                       selected={sport.includes(index + 1)}
-                      onPress={() =>
-                        toggleOption(index + 1, setSport)
-                      }
+                      onPress={() => toggleOption(index + 1, setSport)}
                     />
                   )
                 )}
@@ -220,9 +230,7 @@ const ShowUserModal = () =>{
                       key={index}
                       label={option}
                       selected={habit.includes(index + 1)}
-                      onPress={() =>
-                        toggleOption(index + 1, setHabit)
-                      }
+                      onPress={() => toggleOption(index + 1, setHabit)}
                     />
                   )
                 )}
@@ -254,10 +262,7 @@ const ShowUserModal = () =>{
               <Text style={styles.modalHeader}>登入</Text>
               <View style={{ gap: 10 }}>
                 <View style={styles.inputHeaderLayout}>
-                  <SvgImage
-                    style={styles.inputHeaderSvg}
-                    name="userAccount"
-                  />
+                  <SvgImage style={styles.inputHeaderSvg} name="userAccount" />
                   <Text style={styles.label}>使用者名稱:</Text>
                 </View>
                 <TextInput
@@ -267,10 +272,7 @@ const ShowUserModal = () =>{
                   onChangeText={setAccount}
                 />
                 <View style={styles.inputHeaderLayout}>
-                  <SvgImage
-                    style={styles.inputHeaderSvg}
-                    name="userPassword"
-                  />
+                  <SvgImage style={styles.inputHeaderSvg} name="userPassword" />
                   <Text style={styles.label}>使用者密碼:</Text>
                 </View>
                 <TextInput
@@ -341,7 +343,7 @@ const ShowUserModal = () =>{
                   <Text style={styles.buttonText}>刪除使用者</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={async() => {
+                  onPress={async () => {
                     await userLogout();
                     setUserModalVisible(!userModalVisible);
                   }}
@@ -374,10 +376,7 @@ const ShowUserModal = () =>{
               <Text style={styles.modalHeader}>註冊</Text>
               <View style={{ gap: 10 }}>
                 <View style={styles.inputHeaderLayout}>
-                  <SvgImage
-                    style={styles.inputHeaderSvg}
-                    name="userAccount"
-                  />
+                  <SvgImage style={styles.inputHeaderSvg} name="userAccount" />
                   <Text style={styles.label}>使用者名稱:</Text>
                 </View>
                 <TextInput
@@ -387,10 +386,7 @@ const ShowUserModal = () =>{
                   onChangeText={setAccount}
                 />
                 <View style={styles.inputHeaderLayout}>
-                  <SvgImage
-                    style={styles.inputHeaderSvg}
-                    name="userPassword"
-                  />
+                  <SvgImage style={styles.inputHeaderSvg} name="userPassword" />
                   <Text style={styles.label}>使用者密碼:</Text>
                 </View>
                 <TextInput
@@ -406,7 +402,7 @@ const ShowUserModal = () =>{
                     await userRegister(account, password);
                     usernameRegisterInput?.clear();
                     passwordRegisterInput?.clear();
-                    setUserSettingsVisible(!userSettingsVisible)
+                    setUserSettingsVisible(!userSettingsVisible);
                   }}
                 >
                   <Text style={styles.buttonText}>提交</Text>
@@ -449,7 +445,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "#ccc",
   },
-  preferenceBox: { // 1
+  preferenceBox: {
+    // 1
     backgroundColor: "#d3d3d3",
     borderRadius: 10,
     gap: 10,
@@ -470,7 +467,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  inputHeaderSvg:{
+  inputHeaderSvg: {
     width: 20,
     height: 20,
     marginRight: 10,
