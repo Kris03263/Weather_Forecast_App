@@ -237,7 +237,6 @@ export const userSetSports = async (_sportIDs: number[]) => {
     }
 
     const sports = await HandleGetUserSports(userID);
-    console.log("Get sports: ", sports);
 
     store.dispatch(setUserSettings({sport: sports, habit: store.getState().userSettings.habit}));
 
@@ -293,7 +292,6 @@ const HandleSetUser = async (_account: string, _password: string): Promise<User>
 };
 
 const HandleGetUser = async (_userID: number): Promise<User> => {
-  console.log("User ID: ", _userID);
   const data = await fetch(`https://weather-2-10.onrender.com/Users/?id=${_userID}`, {
     method: "GET",
     headers: {
@@ -302,12 +300,9 @@ const HandleGetUser = async (_userID: number): Promise<User> => {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("Raw Data: ", data);
       return data as User;
     })
     .catch((error) => console.error("Error:", error));
-
-    console.log("Final Data: ", data);
 
     if (!data || data.id === -1) { 
       throw new Error(data?.status ?? "Data is empty");
@@ -371,7 +366,7 @@ const HandleSetUserSports = async (_userID: number, _sportIDs: number[]) => {
     method: "POST",
     body: JSON.stringify({
       userID: _userID,
-      sportIDs: _sportIDs.map((index) => index + 1),
+      sportIDs: _sportIDs,
     }),
   })
     .then((response) => response.json())
@@ -421,7 +416,7 @@ const HandleSetUserHabits = async (_userID: number, _habitIDs: number[]) => {
     method: "POST",
     body: JSON.stringify({
       userID: _userID,
-      habitIDs: _habitIDs.map((index) => index + 1),
+      habitIDs: _habitIDs,
     }),
   })
     .then((response) => response.json())

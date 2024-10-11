@@ -58,8 +58,8 @@ export default function SettingsScreen() {
   const [habit, setHabit] = useState<number[]>([]); // Start from 1
 
   useEffect(() => {
-    setSport(store.getState().userSettings.sport.map((sport) => sport.id)); 
-    setHabit(store.getState().userSettings.habit.map((habit) => habit.id));
+    setSport(store.getState().userSettings?.sport?.map((sport) => sport.id) ?? []); 
+    setHabit(store.getState().userSettings?.habit?.map((habit) => habit.id) ?? []);
   }, [userSettings])
 
   // Define ref (element ID)
@@ -129,40 +129,40 @@ const ShowUserModal = () =>{
         {/* 天氣偏好區塊 */}
         <View style={styles.preferenceBox}>
           <Text style={styles.boxTitle}>天氣偏好</Text>
-          <View style={styles.inputRow}>
+          <View style={styles.boxInputLayout}>
             <Text style={styles.label}>溫度偏好:</Text>
-            <TextInput style={styles.input} placeholder="輸入溫度(°C)" />
+            <TextInput style={styles.inputText} placeholder="輸入溫度(°C)" />
           </View>
-          <View style={styles.inputRow}>
+          <View style={styles.boxInputLayout}>
             <Text style={styles.label}>濕度偏好:</Text>
-            <TextInput style={styles.input} placeholder="輸入濕度" />
+            <TextInput style={styles.inputText} placeholder="輸入濕度" />
           </View>
         </View>
 
         {/* 活動偏好區塊 */}
         <View style={styles.preferenceBox}>
           <Text style={styles.boxTitle}>活動偏好</Text>
-          <View style={styles.inputRow}>
+          <View style={styles.boxInputLayout}>
             <Text style={styles.label}>運動偏好:</Text>
             <TouchableOpacity
-              style={styles.interactButton}
+              style={styles.button}
               onPress={() => setModalVisible(true)}
             >
-              <Text style={styles.interactText}>選擇運動</Text>
+              <Text style={styles.buttonText}>選擇運動</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.inputRow}>
+          <View style={styles.boxInputLayout}>
             <Text style={styles.label}>興趣偏好:</Text>
             <TouchableOpacity
-              style={styles.interactButton}
+              style={styles.button}
               onPress={() => setSecondModalVisible(true)}
             >
-              <Text style={styles.interactText}>選擇嗜好</Text>
+              <Text style={styles.buttonText}>選擇嗜好</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/*選擇運動Modal*/}
+        {/*選擇運動 Modal*/}
         <Modal
           animationType="fade"
           transparent={true}
@@ -173,7 +173,7 @@ const ShowUserModal = () =>{
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>選擇運動</Text>
+              <Text style={styles.modalHeader}>選擇運動</Text>
               <View style={styles.radioGroup}>
                 {["籃球", "羽球", "排球", "游泳", "公路車", "慢跑", "桌球"].map(
                   (option, index) => (
@@ -195,13 +195,13 @@ const ShowUserModal = () =>{
                   setModalVisible(!modalVisible);
                 }}
               >
-                <Text style={styles.textStyle}>儲存&關閉</Text>
+                <Text style={styles.buttonText}>儲存&關閉</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
-        {/*選擇嗜好Modal*/}
+        {/*選擇嗜好 Modal*/}
         <Modal
           animationType="fade"
           transparent={true}
@@ -212,7 +212,7 @@ const ShowUserModal = () =>{
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>選擇嗜好</Text>
+              <Text style={styles.modalHeader}>選擇嗜好</Text>
               <View style={styles.radioGroup}>
                 {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
                   (option, index) => (
@@ -234,13 +234,13 @@ const ShowUserModal = () =>{
                   setSecondModalVisible(!secondModalVisible);
                 }}
               >
-                <Text style={styles.textStyle}>儲存&關閉</Text>
+                <Text style={styles.buttonText}>儲存&關閉</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
-        {/*登入UI*/}
+        {/*登入 Modal*/}
         <Modal
           animationType="fade"
           transparent={true}
@@ -251,71 +251,66 @@ const ShowUserModal = () =>{
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>登入</Text>
+              <Text style={styles.modalHeader}>登入</Text>
               <View style={{ gap: 10 }}>
-                <View style={styles.inputRow}>
-                  <Text style={styles.label}>
-                    <SvgImage
-                      style={{ width: 30, height: 30 }}
-                      name="userAccount"
-                    />
-                    使用者名稱:
-                  </Text>
+                <View style={styles.inputHeaderLayout}>
+                  <SvgImage
+                    style={styles.inputHeaderSvg}
+                    name="userAccount"
+                  />
+                  <Text style={styles.label}>使用者名稱:</Text>
                 </View>
                 <TextInput
-                  style={styles.input}
+                  style={styles.inputText}
                   ref={usernameLoginInputRef}
                   placeholder="輸入名稱"
                   onChangeText={setAccount}
                 />
-                <View style={styles.inputRow}>
-                  <Text style={styles.label}>
-                    <SvgImage
-                      style={{ width: 30, height: 30 }}
-                      name="userPassword"
-                    />
-                    使用者密碼:
-                  </Text>
+                <View style={styles.inputHeaderLayout}>
+                  <SvgImage
+                    style={styles.inputHeaderSvg}
+                    name="userPassword"
+                  />
+                  <Text style={styles.label}>使用者密碼:</Text>
                 </View>
                 <TextInput
-                  style={styles.input}
+                  style={styles.inputText}
                   ref={passwordLoginInputRef}
                   placeholder="輸入密碼"
                   secureTextEntry={true}
                   onChangeText={setPassword}
                 />
+                <TouchableOpacity
+                  onPress={() => {
+                    setUserSettingsVisible(true);
+                    setUserLoggingVisible(!userLoggingVisible);
+                  }}
+                >
+                  <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  onPress={async () => {
+                    await userLogin(account, password);
+                    usernameInput?.clear();
+                    passwordInput?.clear();
+                    setUserLoggingVisible(!userLoggingVisible);
+                  }}
+                >
+                  <Text style={styles.buttonText}>登入</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  onPress={() => setUserLoggingVisible(!userLoggingVisible)}
+                >
+                  <Text style={styles.buttonText}>關閉</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={styles.linkButton}
-                onPress={() => {
-                  setUserSettingsVisible(true);
-                  setUserLoggingVisible(!userLoggingVisible);
-                }}
-              >
-                <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalbutton, styles.modalbuttonClose]}
-                onPress={async () => {
-                  await userLogin(account, password);
-                  usernameInput?.clear();
-                  passwordInput?.clear();
-                  setUserLoggingVisible(!userLoggingVisible);
-                }}
-              >
-                <Text style={styles.textStyle}>登入</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalbutton, styles.modalbuttonClose]}
-                onPress={() => setUserLoggingVisible(!userLoggingVisible)}
-              >
-                <Text style={styles.textStyle}>關閉</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
-        {/*使用者顯示modal*/}
+        {/*使用者顯示 Modal*/}
         <Modal
           animationType="fade"
           transparent={true}
@@ -326,46 +321,46 @@ const ShowUserModal = () =>{
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>使用者</Text>
+              <Text style={styles.modalHeader}>使用者</Text>
               <View style={{ gap: 10 }}>
-                <View style={styles.inputRow}>
+                <View style={styles.inputHeaderLayout}>
                   <Text style={styles.label}>使用者名稱:</Text>
                   <Text style={styles.label}>{user.account}</Text>
                 </View>
-                <View style={styles.inputRow}>
+                <View style={styles.inputHeaderLayout}>
                   <Text style={styles.label}>使用者密碼:</Text>
                   <Text style={styles.label}>{user.password}</Text>
                 </View>
+                <TouchableOpacity
+                  onPress={async () => {
+                    await userDelete();
+                    setUserModalVisible(!userModalVisible);
+                  }}
+                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                >
+                  <Text style={styles.buttonText}>刪除使用者</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={async() => {
+                    await userLogout();
+                    setUserModalVisible(!userModalVisible);
+                  }}
+                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                >
+                  <Text style={styles.buttonText}>登出</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  onPress={() => setUserModalVisible(!userModalVisible)}
+                >
+                  <Text style={styles.buttonText}>關閉</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={async () => {
-                  await userDelete();
-                  setUserModalVisible(!userModalVisible);
-                }}
-                style={[styles.modalbutton, styles.modalbuttonClose]}
-              >
-                <Text style={styles.textStyle}>刪除使用者</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={async() => {
-                  await userLogout();
-                  setUserModalVisible(!userModalVisible);
-                }}
-                style={[styles.modalbutton, styles.modalbuttonClose]}
-              >
-                <Text style={styles.textStyle}>登出</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalbutton, styles.modalbuttonClose]}
-                onPress={() => setUserModalVisible(!userModalVisible)}
-              >
-                <Text style={styles.textStyle}>關閉</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
-        {/*使用者註冊modal*/}
+        {/*使用者註冊 Modal*/}
         <Modal
           animationType="fade"
           transparent={true}
@@ -376,57 +371,53 @@ const ShowUserModal = () =>{
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>註冊</Text>
+              <Text style={styles.modalHeader}>註冊</Text>
               <View style={{ gap: 10 }}>
-                <View style={styles.inputRow}>
-                  <Text style={styles.label}>
-                    <SvgImage
-                      style={{ width: 30, height: 30 }}
-                      name="userAccount"
-                    />
-                    使用者名稱:
-                  </Text>
+                <View style={styles.inputHeaderLayout}>
+                  <SvgImage
+                    style={styles.inputHeaderSvg}
+                    name="userAccount"
+                  />
+                  <Text style={styles.label}>使用者名稱:</Text>
                 </View>
                 <TextInput
-                  style={styles.input}
+                  style={styles.inputText}
                   placeholder="輸入名稱"
                   ref={usernameRegisterInputRef}
                   onChangeText={setAccount}
                 />
-                <View style={styles.inputRow}>
-                  <Text style={styles.label}>
-                    <SvgImage
-                      style={{ width: 30, height: 30 }}
-                      name="userPassword"
-                    />
-                    使用者密碼:
-                  </Text>
+                <View style={styles.inputHeaderLayout}>
+                  <SvgImage
+                    style={styles.inputHeaderSvg}
+                    name="userPassword"
+                  />
+                  <Text style={styles.label}>使用者密碼:</Text>
                 </View>
                 <TextInput
-                  style={styles.input}
+                  style={styles.inputText}
                   placeholder="輸入密碼"
                   ref={passwordRegisterInputRef}
                   onChangeText={setPassword}
                   secureTextEntry={true}
                 />
+                <TouchableOpacity
+                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  onPress={async () => {
+                    await userRegister(account, password);
+                    usernameRegisterInput?.clear();
+                    passwordRegisterInput?.clear();
+                    setUserSettingsVisible(!userSettingsVisible)
+                  }}
+                >
+                  <Text style={styles.buttonText}>提交</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  onPress={() => setUserSettingsVisible(!userSettingsVisible)}
+                >
+                  <Text style={styles.buttonText}>關閉</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={[styles.modalbutton, styles.modalbuttonClose]}
-                onPress={async () => {
-                  await userRegister(account, password);
-                  usernameRegisterInput?.clear();
-                  passwordRegisterInput?.clear();
-                  setUserSettingsVisible(!userSettingsVisible)
-                }}
-              >
-                <Text style={styles.textStyle}>提交</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalbutton, styles.modalbuttonClose]}
-                onPress={() => setUserSettingsVisible(!userSettingsVisible)}
-              >
-                <Text style={styles.textStyle}>關閉</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -458,13 +449,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "#ccc",
   },
-  userIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#ccc",
-  },
-  preferenceBox: {
+  preferenceBox: { // 1
     backgroundColor: "#d3d3d3",
     borderRadius: 10,
     gap: 10,
@@ -476,18 +461,28 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
   },
-  inputRow: {
+  boxInputLayout: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
+    justifyContent: "space-between",
+  },
+  inputHeaderLayout: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  inputHeaderSvg:{
+    width: 20,
+    height: 20,
+    marginRight: 10,
   },
   label: {
     fontSize: 16,
     width: "auto",
     marginRight: 10,
   },
-  input: {
+  inputText: {
     flex: 1,
+    maxWidth: 200,
     backgroundColor: "#fff",
     paddingVertical: 5,
     paddingHorizontal: 10,
@@ -495,19 +490,19 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 1,
   },
-  interactButton: {
+  button: {
     backgroundColor: "#4f8ef7",
+    maxWidth: 200,
     flex: 1,
     borderRadius: 5,
     alignItems: "center",
     paddingVertical: 4,
     paddingHorizontal: 10,
   },
-  interactText: {
-    color: "#fff",
-    fontSize: 18,
+  buttonText: {
+    color: "white",
     fontWeight: "bold",
-    alignContent: "center",
+    textAlign: "center",
   },
   centeredView: {
     flex: 1,
@@ -532,7 +527,6 @@ const styles = StyleSheet.create({
   },
   modalbutton: {
     borderRadius: 10,
-    marginTop: 10,
     width: "100%",
     alignItems: "center",
     padding: 10,
@@ -540,12 +534,7 @@ const styles = StyleSheet.create({
   modalbuttonClose: {
     backgroundColor: "#2196F3",
   },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  modalText: {
+  modalHeader: {
     marginBottom: 15,
     fontWeight: "bold",
     fontSize: 20,
@@ -574,9 +563,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-around",
-  },
-  linkButton: {
-    marginVertical: 10,
   },
   linkText: {
     color: "gray",
