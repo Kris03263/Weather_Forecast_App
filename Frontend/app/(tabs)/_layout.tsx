@@ -1,9 +1,6 @@
 import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
-import { Platform, PermissionsAndroid } from "react-native";
-import Geolocation, {
-  GeolocationResponse,
-} from "@react-native-community/geolocation";
+import * as Location from "expo-location";
 import { Provider } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -342,7 +339,6 @@ const HandleUserLogin = async (
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
       return data as User;
     })
     .catch((error) => console.error("Error:", error));
@@ -370,7 +366,6 @@ const HandleSetUserSports = async (
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
       if (data.Stats === "Update Successful !") {
         return true;
       } else {
@@ -410,10 +405,6 @@ const HandleSetUserHabits = async (
   _userID: string,
   _habitIDs: number[]
 ): Promise<boolean> => {
-  console.log({
-    userID: _userID,
-    habitIDs: _habitIDs,
-  });
   const response = await fetch(`${hostURL}/Users/UserHabits`, {
     headers: {
       "Content-Type": "application/json",
@@ -426,7 +417,6 @@ const HandleSetUserHabits = async (
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
       if (data.Stats === "Update Successful !") {
         return true;
       } else {
@@ -467,36 +457,39 @@ const HandleGetUserHabits = async (_userID: string): Promise<Habit[]> => {
 const HandleGetLocal = async (): Promise<Region> => {
   // Request location permission
   const requestLocationPermission = async () => {
-    if (Platform.OS === "android") {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: "Location Permission",
-          message: "We need access to your location",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK",
-        }
-      );
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } else {
-      return true;
-    }
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    return status == "granted";
+    // if (Platform.OS === "android") {
+    //   const granted = await PermissionsAndroid.request(
+    //     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    //     {
+    //       title: "Location Permission",
+    //       message: "We need access to your location",
+    //       buttonNeutral: "Ask Me Later",
+    //       buttonNegative: "Cancel",
+    //       buttonPositive: "OK",
+    //     }
+    //   );
+    //   return granted === PermissionsAndroid.RESULTS.GRANTED;
+    // } else {
+    //   return true;
+    // }
   };
 
   // Get current location
-  const getCurrentLocation = async (): Promise<GeolocationResponse> => {
-    return new Promise((resolve, reject) => {
-      Geolocation.getCurrentPosition(
-        (pos) => {
-          resolve(pos);
-        },
-        (error) => {
-          reject(new Error(error.message));
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-      );
-    });
+  const getCurrentLocation = async (): Promise<Location.LocationObject> => {
+    return await Location.getCurrentPositionAsync({});
+    // return new Promise((resolve, reject) => {
+    //   Geolocation.getCurrentPosition(
+    //     (pos) => {
+    //       resolve(pos);
+    //     },
+    //     (error) => {
+    //       reject(new Error(error.message));
+    //     },
+    //     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    //   );
+    // });
   };
 
   if (!(await requestLocationPermission())) {
@@ -645,7 +638,7 @@ export default function TabLayout() {
         console.log("Complete get regions from local storage");
 
         // Get user id from local storage
-        userID = JSON.parse((await AsyncStorage.getItem("userID")) || "-1");
+        userID = (await AsyncStorage.getItem("userID")) || "-1";
         console.log("Complete get userID from local storage");
 
         // Get current location
@@ -706,7 +699,7 @@ export default function TabLayout() {
         // Update daily sport suggestion
         try {
           dailySportSuggestions = await HandleGetDailySportSug(
-            user.id,
+            userID,
             regions[0].latitude,
             regions[0].longitude
           );

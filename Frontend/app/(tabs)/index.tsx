@@ -1,16 +1,6 @@
-import {
-  Image,
-  StyleSheet,
-  Platform,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  PermissionsAndroid,
-} from "react-native";
-import { useEffect } from "react";
+import { StyleSheet, View, ScrollView } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import ModalDropdown from "react-native-modal-dropdown";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
@@ -38,6 +28,18 @@ import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
+      {/* Gradiant */}
+      <LinearGradient
+        colors={["#10202b", "#305f80"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: "100%",
+        }}
+      ></LinearGradient>
+
       {/* Top Section */}
       <View style={styles.topSection}>
         <WeatherDisplay />
@@ -85,6 +87,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#10202b",
   },
   topSection: {
+    marginTop: 30,
     height: "30%",
     justifyContent: "center",
     position: "relative",

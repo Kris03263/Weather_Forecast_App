@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { Provider, useSelector } from "react-redux";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { SvgImage } from "../../components/Svg";
 
@@ -105,28 +106,20 @@ export default function SettingsScreen() {
     );
   };
 
-  const habitList = {
-    做甜點: 1,
-    健行: 2,
-    登山: 3,
-    玩遊戲: 4,
-    出遊: 5,
-    閱讀: 6,
-  };
-
-  const sportList = {
-    籃球: 1,
-    羽球: 2,
-    排球: 3,
-    游泳: 4,
-    桌球: 5,
-    慢跑: 6,
-    公路車: 7,
-  };
-
   return (
     <Provider store={store}>
       <View style={styles.container}>
+        <LinearGradient
+          colors={["#10202b", "#305f80"]}
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 0,
+            height: "100%",
+          }}
+        ></LinearGradient>
+
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerText}>設定</Text>
@@ -139,34 +132,34 @@ export default function SettingsScreen() {
         </View>
 
         {/* 天氣偏好區塊 */}
-        <View style={styles.preferenceBox}>
+        <View style={styles.box}>
           <Text style={styles.boxTitle}>天氣偏好</Text>
           <View style={styles.boxInputLayout}>
-            <Text style={styles.label}>溫度偏好:</Text>
-            <TextInput style={styles.inputText} placeholder="輸入溫度(°C)" />
+            <Text style={styles.inputLabel}>溫度偏好:</Text>
+            <TextInput style={styles.boxInput} placeholder="輸入溫度(°C)" />
           </View>
           <View style={styles.boxInputLayout}>
-            <Text style={styles.label}>濕度偏好:</Text>
-            <TextInput style={styles.inputText} placeholder="輸入濕度" />
+            <Text style={styles.inputLabel}>濕度偏好:</Text>
+            <TextInput style={styles.boxInput} placeholder="輸入濕度" />
           </View>
         </View>
 
         {/* 活動偏好區塊 */}
-        <View style={styles.preferenceBox}>
+        <View style={styles.box}>
           <Text style={styles.boxTitle}>活動偏好</Text>
           <View style={styles.boxInputLayout}>
-            <Text style={styles.label}>運動偏好:</Text>
+            <Text style={styles.inputLabel}>運動偏好:</Text>
             <TouchableOpacity
-              style={styles.button}
+              style={styles.boxButton}
               onPress={() => setModalVisible(true)}
             >
               <Text style={styles.buttonText}>選擇運動</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.boxInputLayout}>
-            <Text style={styles.label}>興趣偏好:</Text>
+            <Text style={styles.inputLabel}>興趣偏好:</Text>
             <TouchableOpacity
-              style={styles.button}
+              style={styles.boxButton}
               onPress={() => setSecondModalVisible(true)}
             >
               <Text style={styles.buttonText}>選擇嗜好</Text>
@@ -185,28 +178,40 @@ export default function SettingsScreen() {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalHeader}>選擇運動</Text>
-              <View style={styles.radioGroup}>
-                {["籃球", "羽球", "排球", "游泳", "公路車", "慢跑", "桌球"].map(
-                  (option, index) => (
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>選擇運動</Text>
+              </View>
+              <View style={styles.modalBody}>
+                <View style={styles.radioGroup}>
+                  {[
+                    "籃球",
+                    "羽球",
+                    "排球",
+                    "游泳",
+                    "公路車",
+                    "慢跑",
+                    "桌球",
+                  ].map((option, index) => (
                     <RadioButton
                       key={index}
                       label={option}
                       selected={sport.includes(index + 1)}
                       onPress={() => toggleOption(index + 1, setSport)}
                     />
-                  )
-                )}
+                  ))}
+                </View>
               </View>
-              <TouchableOpacity
-                style={[styles.modalbutton, styles.modalbuttonClose]}
-                onPress={async () => {
-                  await userSetSports(sport);
-                  setModalVisible(!modalVisible);
-                }}
-              >
-                <Text style={styles.buttonText}>儲存&關閉</Text>
-              </TouchableOpacity>
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={async () => {
+                    await userSetSports(sport);
+                    setModalVisible(!modalVisible);
+                  }}
+                >
+                  <Text style={styles.buttonText}>儲存&關閉</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>
@@ -222,28 +227,34 @@ export default function SettingsScreen() {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalHeader}>選擇嗜好</Text>
-              <View style={styles.radioGroup}>
-                {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
-                  (option, index) => (
-                    <RadioButton
-                      key={index}
-                      label={option}
-                      selected={habit.includes(index + 1)}
-                      onPress={() => toggleOption(index + 1, setHabit)}
-                    />
-                  )
-                )}
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>選擇嗜好</Text>
               </View>
-              <TouchableOpacity
-                style={[styles.modalbutton, styles.modalbuttonClose]}
-                onPress={async () => {
-                  await userSetHabits(habit);
-                  setSecondModalVisible(!secondModalVisible);
-                }}
-              >
-                <Text style={styles.buttonText}>儲存&關閉</Text>
-              </TouchableOpacity>
+              <View style={styles.modalBody}>
+                <View style={styles.radioGroup}>
+                  {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
+                    (option, index) => (
+                      <RadioButton
+                        key={index}
+                        label={option}
+                        selected={habit.includes(index + 1)}
+                        onPress={() => toggleOption(index + 1, setHabit)}
+                      />
+                    )
+                  )}
+                </View>
+              </View>
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={async () => {
+                    await userSetHabits(habit);
+                    setSecondModalVisible(!secondModalVisible);
+                  }}
+                >
+                  <Text style={styles.buttonText}>儲存&關閉</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>
@@ -259,24 +270,26 @@ export default function SettingsScreen() {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalHeader}>登入</Text>
-              <View style={{ gap: 10 }}>
-                <View style={styles.inputHeaderLayout}>
-                  <SvgImage style={styles.inputHeaderSvg} name="userAccount" />
-                  <Text style={styles.label}>使用者名稱:</Text>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>登入</Text>
+              </View>
+              <View style={styles.modalBody}>
+                <View style={styles.modalInputLayout}>
+                  <SvgImage style={styles.modalInputSvg} name="userAccount" />
+                  <Text style={styles.inputLabel}>使用者名稱:</Text>
                 </View>
                 <TextInput
-                  style={styles.inputText}
+                  style={styles.modalInput}
                   ref={usernameLoginInputRef}
                   placeholder="輸入名稱"
                   onChangeText={setAccount}
                 />
-                <View style={styles.inputHeaderLayout}>
-                  <SvgImage style={styles.inputHeaderSvg} name="userPassword" />
-                  <Text style={styles.label}>使用者密碼:</Text>
+                <View style={styles.modalInputLayout}>
+                  <SvgImage style={styles.modalInputSvg} name="userPassword" />
+                  <Text style={styles.inputLabel}>使用者密碼:</Text>
                 </View>
                 <TextInput
-                  style={styles.inputText}
+                  style={styles.modalInput}
                   ref={passwordLoginInputRef}
                   placeholder="輸入密碼"
                   secureTextEntry={true}
@@ -290,8 +303,10 @@ export default function SettingsScreen() {
                 >
                   <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
                 </TouchableOpacity>
+              </View>
+              <View style={styles.modalFooter}>
                 <TouchableOpacity
-                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  style={styles.modalButton}
                   onPress={async () => {
                     await userLogin(account, password);
                     usernameInput?.clear();
@@ -302,7 +317,7 @@ export default function SettingsScreen() {
                   <Text style={styles.buttonText}>登入</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  style={styles.modalButton}
                   onPress={() => setUserLoggingVisible(!userLoggingVisible)}
                 >
                   <Text style={styles.buttonText}>關閉</Text>
@@ -323,22 +338,26 @@ export default function SettingsScreen() {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalHeader}>使用者</Text>
-              <View style={{ gap: 10 }}>
-                <View style={styles.inputHeaderLayout}>
-                  <Text style={styles.label}>使用者名稱:</Text>
-                  <Text style={styles.label}>{user.account}</Text>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>使用者</Text>
+              </View>
+              <View style={styles.modalBody}>
+                <View style={styles.modalInputLayout}>
+                  <Text style={styles.inputLabel}>使用者名稱:</Text>
+                  <Text style={styles.inputLabel}>{user.account}</Text>
                 </View>
-                <View style={styles.inputHeaderLayout}>
-                  <Text style={styles.label}>使用者密碼:</Text>
-                  <Text style={styles.label}>{user.password}</Text>
+                <View style={styles.modalInputLayout}>
+                  <Text style={styles.inputLabel}>使用者密碼:</Text>
+                  <Text style={styles.inputLabel}>{user.password}</Text>
                 </View>
+              </View>
+              <View style={styles.modalFooter}>
                 <TouchableOpacity
                   onPress={async () => {
                     await userDelete();
                     setUserModalVisible(!userModalVisible);
                   }}
-                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  style={styles.modalButton}
                 >
                   <Text style={styles.buttonText}>刪除使用者</Text>
                 </TouchableOpacity>
@@ -347,12 +366,12 @@ export default function SettingsScreen() {
                     await userLogout();
                     setUserModalVisible(!userModalVisible);
                   }}
-                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  style={styles.modalButton}
                 >
                   <Text style={styles.buttonText}>登出</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  style={styles.modalButton}
                   onPress={() => setUserModalVisible(!userModalVisible)}
                 >
                   <Text style={styles.buttonText}>關閉</Text>
@@ -373,31 +392,35 @@ export default function SettingsScreen() {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalHeader}>註冊</Text>
-              <View style={{ gap: 10 }}>
-                <View style={styles.inputHeaderLayout}>
-                  <SvgImage style={styles.inputHeaderSvg} name="userAccount" />
-                  <Text style={styles.label}>使用者名稱:</Text>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>註冊</Text>
+              </View>
+              <View style={styles.modalBody}>
+                <View style={styles.modalInputLayout}>
+                  <SvgImage style={styles.modalInputSvg} name="userAccount" />
+                  <Text style={styles.inputLabel}>使用者名稱:</Text>
                 </View>
                 <TextInput
-                  style={styles.inputText}
+                  style={styles.modalInput}
                   placeholder="輸入名稱"
                   ref={usernameRegisterInputRef}
                   onChangeText={setAccount}
                 />
-                <View style={styles.inputHeaderLayout}>
-                  <SvgImage style={styles.inputHeaderSvg} name="userPassword" />
-                  <Text style={styles.label}>使用者密碼:</Text>
+                <View style={styles.modalInputLayout}>
+                  <SvgImage style={styles.modalInputSvg} name="userPassword" />
+                  <Text style={styles.inputLabel}>使用者密碼:</Text>
                 </View>
                 <TextInput
-                  style={styles.inputText}
+                  style={styles.modalInput}
                   placeholder="輸入密碼"
                   ref={passwordRegisterInputRef}
                   onChangeText={setPassword}
                   secureTextEntry={true}
                 />
+              </View>
+              <View style={styles.modalFooter}>
                 <TouchableOpacity
-                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  style={styles.modalButton}
                   onPress={async () => {
                     await userRegister(account, password);
                     usernameRegisterInput?.clear();
@@ -408,7 +431,7 @@ export default function SettingsScreen() {
                   <Text style={styles.buttonText}>提交</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.modalbutton, styles.modalbuttonClose]}
+                  style={styles.modalButton}
                   onPress={() => setUserSettingsVisible(!userSettingsVisible)}
                 >
                   <Text style={styles.buttonText}>關閉</Text>
@@ -425,17 +448,39 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1a2738",
+    backgroundColor: "#10202b",
     padding: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    color: "white",
+    marginRight: 10,
+  },
+  buttonText: {
+    fontSize: 16,
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  linkText: {
+    color: "gray",
+    textDecorationLine: "underline",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginVertical: 30,
+    padding: "3%",
   },
   headerText: {
-    color: "#fff",
+    color: "white",
     fontSize: 24,
     fontWeight: "bold",
   },
@@ -445,17 +490,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "#ccc",
   },
-  preferenceBox: {
-    // 1
-    backgroundColor: "#d3d3d3",
+
+  // box
+  box: {
+    backgroundColor: "#FFFFFF0A",
     borderRadius: 10,
     gap: 10,
     padding: 15,
     marginBottom: 20,
   },
   boxTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
+    color: "white",
     marginBottom: 10,
   },
   boxInputLayout: {
@@ -463,51 +510,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  inputHeaderLayout: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  inputHeaderSvg: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-  label: {
-    fontSize: 16,
-    width: "auto",
-    marginRight: 10,
-  },
-  inputText: {
-    flex: 1,
-    maxWidth: 200,
-    backgroundColor: "#fff",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    borderColor: "#ccc",
-    borderWidth: 1,
-  },
-  button: {
+  boxButton: {
     backgroundColor: "#4f8ef7",
-    maxWidth: 200,
+    maxWidth: 180,
     flex: 1,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: "center",
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    padding: 10,
   },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
+  boxInput: {
+    width: 180,
+    backgroundColor: "#ffffff00",
+    padding: 10,
+    borderRadius: 10,
+    borderColor: "white",
+    borderWidth: 2,
   },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
+
+  // modal
   modalView: {
+    width: 250,
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
@@ -522,21 +544,44 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  modalbutton: {
-    borderRadius: 10,
-    width: "100%",
-    alignItems: "center",
-    padding: 10,
-  },
-  modalbuttonClose: {
-    backgroundColor: "#2196F3",
-  },
-  modalHeader: {
-    marginBottom: 15,
+  modalHeader: {},
+  modalHeaderText: {
     fontWeight: "bold",
     fontSize: 20,
     textAlign: "center",
   },
+  modalBody: {
+    width: "100%",
+    marginVertical: 15,
+    gap: 10,
+  },
+  modalFooter: {
+    width: "100%",
+    gap: 10,
+  },
+  modalButton: {
+    backgroundColor: "#2196F3",
+    borderRadius: 10,
+    alignItems: "center",
+    padding: 10,
+  },
+  modalInputLayout: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  modalInputSvg: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  modalInput: {
+    padding: 5,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+
+  // radio btn
   radioButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -559,10 +604,6 @@ const styles = StyleSheet.create({
   radioGroup: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-around",
-  },
-  linkText: {
-    color: "gray",
-    textDecorationLine: "underline",
+    justifyContent: "space-between",
   },
 });

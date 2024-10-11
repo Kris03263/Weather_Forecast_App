@@ -92,6 +92,7 @@ export function IndicatorsDisplayWidget_double({
 // Default Style
 const styles = StyleSheet.create({
   customWidgetStyle: {
+    paddingHorizontal: "10%",
     justifyContent: "center",
     alignItems: "center",
     gap: 20,

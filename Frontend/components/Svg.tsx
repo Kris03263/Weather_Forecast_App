@@ -14,6 +14,7 @@ import WeatherIcon from "@/assets/svgs/weather-icon.svg";
 import UserAccountIcon from "@/assets/svgs/userAccount-icon.svg";
 import UserPasswordIcon from "@/assets/svgs/userPassword-icon.svg";
 import ListIcon from "@/assets/svgs/list-icon.svg";
+import { Svg } from "react-native-svg";
 
 interface SvgProps {
   style?: object;
@@ -38,5 +39,9 @@ export function SvgImage({ style = {}, name = "" }: SvgProps) {
     list: ListIcon,
   }[name];
 
-  return <View>{Icon ? <Icon style={style} /> : null}</View>;
+  return (
+    <View style={style}>
+      {Icon ? <Icon style={style} width="100%" height="100%" /> : null}
+    </View>
+  );
 }
