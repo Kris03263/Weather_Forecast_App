@@ -145,6 +145,8 @@ def register():
             dt = UserDataResult("-1","","","no user")
             response = make_response(jsonify(dt.to_dict()),404)
             return response
+        cursor.execute("Select * from users where id =?",[id])
+        user = cursor.fetchall()
         dt = UserDataResult(user[0][0],user[0][1],user[0][2],"successful")
         return jsonify(dt.to_dict())
         
