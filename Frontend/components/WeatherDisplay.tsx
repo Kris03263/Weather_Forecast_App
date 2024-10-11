@@ -6,13 +6,10 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-
-import store from "@/redux/store";
 import { useSelector } from "react-redux";
 
 import {
-  Region,
-  selecter,
+  Selecter,
   WeatherDataList,
   indicatorsDictionary,
 } from "@/app/(tabs)/_layout";
@@ -21,12 +18,11 @@ import { SvgImage } from "./Svg";
 import { DynamicImage } from "./DynamicImage";
 
 export function WeatherDisplay() {
-  const region = useSelector((state: { region: Region[] }) => state.region);
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
   const selecter = useSelector(
-    (state: { selecter: selecter }) => state.selecter
+    (state: { selecter: Selecter }) => state.selecter
   );
   const temp =
     indicatorsDictionary["temp" as keyof typeof indicatorsDictionary];
@@ -53,9 +49,7 @@ export function WeatherDisplay() {
     <View style={styles.layout}>
       <View style={styles.cityNameDisplay}>
         <Text style={styles.cityName}>{selecter.region} </Text>
-        <TouchableOpacity
-          onPress={() => console.log(store.getState().dailySportSuggestions)}
-        >
+        <TouchableOpacity>
           <SvgImage style={{ width: 25, height: 25 }} name="list" />
         </TouchableOpacity>
       </View>

@@ -1,7 +1,9 @@
 import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
 import { Platform, PermissionsAndroid } from "react-native";
-import Geolocation, { GeoPosition } from "react-native-geolocation-service";
+import Geolocation, {
+  GeolocationResponse,
+} from "@react-native-community/geolocation";
 import { Provider } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -78,7 +80,7 @@ export interface Region {
   latitude: string;
 }
 
-export interface selecter {
+export interface Selecter {
   region: string;
   timeInterval: number;
 }
@@ -483,7 +485,7 @@ const HandleGetLocal = async (): Promise<Region> => {
   };
 
   // Get current location
-  const getCurrentLocation = async (): Promise<GeoPosition> => {
+  const getCurrentLocation = async (): Promise<GeolocationResponse> => {
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition(
         (pos) => {

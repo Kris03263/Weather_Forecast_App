@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { selecter } from "@/app/(tabs)/_layout";
+import { Selecter } from "@/app/(tabs)/_layout";
 
 const selecterSlice = createSlice({
   name: "selecter",
-  initialState: {} as selecter,
+  initialState: {} as Selecter,
   reducers: {
     updateRegion: (state, action: { payload: string }) => {
       state.region = action.payload;

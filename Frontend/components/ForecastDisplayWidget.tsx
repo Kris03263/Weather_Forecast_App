@@ -5,23 +5,20 @@ import {
   Text,
   FlatList,
 } from "react-native";
+import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 import { DynamicImage } from "@/components/DynamicImage";
 
-import store from "@/redux/store";
-import { useSelector } from "react-redux";
-
-import { Region, WeatherDataList, selecter } from "@/app/(tabs)/_layout";
+import { WeatherDataList, Selecter } from "@/app/(tabs)/_layout";
 
 export function ForecastDisplayWidget() {
-  const region = useSelector((state: { region: Region[] }) => state.region);
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
   const selecter = useSelector(
-    (state: { selecter: selecter }) => state.selecter
+    (state: { selecter: Selecter }) => state.selecter
   );
 
   const FormatTime = (time: string) => {

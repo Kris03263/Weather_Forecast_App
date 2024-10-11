@@ -6,17 +6,14 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 
-import store from "@/redux/store";
-import { useSelector } from "react-redux";
-
 import {
   WeatherDataList,
-  selecter,
-  Region,
+  Selecter,
   indicatorsDictionary,
 } from "@/app/(tabs)/_layout";
 
@@ -27,12 +24,11 @@ interface IndicatorsDisplayWidgetProps_single {
 export function IndicatorsDisplayWidget_single({
   type,
 }: IndicatorsDisplayWidgetProps_single) {
-  const region = useSelector((state: { region: Region[] }) => state.region);
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
   const selecter = useSelector(
-    (state: { selecter: selecter }) => state.selecter
+    (state: { selecter: Selecter }) => state.selecter
   );
   const indicator =
     indicatorsDictionary[type as keyof typeof indicatorsDictionary];
