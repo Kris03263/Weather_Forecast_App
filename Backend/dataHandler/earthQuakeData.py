@@ -5,23 +5,27 @@ url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorizati
 def getEarthDataFCM():
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]
     resultData = []
+
     for i in range(len(earthquakeData)):
         resultData.append({
             "color":     earthquakeData[i]["ReportColor"],
             "content":   earthquakeData[i]["ReportContent"],
             "intensity": []
         })
+        
         shakeArea = earthquakeData[i]["Intensity"]["ShakingArea"]
         for nowElement in shakeArea:
             if not -nowElement["AreaDesc"].find("最"):
                 del nowElement["EqStation"]
                 resultData[i]["intensity"].append(nowElement)
             resultData[i]["intensity"] = sorted(resultData[i]["intensity"], key=lambda x: int(x['AreaIntensity'][0]))
+    
     return resultData
 
 def getEarthData(lon,lat):
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]
     resultData = []
+
     for i in range(len(earthquakeData)):
         shakeLon = earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["EpicenterLongitude"]
         shakeLat = earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["EpicenterLatitude"]
@@ -37,12 +41,14 @@ def getEarthData(lon,lat):
             "distance":  haversine(lat,lon,shakeLat,shakeLon),
             "intensity": []
         })
+        
         shakeArea = earthquakeData[i]["Intensity"]["ShakingArea"]
         for nowElement in shakeArea:
             if not -nowElement["AreaDesc"].find("最"):
                 del nowElement["EqStation"]
                 resultData[i]["intensity"].append(nowElement)
             resultData[i]["intensity"] = sorted(resultData[i]["intensity"], key=lambda x: int(x['AreaIntensity'][0]))
+    
     return resultData
 
 def haversine(lat1, lon1, lat2, lon2):
