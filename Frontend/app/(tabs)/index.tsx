@@ -20,7 +20,8 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Gradiant */}
       <LinearGradient
-        colors={["#10202b", "#305f80"]}
+        colors={["#90E6FD", "#0384e2"]}
+        // locations={[0, 0.3, 1]}
         style={{
           position: "absolute",
           left: 0,
