@@ -86,14 +86,6 @@ export default function SettingsScreen() {
   const usernameRegisterInput = usernameRegisterInputRef.current;
   const passwordRegisterInput = passwordRegisterInputRef.current;
 
-  // const ShowUserModal = () => {
-  //   if (user.id && user.id !== "-1") {
-  //     setuserInfoModalVisible(true);
-  //   } else {
-  //     setUserLoginVisible(true);
-  //   }
-  // };
-
   const toggleOption = (
     option: number,
     setSelected: React.Dispatch<React.SetStateAction<number[]>>

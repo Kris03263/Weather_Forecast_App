@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 import wetIcon from "@/assets/svgs/wet-icon.svg";
 import RainRateIcon from "@/assets/svgs/rainRate-icon.svg";
@@ -14,7 +14,6 @@ import WeatherIcon from "@/assets/svgs/weather-icon.svg";
 import UserAccountIcon from "@/assets/svgs/userAccount-icon.svg";
 import UserPasswordIcon from "@/assets/svgs/userPassword-icon.svg";
 import ListIcon from "@/assets/svgs/list-icon.svg";
-import { Svg } from "react-native-svg";
 
 interface SvgProps {
   style?: object;

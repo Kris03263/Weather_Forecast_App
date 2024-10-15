@@ -1,11 +1,4 @@
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Text,
-  ScrollView,
-  Image,
-} from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
@@ -61,7 +54,6 @@ export function SuggestionDisplayWidget({
   );
 
   if (Object.keys(testData).length === 0) {
-    // if (true) {
     return (
       <Widget style={styles.customWidgetStyle}>
         <View style={styles.layout}>

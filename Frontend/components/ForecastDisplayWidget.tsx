@@ -21,17 +21,6 @@ export function ForecastDisplayWidget() {
     (state: { selecter: Selecter }) => state.selecter
   );
 
-  const FormatTime = (time: string) => {
-    switch (selecter.timeInterval) {
-      case 0:
-        return time.split(" ")[1].split(":")[0] + "時";
-      case 1:
-        return time.split(" ")[0].split("-")[2] + "日";
-      default:
-        return time;
-    }
-  };
-
   if (Object.keys(weatherDataList).length === 0) {
     return (
       <Widget style={styles.customWidgetStyle}>
@@ -95,8 +84,6 @@ const styles = StyleSheet.create({
     width: "100%",
     overflow: "hidden",
     alignItems: "center",
-    marginBottom: 10,
-    gap: 10,
     marginBottom: 10,
     gap: 10,
   },

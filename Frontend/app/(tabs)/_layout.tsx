@@ -117,7 +117,6 @@ export interface DailySportSug {
 export const userLogin = async (_account: string, _password: string) => {
   try {
     const user = await HandleUserLogin(_account, _password);
-    console.log(user);
     if (!user || user.id === "-1") {
       throw new Error(user?.status ?? "User data is empty");
     }
@@ -283,9 +282,6 @@ const HandleSetUser = async (
 const HandleGetUser = async (_userID: string): Promise<User> => {
   const data = await fetch(`${hostURL}/Users/?id=${_userID}`, {
     method: "GET",
-    headers: {
-      // "Content-Type": "application/json",
-    },
   })
     .then((response) => response.json())
     .then((data) => {
@@ -454,42 +450,16 @@ const HandleGetUserHabits = async (_userID: string): Promise<Habit[]> => {
   return data;
 };
 
-const HandleGetLocal = async (): Promise<Region> => {
+const HandleGetLocation = async (): Promise<Region> => {
   // Request location permission
   const requestLocationPermission = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     return status == "granted";
-    // if (Platform.OS === "android") {
-    //   const granted = await PermissionsAndroid.request(
-    //     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-    //     {
-    //       title: "Location Permission",
-    //       message: "We need access to your location",
-    //       buttonNeutral: "Ask Me Later",
-    //       buttonNegative: "Cancel",
-    //       buttonPositive: "OK",
-    //     }
-    //   );
-    //   return granted === PermissionsAndroid.RESULTS.GRANTED;
-    // } else {
-    //   return true;
-    // }
   };
 
   // Get current location
   const getCurrentLocation = async (): Promise<Location.LocationObject> => {
     return await Location.getCurrentPositionAsync({});
-    // return new Promise((resolve, reject) => {
-    //   Geolocation.getCurrentPosition(
-    //     (pos) => {
-    //       resolve(pos);
-    //     },
-    //     (error) => {
-    //       reject(new Error(error.message));
-    //     },
-    //     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    //   );
-    // });
   };
 
   if (!(await requestLocationPermission())) {
@@ -578,11 +548,6 @@ const HandleGetDailySportSug = async (
   _latitude: string,
   _longitude: string
 ): Promise<DailySportSug[]> => {
-  console.log({
-    userID: _userID,
-    longitude: _longitude,
-    latitude: _latitude,
-  });
   const data = await fetch(`${hostURL}/Users/GetDailySportsSuggestion`, {
     method: "POST",
     headers: {
@@ -643,7 +608,7 @@ export default function TabLayout() {
 
         // Get current location
         try {
-          region = await HandleGetLocal();
+          region = await HandleGetLocation();
           console.log("Complete get current location");
         } catch (error) {
           console.error("Failed to get current location: " + error);

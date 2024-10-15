@@ -1,8 +1,6 @@
 import { StyleSheet, View, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import ModalDropdown from "react-native-modal-dropdown";
-
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
 import { IndicatorsDisplayWidget_single } from "@/components/IndicatorsDisplayWidget_single";
@@ -16,14 +14,6 @@ import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 // - [ ] Switch to use region name to fetch weather data
 // - [V] Switch to use Redux for global state management
 // - [V] Move weatherDataList, region, currentTime to index.tsx
-
-// export interface State {
-//   user: User;
-//   weatherData: WeatherDataList;
-//   regions: Region[];
-//   isLoading: boolean;
-//   timeInterval: number;
-// }
 
 export default function HomeScreen() {
   return (
