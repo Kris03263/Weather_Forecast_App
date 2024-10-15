@@ -21,6 +21,9 @@ def getEarthDataFCM():
             resultData[i]["intensity"] = sorted(resultData[i]["intensity"], key=lambda x: int(x['AreaIntensity'][0]))
     
     return resultData
+def getEarthData2(lon,lat):
+    import random
+    return random.random()
 
 def getEarthData(lon,lat):
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]
