@@ -3,7 +3,7 @@ import sqlite3
 from .Models import UserDataResult,Habit,Sport,SportsSuggestion,HabitsSuggestion,DailySuggestion
 import dataHandler.weatherData
 from flask_cors import CORS
-import json
+import dataHandler.boroughData as b
 
 userControl_blueprint = Blueprint('userControl_blueprint', __name__)
 DATABASE = 'data.sqlite'
@@ -321,6 +321,9 @@ def getAllSportsOption():
     response = make_response(jsonify(result),200)
     return response
 
+@userControl_blueprint.route('/GetAllRegion', methods=['GET'])
+def getAllRegion():
+    return jsonify(b.GetBoroughCode())
 
 
     
