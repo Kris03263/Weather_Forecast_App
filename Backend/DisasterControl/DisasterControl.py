@@ -8,7 +8,6 @@ import json
 from flask_cors import CORS
 disasterControl_blueprint = Blueprint('disasterControl_blueprint', __name__)
 CORS(disasterControl_blueprint)
-connectClient = {}
 background_tasks = {}
 # 定義地震polling專用事件
 def check_and_broadcast_updates(socketio,sid, latitude, longitude):
@@ -46,10 +45,8 @@ def register_socketio_events(socketio):
             return
         if sid not in background_tasks and latitude is not None and longitude is not None:
             # 綁定經緯度到客戶端的 socket id
-            connectClient[request.sid] = (latitude, longitude)
-            join_room(sid)
             print(f'Location set for {sid}: ({latitude}, {longitude})')
-            emit('registration_success', {'message': 'Location registered successfully'},to=sid)
+            emit('registration_success', {'message': 'Location registered successfully'})
             background_task = socketio.start_background_task(check_and_broadcast_updates,socketio,sid,latitude,longitude)
             background_tasks[sid] = background_task
         else:
@@ -62,7 +59,4 @@ def register_socketio_events(socketio):
         if request.sid in background_tasks:
         # 清理背景任務（可以用其他方式來終止任務）
             del background_tasks[request.sid]
-        if request.sid in connectClient:
-            leave_room(request.sid)
-            del connectClient[request.sid]
             print(f'Client {request.sid} disconnected')
