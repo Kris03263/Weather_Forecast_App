@@ -1,27 +1,9 @@
 from datetime import datetime,timedelta
-from geopy.geocoders import Nominatim
 from .airData import getAirData
-import geopy.geocoders
-import requests,json,certifi,ssl,math
+from .methodPack import setLocate
+import requests,json,math,pytz
 
 # 經度、緯度、時間 lat,lon,time
-
-# 設定憑證
-ctx = ssl.create_default_context(cafile=certifi.where())
-geopy.geocoders.options.default_ssl_context = ctx
-
-# 實例化
-geolocator = Nominatim(scheme='http',user_agent='test')
-
-def setLocate(latitude,longitude):
-    # 進行反向地理編碼
-    location = geolocator.reverse((latitude, longitude))
-    nowCity = location.raw['address']['city']
-    nowdistrict = location.raw['address']['suburb']
-    return {
-         "city":nowCity,
-         "district":nowdistrict
-    }
 
 def getTime(t): return (t - timedelta(minutes=90)).strftime("%Y-%m-%dT%H:%M:%S")# 取得符合取得資料格式的時間
 
@@ -96,6 +78,7 @@ def get12hData(lon,lat,cusloc):
         })# 體感溫度以最大與最小取平均值,降雨量無較遠資料
 
     return resultElement
+
 # 121.66248756678424121,25.06715187342581
 # 已知問題 
 # 1.一週天氣若於白天請求，無法求取當天白天資料 解決辦法：以現時之天氣取代
