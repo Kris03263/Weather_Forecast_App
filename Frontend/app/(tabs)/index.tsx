@@ -1,12 +1,5 @@
-import {
-  Image,
-  StyleSheet,
-  Platform,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, View, ScrollView } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
@@ -14,9 +7,29 @@ import { IndicatorsDisplayWidget_single } from "@/components/IndicatorsDisplayWi
 import { IndicatorsDisplayWidget_double } from "@/components/IndicatorsDisplayWidget_double";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 
+// TODO list:
+// - [V] Add weather data API
+// - [V] Add weather image
+// - [X] Fix muti-day weather forecast view (Cancel)
+// - [ ] Switch to use region name to fetch weather data
+// - [V] Switch to use Redux for global state management
+// - [V] Move weatherDataList, region, currentTime to index.tsx
+
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
+      {/* Gradiant */}
+      <LinearGradient
+        colors={["#10202b", "#305f80"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: "100%",
+        }}
+      ></LinearGradient>
+
       {/* Top Section */}
       <View style={styles.topSection}>
         <WeatherDisplay />
@@ -28,14 +41,16 @@ export default function HomeScreen() {
           <ForecastDisplayWidget />
 
           <View style={styles.row}>
-            <IndicatorsDisplayWidget_single type="humidity" />
-            <IndicatorsDisplayWidget_single type="rain-rate" />
+            <IndicatorsDisplayWidget_single type="wet" />
+            <IndicatorsDisplayWidget_single type="rainRate" />
           </View>
 
-          <IndicatorsDisplayWidget_double
-            type1="wind-speed"
-            type2="wind-direction"
-          />
+          <View style={styles.row}>
+            <IndicatorsDisplayWidget_double
+              type1="windSpeed"
+              type2="windDirection"
+            />
+          </View>
 
           <View style={styles.row}>
             <SuggestionDisplayWidget type="dressing" />
@@ -62,9 +77,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#10202b",
   },
   topSection: {
+    marginTop: 30,
     height: "30%",
     justifyContent: "center",
     position: "relative",
+    padding: "3%",
   },
   bodySection: {
     backgroundColor: "#FFFFFF01",
@@ -77,5 +94,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 20,
+  },
+  dropdown: {
+    marginLeft: 20,
+    width: 150,
+    height: 32,
+    fontSize: 16,
+    padding: 4,
+    color: "white",
+    backgroundColor: "none",
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "white",
+  },
+  dropdownBox: {
+    marginTop: 10,
+    marginLeft: 20,
+    width: 150,
+    height: "auto",
+    color: "none",
+    backgroundColor: "none",
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "white",
+  },
+  dropdownText: {
+    padding: 4,
+    fontSize: 16,
+    color: "white",
+    backgroundColor: "none",
+  },
+  dropdownHightlight: {
+    backgroundColor: "pink",
+    fontWeight: "bold",
   },
 });

@@ -1,21 +1,67 @@
+import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import { useSelector } from "react-redux";
+
 import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Text,
-  ScrollView,
-  Image,
-} from "react-native";
+  Selecter,
+  WeatherDataList,
+  indicatorsDictionary,
+} from "@/app/(tabs)/_layout";
+
+import { SvgImage } from "./Svg";
+import { DynamicImage } from "./DynamicImage";
 
 export function WeatherDisplay() {
+  const weatherDataList = useSelector(
+    (state: { weatherData: WeatherDataList }) => state.weatherData
+  );
+  const selecter = useSelector(
+    (state: { selecter: Selecter }) => state.selecter
+  );
+  const temp =
+    indicatorsDictionary["temp" as keyof typeof indicatorsDictionary];
+  const bodyTemp =
+    indicatorsDictionary["bodyTemp" as keyof typeof indicatorsDictionary];
+
+  if (Object.keys(weatherDataList).length === 0) {
+    return (
+      <View style={styles.layout}>
+        <View style={styles.cityNameDisplay}>
+          <Text style={styles.cityName}>--, --</Text>
+        </View>
+        <View style={styles.temperatureDisplay}>
+          <Text style={styles.temperature}>--°C</Text>
+        </View>
+        <Text style={styles.body_temperature}>| --°C </Text>
+      </View>
+    );
+  }
+  temp.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.temp ?? "";
+  bodyTemp.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.bodyTemp ?? "";
+
   return (
     <View style={styles.layout}>
-      <Text style={styles.cityName}>TAIPEI, TAIWAN</Text>
-      <View style={styles.temperatureDisplay}>
-        <Text style={styles.temperature}>20°C</Text>
-        <Text style={styles.body_temperature}>| 20°C </Text>
+      <View style={styles.cityNameDisplay}>
+        <Text style={styles.cityName}>{selecter.region} </Text>
+        <TouchableOpacity>
+          <SvgImage style={{ width: 25, height: 25 }} name="list" />
+        </TouchableOpacity>
       </View>
-      <View style={styles.weatherIcon} />
+      <View style={styles.temperatureDisplay}>
+        <Text style={styles.temperature}>{temp.value + temp.unit}</Text>
+        <DynamicImage
+          style={styles.weatherIcon}
+          path={
+            weatherDataList[selecter.region][0][0].time > "12:00"
+              ? `day/${weatherDataList[selecter.region][0][0].weatherCode}.png`
+              : `night/${
+                  weatherDataList[selecter.region][0][0].weatherCode
+                }.png`
+          }
+        />
+      </View>
+      <Text style={styles.body_temperature}>
+        {"| " + bodyTemp.value + bodyTemp.unit}
+      </Text>
     </View>
   );
 }
@@ -32,35 +78,37 @@ const styles = StyleSheet.create({
   },
   cityName: {
     color: "white",
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
     textAlign: "left",
   },
+  cityNameDisplay: {
+    alignItems: "center",
+    minWidth: "100%",
+    flexDirection: "row",
+  },
   temperatureDisplay: {
+    gap: 10,
+    height: 75,
     flexDirection: "row",
     justifyContent: "flex-start",
-    alignItems: "baseline",
+    alignItems: "flex-end",
   },
   temperature: {
     color: "white",
-    fontSize: 48,
+    fontSize: 64,
     fontWeight: "bold",
     textAlign: "left",
   },
   body_temperature: {
+    marginBottom: 2,
     color: "white",
-    marginLeft: 10,
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "left",
   },
   weatherIcon: {
-    position: "absolute",
-    right: -50,
-    top: "50%",
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: "#FFE27D",
+    height: "100%",
+    marginRight: 10,
   },
 });

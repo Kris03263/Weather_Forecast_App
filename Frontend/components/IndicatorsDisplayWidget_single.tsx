@@ -1,14 +1,14 @@
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Text,
-  ScrollView,
-  Image,
-} from "react-native";
+import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
+
+import {
+  WeatherDataList,
+  Selecter,
+  indicatorsDictionary,
+} from "@/app/(tabs)/_layout";
 
 interface IndicatorsDisplayWidgetProps_single {
   type: string;
@@ -17,21 +17,42 @@ interface IndicatorsDisplayWidgetProps_single {
 export function IndicatorsDisplayWidget_single({
   type,
 }: IndicatorsDisplayWidgetProps_single) {
-  const title = type
-    .split("-")
-    .map((str) => str.charAt(0).toUpperCase() + str.slice(1))
-    .join(" ");
-  const value = "50%"; // require API
+  const weatherDataList = useSelector(
+    (state: { weatherData: WeatherDataList }) => state.weatherData
+  );
+  const selecter = useSelector(
+    (state: { selecter: Selecter }) => state.selecter
+  );
+  const indicator =
+    indicatorsDictionary[type as keyof typeof indicatorsDictionary];
+
+  if (Object.keys(weatherDataList).length === 0) {
+    return (
+      <TouchableOpacity style={{ flex: 1, width: "100%" }}>
+        <Widget style={styles.customWidgetStyle}>
+          <View style={styles.layout}>
+            <View style={styles.titleDisplay}>
+              <SvgImage style={styles.svgImage} name={type} />
+              <Text style={styles.title}>{indicator.title}</Text>
+            </View>
+            <Text style={styles.value}>--</Text>
+          </View>
+        </Widget>
+      </TouchableOpacity>
+    );
+  }
+
+  indicator.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.[type] ?? ""; // region - timeInterval - index
 
   return (
     <TouchableOpacity style={{ flex: 1, width: "100%" }}>
       <Widget style={styles.customWidgetStyle}>
         <View style={styles.layout}>
           <View style={styles.titleDisplay}>
-            <SvgImage style={{ width: 30, height: 30 }} name={type} />
-            <Text style={styles.title}>{title}</Text>
+            <SvgImage style={styles.svgImage} name={type} />
+            <Text style={styles.title}>{indicator.title}</Text>
           </View>
-          <Text style={styles.value}>{value}</Text>
+          <Text style={styles.value}>{indicator.value + indicator.unit}</Text>
         </View>
       </Widget>
     </TouchableOpacity>
@@ -58,13 +79,17 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "white",
-    fontSize: 24,
+    fontSize: 20,
     textAlign: "left",
   },
   value: {
     color: "white",
-    fontSize: 48,
+    fontSize: 32,
     fontWeight: "bold",
     textAlign: "left",
+  },
+  svgImage: {
+    width: 30,
+    height: 30,
   },
 });

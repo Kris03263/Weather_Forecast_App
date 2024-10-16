@@ -19,7 +19,7 @@ def url(ft,nowCity,nowdistrict,nowTime):
 
 def get3hData(lon,lat,cusloc):
     loc = cusloc if cusloc else setLocate(lat,lon)# 引入地理編碼
-    offsetTime = getTime(datetime.now())# 修正時間
+    offsetTime = getTime(datetime.now(pytz.timezone('Asia/Taipei')))# 修正時間
     weatherData = requests.get(url('3h',loc["city"],loc["district"],offsetTime)).json()["records"]["locations"][0]["location"][0]["weatherElement"]
     resultElement = [] # 初始化陣列
     noData = 1 if datetime.strptime(weatherData[0]["time"][0]["startTime"],"%Y-%m-%d %H:%M:%S").hour%6!=0 else 0# 判斷是否處於降雨率無資料的情況
@@ -49,16 +49,14 @@ def get3hData(lon,lat,cusloc):
 
 def get12hData(lon,lat,cusloc):
     loc = cusloc if cusloc else setLocate(lat,lon)# 引入地理編碼
-    offsetTime = getTime(datetime.now())# 修正時間
+    offsetTime = getTime(datetime.now(pytz.timezone('Asia/Taipei')))# 修正時間
     weatherData = requests.get(url('12h',loc["city"],loc["district"],offsetTime)).json()["records"]["locations"][0]["location"][0]["weatherElement"]
     resultElement = []# 初始化陣列
     dayOffset = 0 if datetime.strptime(weatherData[0]["time"][0]["startTime"],"%Y-%m-%d %H:%M:%S").hour < 18 else 1#調整數據為白天
     if dayOffset : resultElement.append(get3hData(lon,lat,cusloc)[0])
-    lastRainRate = ""
     
     for time in range(0,len(weatherData[0]["time"])-dayOffset,2):
         rainRateDataNow = weatherData[0]["time"][time+dayOffset]["elementValue"][0]["value"]
-        if(rainRateDataNow != " "):lastRainRate = rainRateDataNow
         resultElement.append({
                 "weatherText":   weatherData[5]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "weatherCode":   weatherData[5]["time"][time+dayOffset]["elementValue"][1]["value"],
@@ -66,7 +64,7 @@ def get12hData(lon,lat,cusloc):
                 "temp":          weatherData[1]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "wet":           weatherData[2]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "weatherDes":    weatherData[6]["time"][time+dayOffset]["elementValue"][0]["value"],
-                "rainRate":      lastRainRate,
+                "rainRate":      rainRateDataNow if rainRateDataNow!=" " else "尚無資料",
                 "windSpeed":     weatherData[4]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "windDirection": weatherData[8]["time"][time+dayOffset]["elementValue"][0]["value"],
                 "time":          weatherData[0]["time"][time+dayOffset]["startTime"],

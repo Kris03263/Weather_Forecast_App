@@ -3,125 +3,80 @@ import {
   View,
   TouchableOpacity,
   Text,
-  ScrollView,
-  Image,
+  FlatList,
 } from "react-native";
+import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
-import { useEffect, useState } from "react";
+import { DynamicImage } from "@/components/DynamicImage";
+
+import { WeatherDataList, Selecter } from "@/app/(tabs)/_layout";
 
 export function ForecastDisplayWidget() {
-  const [region, setRegion] = useState([
-    { id: 0, name: "土城區, 新北市" },
-    { id: 1, name: "大安區, 台北市" },
-  ]);
-  const [timeInterval_type, setTimeInterval] = useState(0);
-  const [currentTime, setCurrentTime] = useState("");
-
-  const GetCurrentTime = () => {
-    const date = new Date().toLocaleDateString();
-    setCurrentTime(date);
-  };
-
-  // 每次页面加载时更新时间
-  useEffect(() => {
-    setRegion([
-      { id: 0, name: "土城區, 新北市" },
-      { id: 1, name: "大安區, 台北市" },
-    ]);
-    GetCurrentTime();
-  }, []);
-
-  const HandleAddRegion = (name: string) => {
-    // Check if region is empty
-    name = name ? name : "{district}, {region}";
-
-    // Add new region
-    setRegion([...region, { id: region.length, name: name }]);
-  };
-
-  const HandleSetTimeInterval = (type: number) => {
-    // Set time interval type
-    setTimeInterval(type);
-  };
-
-  return (
-    <Widget style={styles.customWidgetStyle}>
-      <View style={styles.titleDisplay}>
-        <SvgImage style={{ width: 30, height: 30 }} name="weather" />
-        <Text style={styles.title}>Forecast</Text>
-      </View>
-      {region.map((region, index) => (
-        <Region
-          key={region.id}
-          name={region.name}
-          date={currentTime}
-          timeInterval_type={timeInterval_type}
-        ></Region>
-      ))}
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => HandleAddRegion("")}
-      >
-        <SvgImage style={{ width: 40, height: 40 }} name="plus" />
-      </TouchableOpacity>
-    </Widget>
+  const weatherDataList = useSelector(
+    (state: { weatherData: WeatherDataList }) => state.weatherData
   );
-}
+  const selecter = useSelector(
+    (state: { selecter: Selecter }) => state.selecter
+  );
 
-interface RegionProps {
-  key: number;
-  name: string;
-  date: string;
-  timeInterval_type?: number; // 0 -> 3h | 1 -> 1D
-}
-
-export function Region({
-  key,
-  name,
-  date,
-  timeInterval_type = 0,
-}: RegionProps) {
-  const timeInterval_map = [
-    [
-      "00:00",
-      "03:00",
-      "06:00",
-      "09:00",
-      "12:00",
-      "15:00",
-      "18:00",
-      "21:00",
-      "24:00",
-    ],
-    ["Sun.", "Mon.", "Tue.", "Wed.", "Thr.", "Fri.", "Sat."],
-  ];
+  if (Object.keys(weatherDataList).length === 0) {
+    return (
+      <Widget style={styles.customWidgetStyle}>
+        <View style={styles.titleDisplay}>
+          <SvgImage style={{ width: 30, height: 30 }} name="weather" />
+          <Text style={styles.title}>天氣預報</Text>
+        </View>
+        <Text style={styles.subTitle}>暫無資料</Text>
+      </Widget>
+    );
+  }
 
   return (
-    <View style={styles.cityView}>
-      <Text style={styles.subTitle}>
-        {name} ({date})
-      </Text>
-      <ScrollView horizontal style={styles.weatherScroll}>
-        {timeInterval_map[timeInterval_type].map((time, index) => (
-          <TouchableOpacity key={index} style={styles.weatherCard}>
-            <Image
-              // source={require("./cloud.png")} // require weather image
-              style={styles.weatherIcon}
-            />
-            <Text style={styles.weatherTime}>{time}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
+    <TouchableOpacity>
+      <Widget style={styles.customWidgetStyle}>
+        <View style={styles.titleDisplay}>
+          <SvgImage style={{ width: 30, height: 30 }} name="weather" />
+          <Text style={styles.title}>天氣預報</Text>
+        </View>
+
+        <View style={styles.cityView}>
+          <FlatList
+            horizontal
+            style={{ width: "100%" }}
+            data={weatherDataList[selecter.region][0]}
+            renderItem={({ item }) => (
+              <View style={styles.weatherCard}>
+                <Text style={styles.weatherTime}>
+                  {item.time.split(" ")[1].split(":")[0] + "時"}
+                </Text>
+                <DynamicImage
+                  style={styles.weatherIcon}
+                  path={
+                    selecter.timeInterval === 1
+                      ? `day/${item.weatherCode}.png`
+                      : item.time > "12:00"
+                      ? `day/${item.weatherCode}.png`
+                      : `night/${item.weatherCode}.png`
+                  }
+                />
+                <Text style={styles.weatherTemperature}>
+                  {item.temp + "°C"}
+                </Text>
+              </View>
+            )}
+            keyExtractor={(item) => item.time}
+          />
+        </View>
+      </Widget>
+    </TouchableOpacity>
   );
 }
 
 // Default Style
 const styles = StyleSheet.create({
   customWidgetStyle: {
-    minHeight: "auto",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -129,6 +84,8 @@ const styles = StyleSheet.create({
     width: "100%",
     overflow: "hidden",
     alignItems: "center",
+    marginBottom: 10,
+    gap: 10,
   },
   titleDisplay: {
     width: "100%",
@@ -139,13 +96,12 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "white",
-    fontSize: 24,
+    fontSize: 20,
     textAlign: "left",
   },
   subTitle: {
     color: "white",
     fontSize: 16,
-    marginBottom: 10,
     fontWeight: "bold",
   },
   weatherScroll: {
@@ -153,33 +109,30 @@ const styles = StyleSheet.create({
   },
   weatherCard: {
     width: 60,
-    height: 80,
-    backgroundColor: "#EAEAEA30",
-    justifyContent: "center",
+    backgroundColor: "none",
+    justifyContent: "space-between",
     alignItems: "center",
     borderRadius: 8,
-    marginHorizontal: 5,
   },
   weatherIcon: {
-    width: 40,
-    height: 40,
+    width: "80%",
     marginBottom: 5,
   },
   weatherTime: {
     color: "white",
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: "bold",
   },
-  addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#FFFFFF00",
-    justifyContent: "center",
-    alignItems: "center",
+  weatherTemperature: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
-  addButtonText: {
-    fontSize: 24,
-    color: "#000000",
+  row: {
+    minWidth: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20,
   },
 });

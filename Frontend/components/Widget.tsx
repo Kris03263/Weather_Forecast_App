@@ -15,10 +15,11 @@ const styles = StyleSheet.create({
   emptyWidget: {
     flex: 1,
     width: "100%",
-    minHeight: 200,
-    backgroundColor: "#FFFFFF20",
+    paddingVertical: 20,
+    paddingHorizontal: "5%",
+    backgroundColor: "#FFFFFF0A",
     borderRadius: 15,
-    padding: 20,
-    gap: 20,
+    padding: 10,
+    gap: 10,
   },
 });
