@@ -6,7 +6,6 @@ url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorizati
 def getEarthDataFCM():
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]
     resultData = []
-
     for i in range(len(earthquakeData)):
         intensity = []
         shakeArea = earthquakeData[i]["Intensity"]["ShakingArea"]
@@ -25,7 +24,6 @@ def getEarthDataFCM():
 def getEarthData(lon,lat):
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]
     resultData = []
-
     for i in range(len(earthquakeData)):
         shakeLon = earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["EpicenterLongitude"]
         shakeLat = earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["EpicenterLatitude"]
