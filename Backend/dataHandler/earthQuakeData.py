@@ -2,7 +2,7 @@ import requests
 from .methodPack import haversine,setLocate
 
 url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorization=CWA-3D385D45-EFD5-4BD3-9677-9100AD39A4A2&limit=2"
-
+testData = []
 def getEarthDataFCM():
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]
     resultData = []
@@ -22,8 +22,7 @@ def getEarthDataFCM():
         })
     return resultData
 def getEarthData2(lon,lat):
-    import random
-    return random.random()
+    return testData
 
 def getEarthData(lon,lat):
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]

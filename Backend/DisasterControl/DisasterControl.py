@@ -1,14 +1,22 @@
 from flask import Blueprint,request,jsonify
 from dataHandler.earthQuakeData import getEarthData2
+import dataHandler.earthQuakeData
 import dataHandler.weatherData
 from flask_socketio import emit,join_room,leave_room
 from threading import Event
-import time
+import random
 import json
 from flask_cors import CORS
 disasterControl_blueprint = Blueprint('disasterControl_blueprint', __name__)
 CORS(disasterControl_blueprint)
 background_tasks = {}
+@disasterControl_blueprint.route('/TestEarthQuakeSimulation',methods=['GET','POST'])
+def testEarthQuakeSimulation():
+    if request.method == 'GET':
+        return jsonify(getEarthData2('1','1'))
+    if request.method == 'POST':
+        dataHandler.earthQuakeData.testData.append(random.random())
+        return "update successful"
 # 定義地震polling專用事件
 def check_and_broadcast_updates(socketio,sid, latitude, longitude):
     """
@@ -16,13 +24,16 @@ def check_and_broadcast_updates(socketio,sid, latitude, longitude):
     """
     last_earthquake_data = None
     while True:
-        socketio.sleep(3)  # 每秒輪詢一次
+        socketio.sleep(1)  # 每秒輪詢一次
         # 獲取每個客戶端對應經緯度的最新地震資料
         earthquake_data = getEarthData2(longitude,latitude)
+        if last_earthquake_data is None:
+            last_earthquake_data = earthquake_data[len(earthquake_data)-1]
+            continue
         # 如果地震資料有變化，推送給該用戶
-        if earthquake_data and earthquake_data != last_earthquake_data:
-            last_earthquake_data = earthquake_data
-            socketio.emit('earthquake_update', str(earthquake_data) + sid,to=sid)
+        if earthquake_data and earthquake_data[len(earthquake_data)-1] != last_earthquake_data:
+            last_earthquake_data = earthquake_data[len(earthquake_data)-1]
+            socketio.emit('earthquake_update', str(last_earthquake_data),to=sid)
     
 def register_socketio_events(socketio):
     global counter
