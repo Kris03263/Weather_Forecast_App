@@ -4,7 +4,7 @@ import { useState,useRef,useEffect } from "react";
 interface modalVisibleCrontrollProps {
     isModalShow: boolean;
     content: React.ReactNode;
-    onClose: () => void;  
+    onClose: () => void; 
 }
 
 export function SlideModal({isModalShow,content,onClose}: modalVisibleCrontrollProps){
@@ -60,11 +60,11 @@ export function SlideModal({isModalShow,content,onClose}: modalVisibleCrontrollP
           }}>
           <View style={styles.centeredView}>
             <Animated.View
-              style={[styles.modalView, { transform: [{ translateY: pan.y }] }]}
+              style={[styles.modalView,{ transform: [{ translateY: pan.y }] }]}
               {...panResponder.panHandlers}
             >
               <View style={styles.modalHandle} />
-              <ScrollView>
+              <ScrollView contentContainerStyle = {styles.scrollViewContent}>
                 {content}
               </ScrollView>      
               <TouchableOpacity
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
       modalView: {
         width: '100%',
         height: '90%', 
-        backgroundColor: 'white',
+        backgroundColor: '#21262c',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         padding: 20,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
       },
       modalButton: {
         backgroundColor: '#2196F3',
-        borderRadius: 20,
+        borderRadius: 10,
         padding: 10,
         elevation: 2,
       },
@@ -130,4 +130,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
       },
+      scrollViewContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 });

@@ -1,8 +1,11 @@
+import React from "react";
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
+import { SlideModal } from "@/components/slideModal";
 
 import {
   WeatherDataList,
@@ -17,6 +20,12 @@ interface IndicatorsDisplayWidgetProps_single {
 export function IndicatorsDisplayWidget_single({
   type,
 }: IndicatorsDisplayWidgetProps_single) {
+
+  const [earthquakeModalVisible, setEarthquakeModalVisible] = useState(false);
+  const handleCoseModal = () =>{
+    setEarthquakeModalVisible(false);
+  }
+
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
@@ -45,7 +54,7 @@ export function IndicatorsDisplayWidget_single({
   indicator.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.[type] ?? ""; // region - timeInterval - index
 
   return (
-    <TouchableOpacity style={{ flex: 1, width: "100%" }}>
+    <TouchableOpacity style={{ flex: 1, width: "100%" }} onPress={() => setEarthquakeModalVisible(!earthquakeModalVisible)}>
       <Widget style={styles.customWidgetStyle}>
         <View style={styles.layout}>
           <View style={styles.titleDisplay}>
@@ -55,6 +64,11 @@ export function IndicatorsDisplayWidget_single({
           <Text style={styles.value}>{indicator.value + indicator.unit}</Text>
         </View>
       </Widget>
+      <SlideModal
+      isModalShow = {earthquakeModalVisible} 
+      onClose={handleCoseModal}
+      content = {<Text>here put content</Text>}
+      />
     </TouchableOpacity>
   );
 }
