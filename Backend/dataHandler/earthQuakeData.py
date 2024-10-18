@@ -6,19 +6,22 @@ testData = []
 def getEarthDataFCM():
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]
     resultData = []
-
+    nowCity = "新北市"
     for i in range(len(earthquakeData)):
-        intensity = []
+        AreaIntensity = ""
         shakeArea = earthquakeData[i]["Intensity"]["ShakingArea"]
         for nowElement in shakeArea:
                 if not -nowElement["AreaDesc"].find("最"):
-                    del nowElement["EqStation"]
-                    intensity.append(nowElement)
-                intensity = sorted(intensity, key=lambda x: int(x['AreaIntensity'][0]))
+                    for name in nowElement["CountyName"].split('、'):
+                        if name == nowCity:AreaIntensity = nowElement["AreaIntensity"]
         resultData.append({
-            "color":     earthquakeData[i]["ReportColor"],
-            "content":   earthquakeData[i]["ReportContent"],
-            "intensity": intensity
+            "color":                earthquakeData[i]["ReportColor"],
+            "nowLocation":          nowCity,
+            "content":              earthquakeData[i]["ReportContent"],
+            "depth":                str(earthquakeData[i]["EarthquakeInfo"]["FocalDepth"]),
+            "location":             earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["Location"],
+            "magnitude":            str(earthquakeData[i]["EarthquakeInfo"]["EarthquakeMagnitude"]["MagnitudeValue"]),
+            "nowLocationIntensity": AreaIntensity
         })
     return resultData
 def getEarthData2(lon,lat):
@@ -43,16 +46,18 @@ def getEarthData(lon,lat):
             intensity = sorted(intensity, key=lambda x: int(x['AreaIntensity'][0]))
 
         resultData.append({
-            "color":     earthquakeData[i]["ReportColor"],
-            "content":   earthquakeData[i]["ReportContent"],
-            "reportImg": earthquakeData[i]["ReportImageURI"],
-            "shakeImg":  earthquakeData[i]["ShakemapImageURI"],
-            "time":      earthquakeData[i]["EarthquakeInfo"]["OriginTime"],
-            "depth":     str(earthquakeData[i]["EarthquakeInfo"]["FocalDepth"]),
-            "location":  earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["Location"],
-            "magnitude": str(earthquakeData[i]["EarthquakeInfo"]["EarthquakeMagnitude"]["MagnitudeValue"]),
-            "distance":  haversine(lat,lon,shakeLat,shakeLon),
-            "intensity": intensity,
-            "nowLocationAlert":AreaIntensity if AreaIntensity else "該地區未列入最大震度範圍"
+            "color":                earthquakeData[i]["ReportColor"],
+            "content":              earthquakeData[i]["ReportContent"],
+            "reportImg":            earthquakeData[i]["ReportImageURI"],
+            "shakeImg":             earthquakeData[i]["ShakemapImageURI"],
+            "time":                 earthquakeData[i]["EarthquakeInfo"]["OriginTime"],
+            "depth":                str(earthquakeData[i]["EarthquakeInfo"]["FocalDepth"]),
+            "location":             earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["Location"],
+            "magnitude":            str(earthquakeData[i]["EarthquakeInfo"]["EarthquakeMagnitude"]["MagnitudeValue"]),
+            "distance":             haversine(lat,lon,shakeLat,shakeLon),
+            "intensity":            intensity,
+            "nowLocationIntensity": AreaIntensity if AreaIntensity else "該地區未列入最大震度範圍"
         })
     return resultData
+
+print(getEarthDataFCM())
