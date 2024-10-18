@@ -44,7 +44,7 @@ def get3hData(lon,lat,cusloc):
             "aqi":      None,
             "pm2.5":    None
         })})
-
+    
     return resultElement
 
 def get12hData(lon,lat,cusloc):

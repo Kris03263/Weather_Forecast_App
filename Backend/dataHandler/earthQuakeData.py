@@ -24,13 +24,13 @@ def getEarthDataFCM():
             "nowLocationIntensity": AreaIntensity
         })
     return resultData
-def getEarthData2(lon,lat):
+def getEarthData2(lon,lat,city):
     return testData
 
-def getEarthData(lon,lat):
+def getEarthData(lon,lat,city):
     earthquakeData = requests.get(url,verify=False).json()["records"]["Earthquake"]
     resultData = []
-
+    _city = city
     for i in range(len(earthquakeData)):
         shakeLon = earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["EpicenterLongitude"]
         shakeLat = earthquakeData[i]["EarthquakeInfo"]["Epicenter"]["EpicenterLatitude"]
@@ -41,8 +41,10 @@ def getEarthData(lon,lat):
             if not -nowElement["AreaDesc"].find("最"):
                 del nowElement["EqStation"]
                 intensity.append(nowElement)
+                if _city is None:
+                    _city = setLocate(lat,lon)["city"]
                 for name in nowElement["CountyName"].split('、'):
-                    if name == setLocate(lat,lon)["city"]:AreaIntensity = nowElement["AreaIntensity"]
+                    if name == _city:AreaIntensity = nowElement["AreaIntensity"]
             intensity = sorted(intensity, key=lambda x: int(x['AreaIntensity'][0]))
 
         resultData.append({
@@ -60,4 +62,4 @@ def getEarthData(lon,lat):
         })
     return resultData
 
-print(getEarthDataFCM())
+#print(getEarthDataFCM())

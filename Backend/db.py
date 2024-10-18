@@ -24,6 +24,7 @@ sql_query1 = """CREATE TABLE IF NOT EXISTS users(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     account TEXT NOT NULL,
     password TEXT NOT NULL,
+    city TEXY,
     deleted INTEGER NOT NULL);"""
 
 sql_query2 = """CREATE TABLE IF NOT EXISTS sports(

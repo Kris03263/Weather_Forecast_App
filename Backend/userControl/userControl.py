@@ -20,12 +20,6 @@ def checkUserExits(id):
 #登入
 @userControl_blueprint.route('/Login',methods=['POST'])
 def login():
-    '''
-    {
-    "userAccount" : "test",
-    "password" : "test"
-    }
-    '''
     data = request.get_json()
     userAccount = data.get('userAccount')
     password = data.get('password')
@@ -67,12 +61,6 @@ def register():
         return jsonify(dt.to_dict())
         
     if request.method == 'POST':
-        '''
-        {
-        "userAccount" : "test",
-        "password" : "test"
-        }
-        '''
         data = request.get_json()
         userAccount = data.get('userAccount')
         password = data.get('password')
@@ -98,11 +86,6 @@ def register():
             dt = UserDataResult("-1","","","Register Error")
             return jsonify(dt.to_dict())
     if request.method == 'DELETE':
-        '''
-        {
-        "userID" : "userid"
-        }
-        '''
         data = request.get_json()
         id = data.get('userID')
         if id == None:
@@ -147,12 +130,6 @@ def habits():
         response = make_response(jsonify(habits),200)
         return response
     if request.method == "POST":
-        '''
-        {
-        "userID : "id"
-        "habitIDs" : "habitsIDList"
-        }
-        '''
         data = request.get_json();
         userID = data.get('userID')
         habbitIdList = data.get('habitIDs')
@@ -209,12 +186,6 @@ def sports():
         response = make_response(jsonify(sports),200)
         return response
     if request.method == "POST":
-        '''
-        {
-        "userID : "id"
-        "sportIDs" : "sportsIDList"
-        }
-        '''
         data = request.get_json();
         userID = data.get('userID')
         if userID == None:
