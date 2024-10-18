@@ -10,52 +10,52 @@ import {
 import { SvgImage } from "./Svg";
 import { DynamicImage } from "./DynamicImage";
 
-export function WeatherDisplay() {
+interface WeatherDisplayProps {
+  isSecendLayout: boolean;
+}
+
+export function WeatherDisplay({ isSecendLayout }: WeatherDisplayProps) {
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
   const selecter = useSelector(
     (state: { selecter: Selecter }) => state.selecter
   );
+  const weatherData = weatherDataList?.[selecter.region]?.[0]?.[0] ?? null;
   const temp =
     indicatorsDictionary["temp" as keyof typeof indicatorsDictionary];
+  temp.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.temp ?? "--";
   const bodyTemp =
     indicatorsDictionary["bodyTemp" as keyof typeof indicatorsDictionary];
+  bodyTemp.value =
+    weatherDataList?.[selecter.region]?.[0]?.[0]?.bodyTemp ?? "--";
 
-  if (Object.keys(weatherDataList).length === 0) {
+  if (isSecendLayout) {
     return (
-      <View style={styles.layout}>
-        <View style={styles.cityNameDisplay}>
-          <Text style={styles.cityName}>--, --</Text>
+      <View style={styles2.layout}>
+        <View style={styles2.temperatureDisplay}>
+          <Text style={styles2.temperature}>{temp.value + temp.unit}</Text>
+          <Text style={styles2.body_temperature}>
+            {"| " + bodyTemp.value + bodyTemp.unit}
+          </Text>
         </View>
-        <View style={styles.temperatureDisplay}>
-          <Text style={styles.temperature}>--°C</Text>
-        </View>
-        <Text style={styles.body_temperature}>| --°C </Text>
       </View>
     );
   }
-  temp.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.temp ?? "";
-  bodyTemp.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.bodyTemp ?? "";
 
   return (
     <View style={styles.layout}>
-      <View style={styles.cityNameDisplay}>
-        <Text style={styles.cityName}>{selecter.region} </Text>
-        <TouchableOpacity>
-          <SvgImage style={{ width: 25, height: 25 }} name="list" />
-        </TouchableOpacity>
-      </View>
       <View style={styles.temperatureDisplay}>
         <Text style={styles.temperature}>{temp.value + temp.unit}</Text>
         <DynamicImage
           style={styles.weatherIcon}
           path={
-            weatherDataList[selecter.region][0][0].time > "12:00"
-              ? `day/${weatherDataList[selecter.region][0][0].weatherCode}.png`
-              : `night/${
-                  weatherDataList[selecter.region][0][0].weatherCode
-                }.png`
+            !weatherData
+              ? ""
+              : weatherData.time.split(" ")[1] < "18:00:00" &&
+                weatherData.time.split(" ")[1] >= "06:00:00"
+              ? `day/${weatherData.weatherCode}.png`
+              : `night/${weatherData.weatherCode}.png`
           }
         />
       </View>
@@ -76,17 +76,6 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 10,
   },
-  cityName: {
-    color: "white",
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "left",
-  },
-  cityNameDisplay: {
-    alignItems: "center",
-    minWidth: "100%",
-    flexDirection: "row",
-  },
   temperatureDisplay: {
     gap: 10,
     height: 75,
@@ -97,6 +86,39 @@ const styles = StyleSheet.create({
   temperature: {
     color: "white",
     fontSize: 64,
+    fontWeight: "bold",
+    textAlign: "left",
+  },
+  body_temperature: {
+    marginBottom: 2,
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "left",
+  },
+  weatherIcon: {
+    height: "100%",
+    marginRight: 10,
+  },
+});
+
+const styles2 = StyleSheet.create({
+  layout: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    gap: 10,
+  },
+  temperatureDisplay: {
+    gap: 10,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "flex-end",
+  },
+  temperature: {
+    color: "white",
+    fontSize: 30,
     fontWeight: "bold",
     textAlign: "left",
   },

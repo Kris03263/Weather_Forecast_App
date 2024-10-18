@@ -13,10 +13,14 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { SvgImage } from "../../components/Svg";
 
+import { BackgroundGradient } from "../../constants/Colors";
+
 import {
   User,
   Sport,
   Habit,
+  Selecter,
+  WeatherDataList,
   userSetSports,
   userSetHabits,
   userLogin,
@@ -26,6 +30,7 @@ import {
 } from "./_layout";
 
 import store from "../../redux/store";
+import { Widget } from "@/components/Widget";
 
 interface RadioButtonProps {
   label: string;
@@ -59,6 +64,13 @@ export default function SettingsScreen() {
     (state: { userSettings: { sport: Sport[]; habit: Habit[] } }) =>
       state.userSettings
   );
+  const selecter = useSelector(
+    (state: { selecter: Selecter }) => state.selecter
+  );
+  const weatherDataList = useSelector(
+    (state: { weatherData: WeatherDataList }) => state.weatherData
+  );
+  const weatherData = weatherDataList?.[selecter.region]?.[0]?.[0] ?? null;
 
   // Temp data
   const [account, setAccount] = useState("");
@@ -100,32 +112,43 @@ export default function SettingsScreen() {
 
   if (user.id && user.id !== "-1") {
     return (
-      <Provider store={store}>
-        <View style={styles.container}>
-          <LinearGradient
-            colors={["#10202b", "#305f80"]}
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: 0,
-              height: "100%",
-            }}
-          ></LinearGradient>
+      <View style={styles.container}>
+        <LinearGradient
+          colors={
+            !weatherData
+              ? ["#333333", "#333333"]
+              : weatherData.time.split(" ")[1] < "18:00:00" &&
+                weatherData.time.split(" ")[1] >= "06:00:00"
+              ? BackgroundGradient.day[
+                  weatherData.weatherCode as keyof typeof BackgroundGradient.day
+                ]
+              : BackgroundGradient.night[
+                  weatherData.weatherCode as keyof typeof BackgroundGradient.night
+                ]
+          }
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 0,
+            height: "100%",
+          }}
+        ></LinearGradient>
 
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.headerText}>設定</Text>
-            <View>
-              <TouchableOpacity
-                style={styles.avatar}
-                onPress={() => setUserInfoModalVisible(true)}
-              ></TouchableOpacity>
-            </View>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerText}>設定</Text>
+          <View>
+            <TouchableOpacity
+              style={styles.avatar}
+              onPress={() => setUserInfoModalVisible(true)}
+            ></TouchableOpacity>
           </View>
+        </View>
 
-          {/* 天氣偏好區塊 */}
-          <View style={styles.box}>
+        {/* 天氣偏好區塊 */}
+        <View style={styles.body}>
+          <Widget>
             <Text style={styles.boxTitle}>天氣偏好</Text>
             <View style={styles.boxInputLayout}>
               <Text style={styles.inputLabel}>溫度偏好:</Text>
@@ -135,187 +158,196 @@ export default function SettingsScreen() {
               <Text style={styles.inputLabel}>濕度偏好:</Text>
               <TextInput style={styles.boxInput} placeholder="輸入濕度" />
             </View>
-          </View>
+          </Widget>
+        </View>
 
-          {/* 活動偏好區塊 */}
-          <View style={styles.box}>
-            <Text style={styles.boxTitle}>活動偏好</Text>
-            <View style={styles.boxInputLayout}>
-              <Text style={styles.inputLabel}>運動偏好:</Text>
-              <TouchableOpacity
-                style={styles.boxButton}
-                onPress={() => setSportModalVisible(true)}
-              >
-                <Text style={styles.buttonText}>選擇運動</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.boxInputLayout}>
-              <Text style={styles.inputLabel}>興趣偏好:</Text>
-              <TouchableOpacity
-                style={styles.boxButton}
-                onPress={() => setHabitModalVisible(true)}
-              >
-                <Text style={styles.buttonText}>選擇嗜好</Text>
-              </TouchableOpacity>
-            </View>
+        {/* 活動偏好區塊 */}
+        <Widget>
+          <Text style={styles.boxTitle}>活動偏好</Text>
+          <View style={styles.boxInputLayout}>
+            <Text style={styles.inputLabel}>運動偏好:</Text>
+            <TouchableOpacity
+              style={styles.boxButton}
+              onPress={() => setSportModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>選擇運動</Text>
+            </TouchableOpacity>
           </View>
+          <View style={styles.boxInputLayout}>
+            <Text style={styles.inputLabel}>興趣偏好:</Text>
+            <TouchableOpacity
+              style={styles.boxButton}
+              onPress={() => setHabitModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>選擇嗜好</Text>
+            </TouchableOpacity>
+          </View>
+        </Widget>
 
-          {/*選擇運動 Modal*/}
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={sportModalVisible}
-            onRequestClose={() => {
-              setSportModalVisible(!sportModalVisible);
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalHeaderText}>選擇運動</Text>
+        {/*選擇運動 Modal*/}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={sportModalVisible}
+          onRequestClose={() => {
+            setSportModalVisible(!sportModalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>選擇運動</Text>
+              </View>
+              <View style={styles.modalBody}>
+                <View style={styles.radioGroup}>
+                  {[
+                    "籃球",
+                    "羽球",
+                    "排球",
+                    "游泳",
+                    "公路車",
+                    "慢跑",
+                    "桌球",
+                  ].map((option, index) => (
+                    <RadioButton
+                      key={index}
+                      label={option}
+                      selected={sport.includes(index + 1)}
+                      onPress={() => toggleOption(index + 1, setSport)}
+                    />
+                  ))}
                 </View>
-                <View style={styles.modalBody}>
-                  <View style={styles.radioGroup}>
-                    {[
-                      "籃球",
-                      "羽球",
-                      "排球",
-                      "游泳",
-                      "公路車",
-                      "慢跑",
-                      "桌球",
-                    ].map((option, index) => (
+              </View>
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={async () => {
+                    await userSetSports(sport);
+                    setSportModalVisible(!sportModalVisible);
+                  }}
+                >
+                  <Text style={styles.buttonText}>儲存&關閉</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/*選擇嗜好 Modal*/}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={habitModalVisible}
+          onRequestClose={() => {
+            setHabitModalVisible(!habitModalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>選擇嗜好</Text>
+              </View>
+              <View style={styles.modalBody}>
+                <View style={styles.radioGroup}>
+                  {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
+                    (option, index) => (
                       <RadioButton
                         key={index}
                         label={option}
-                        selected={sport.includes(index + 1)}
-                        onPress={() => toggleOption(index + 1, setSport)}
+                        selected={habit.includes(index + 1)}
+                        onPress={() => toggleOption(index + 1, setHabit)}
                       />
-                    ))}
-                  </View>
-                </View>
-                <View style={styles.modalFooter}>
-                  <TouchableOpacity
-                    style={styles.modalButton}
-                    onPress={async () => {
-                      await userSetSports(sport);
-                      setSportModalVisible(!sportModalVisible);
-                    }}
-                  >
-                    <Text style={styles.buttonText}>儲存&關閉</Text>
-                  </TouchableOpacity>
+                    )
+                  )}
                 </View>
               </View>
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={async () => {
+                    await userSetHabits(habit);
+                    setHabitModalVisible(!habitModalVisible);
+                  }}
+                >
+                  <Text style={styles.buttonText}>儲存&關閉</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </Modal>
+          </View>
+        </Modal>
 
-          {/*選擇嗜好 Modal*/}
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={habitModalVisible}
-            onRequestClose={() => {
-              setHabitModalVisible(!habitModalVisible);
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalHeaderText}>選擇嗜好</Text>
+        {/*使用者顯示 Modal*/}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={userInfoModalVisible}
+          onRequestClose={() => {
+            setUserInfoModalVisible(!userInfoModalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderText}>使用者</Text>
+              </View>
+              <View style={styles.modalBody}>
+                <View style={styles.modalInputLayout}>
+                  <Text style={styles.inputLabel}>使用者名稱:</Text>
+                  <Text style={styles.inputLabel}>{user.account}</Text>
                 </View>
-                <View style={styles.modalBody}>
-                  <View style={styles.radioGroup}>
-                    {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
-                      (option, index) => (
-                        <RadioButton
-                          key={index}
-                          label={option}
-                          selected={habit.includes(index + 1)}
-                          onPress={() => toggleOption(index + 1, setHabit)}
-                        />
-                      )
-                    )}
-                  </View>
-                </View>
-                <View style={styles.modalFooter}>
-                  <TouchableOpacity
-                    style={styles.modalButton}
-                    onPress={async () => {
-                      await userSetHabits(habit);
-                      setHabitModalVisible(!habitModalVisible);
-                    }}
-                  >
-                    <Text style={styles.buttonText}>儲存&關閉</Text>
-                  </TouchableOpacity>
+                <View style={styles.modalInputLayout}>
+                  <Text style={styles.inputLabel}>使用者密碼:</Text>
+                  <Text style={styles.inputLabel}>{user.password}</Text>
                 </View>
               </View>
-            </View>
-          </Modal>
-
-          {/*使用者顯示 Modal*/}
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={userInfoModalVisible}
-            onRequestClose={() => {
-              setUserInfoModalVisible(!userInfoModalVisible);
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalHeaderText}>使用者</Text>
-                </View>
-                <View style={styles.modalBody}>
-                  <View style={styles.modalInputLayout}>
-                    <Text style={styles.inputLabel}>使用者名稱:</Text>
-                    <Text style={styles.inputLabel}>{user.account}</Text>
-                  </View>
-                  <View style={styles.modalInputLayout}>
-                    <Text style={styles.inputLabel}>使用者密碼:</Text>
-                    <Text style={styles.inputLabel}>{user.password}</Text>
-                  </View>
-                </View>
-                <View style={styles.modalFooter}>
-                  <TouchableOpacity
-                    onPress={async () => {
-                      await userDelete();
-                      setUserInfoModalVisible(!userInfoModalVisible);
-                    }}
-                    style={styles.modalButton}
-                  >
-                    <Text style={styles.buttonText}>刪除使用者</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={async () => {
-                      await userLogout();
-                      setUserInfoModalVisible(!userInfoModalVisible);
-                    }}
-                    style={styles.modalButton}
-                  >
-                    <Text style={styles.buttonText}>登出</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.modalButton}
-                    onPress={() =>
-                      setUserInfoModalVisible(!userInfoModalVisible)
-                    }
-                  >
-                    <Text style={styles.buttonText}>關閉</Text>
-                  </TouchableOpacity>
-                </View>
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  onPress={async () => {
+                    await userDelete();
+                    setUserInfoModalVisible(!userInfoModalVisible);
+                  }}
+                  style={styles.modalButton}
+                >
+                  <Text style={styles.buttonText}>刪除使用者</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={async () => {
+                    await userLogout();
+                    setUserInfoModalVisible(!userInfoModalVisible);
+                  }}
+                  style={styles.modalButton}
+                >
+                  <Text style={styles.buttonText}>登出</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setUserInfoModalVisible(!userInfoModalVisible)}
+                >
+                  <Text style={styles.buttonText}>關閉</Text>
+                </TouchableOpacity>
               </View>
             </View>
-          </Modal>
-        </View>
-      </Provider>
+          </View>
+        </Modal>
+      </View>
     );
   }
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={["#10202b", "#305f80"]}
+        colors={
+          !weatherData
+            ? ["#333333", "#333333"]
+            : weatherData.time.split(" ")[1] < "18:00:00" &&
+              weatherData.time.split(" ")[1] >= "06:00:00"
+            ? BackgroundGradient.day[
+                weatherData.weatherCode as keyof typeof BackgroundGradient.day
+              ]
+            : BackgroundGradient.night[
+                weatherData.weatherCode as keyof typeof BackgroundGradient.night
+              ]
+        }
         style={{
           position: "absolute",
           left: 0,
@@ -330,7 +362,6 @@ export default function SettingsScreen() {
         style={{
           alignItems: "center",
           justifyContent: "center",
-          // width: "100%",
           height: "100%",
           gap: 20,
         }}
@@ -480,6 +511,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#10202b",
     padding: 20,
+    gap: 20,
   },
   inputLabel: {
     fontSize: 16,
@@ -519,6 +551,9 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: "#ccc",
+  },
+  body: {
+    gap: 20,
   },
 
   // box

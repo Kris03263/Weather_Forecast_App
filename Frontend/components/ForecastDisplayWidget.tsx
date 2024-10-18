@@ -21,18 +21,6 @@ export function ForecastDisplayWidget() {
     (state: { selecter: Selecter }) => state.selecter
   );
 
-  if (Object.keys(weatherDataList).length === 0) {
-    return (
-      <Widget style={styles.customWidgetStyle}>
-        <View style={styles.titleDisplay}>
-          <SvgImage style={{ width: 30, height: 30 }} name="weather" />
-          <Text style={styles.title}>天氣預報</Text>
-        </View>
-        <Text style={styles.subTitle}>暫無資料</Text>
-      </Widget>
-    );
-  }
-
   return (
     <TouchableOpacity>
       <Widget style={styles.customWidgetStyle}>
@@ -45,7 +33,7 @@ export function ForecastDisplayWidget() {
           <FlatList
             horizontal
             style={{ width: "100%" }}
-            data={weatherDataList[selecter.region][0]}
+            data={weatherDataList?.[selecter.region]?.[0] ?? []}
             renderItem={({ item }) => (
               <View style={styles.weatherCard}>
                 <Text style={styles.weatherTime}>
@@ -54,9 +42,8 @@ export function ForecastDisplayWidget() {
                 <DynamicImage
                   style={styles.weatherIcon}
                   path={
-                    selecter.timeInterval === 1
-                      ? `day/${item.weatherCode}.png`
-                      : item.time > "12:00"
+                    item.time.split(" ")[1] < "18:00:00" &&
+                    item.time.split(" ")[1] >= "06:00:00"
                       ? `day/${item.weatherCode}.png`
                       : `night/${item.weatherCode}.png`
                   }

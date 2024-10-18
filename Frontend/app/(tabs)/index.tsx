@@ -1,11 +1,28 @@
-import { StyleSheet, View, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Animated,
+  Dimensions,
+  Text,
+  TouchableOpacity,
+} from "react-native";
+import { useRef, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSelector } from "react-redux";
+
+import { BackgroundGradient } from "@/constants/Colors";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
 import { IndicatorsDisplayWidget_single } from "@/components/IndicatorsDisplayWidget_single";
 import { IndicatorsDisplayWidget_double } from "@/components/IndicatorsDisplayWidget_double";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
+import { SvgImage } from "@/components/Svg";
+
+import { Selecter, WeatherDataList } from "./_layout";
+
+const { height: screenHeight } = Dimensions.get("window");
 
 // TODO list:
 // - [V] Add weather data API
@@ -16,12 +33,51 @@ import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 // - [V] Move weatherDataList, region, currentTime to index.tsx
 
 export default function HomeScreen() {
+  const selecter = useSelector(
+    (state: { selecter: Selecter }) => state.selecter
+  );
+  const weatherDataList = useSelector(
+    (state: { weatherData: WeatherDataList }) => state.weatherData
+  );
+  const weatherData = weatherDataList?.[selecter.region]?.[0]?.[0] ?? null;
+  const [isSecendLayout, setIsSecendLayout] = useState(false);
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, screenHeight / 5],
+    outputRange: [screenHeight * 0.2, screenHeight * 0.1],
+    extrapolate: "clamp",
+  });
+  const contentHeight = scrollY.interpolate({
+    inputRange: [0, screenHeight / 5],
+    outputRange: [screenHeight * 0.7, screenHeight * 0.9],
+    extrapolate: "clamp",
+  });
+  const opacity = scrollY.interpolate({
+    inputRange: [0, screenHeight / 5, screenHeight / 4],
+    outputRange: [1, 0, 1], // 從 1 漸變到 0.5
+    extrapolate: "clamp",
+  });
+
+  scrollY.addListener(({ value }) => {
+    setIsSecendLayout(value > screenHeight / 5);
+  });
+
   return (
     <View style={styles.container}>
       {/* Gradiant */}
       <LinearGradient
-        colors={["#90E6FD", "#0384e2"]}
-        // locations={[0, 0.3, 1]}
+        colors={
+          !weatherData
+            ? ["#333333", "#333333"]
+            : weatherData.time.split(" ")[1] < "18:00:00" &&
+              weatherData.time.split(" ")[1] >= "06:00:00"
+            ? BackgroundGradient.day[
+                weatherData.weatherCode as keyof typeof BackgroundGradient.day
+              ]
+            : BackgroundGradient.night[
+                weatherData.weatherCode as keyof typeof BackgroundGradient.night
+              ]
+        }
         style={{
           position: "absolute",
           left: 0,
@@ -32,13 +88,39 @@ export default function HomeScreen() {
       ></LinearGradient>
 
       {/* Top Section */}
-      <View style={styles.topSection}>
-        <WeatherDisplay />
+      <View style={[styles.topSection]}>
+        <View style={styles.cityNameDisplay}>
+          <Text style={styles.cityName}>{selecter.region} </Text>
+          <TouchableOpacity>
+            <SvgImage style={{ width: 25, height: 25 }} name="list" />
+          </TouchableOpacity>
+        </View>
+        <Animated.View
+          style={[
+            {
+              flexDirection: "row",
+              width: "100%",
+              justifyContent: "flex-start",
+            },
+            { transform: [], opacity },
+            { height: headerHeight },
+          ]}
+        >
+          <WeatherDisplay isSecendLayout={isSecendLayout} />
+        </Animated.View>
       </View>
 
       {/* Body Section */}
-      <ScrollView style={styles.bodySection}>
-        <View style={{ gap: 20 }}>
+      <ScrollView
+        style={styles.bodySection}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
+        <Animated.View style={{ gap: 20, height: contentHeight }}>
           <ForecastDisplayWidget />
 
           <View style={styles.row}>
@@ -66,7 +148,7 @@ export default function HomeScreen() {
           <View style={styles.row}>
             <SuggestionDisplayWidget type="activity" />
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -78,11 +160,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#10202b",
   },
   topSection: {
-    marginTop: 30,
-    height: "30%",
+    marginTop: "10%",
+    // height: "30%",
     justifyContent: "center",
     position: "relative",
     padding: "3%",
+  },
+  cityName: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "left",
+  },
+  cityNameDisplay: {
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: "100%",
+    flexDirection: "row",
   },
   bodySection: {
     backgroundColor: "#FFFFFF01",
