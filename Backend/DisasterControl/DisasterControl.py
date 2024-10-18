@@ -22,25 +22,28 @@ def testEarthQuakeSimulation():
 def getEarthQuackData():
     data = request.get_json();
     userID = data.get('userID')
-    longtitude = data.get('longitude')
-    latitude = data.get('latitude')
-    return jsonify(getEarthData(float(longtitude),float(latitude),getStorageCity(userID)))
+    pre_longtitude = data.get('longitude')
+    longtitude = float(pre_longtitude)
+    pre_latitude = data.get('latitude')
+    latitude = float(pre_latitude)
+    return jsonify(getEarthData(longtitude,latitude,getStorageCity(userID)))
 # 定義地震polling專用事件
 def check_and_broadcast_updates(socketio,sid, latitude, longitude,userID):
     """
     每秒檢查 API 是否有新的地震資訊，並根據經緯度推送給相關客戶端。
     """
     last_earthquake_data = None
-    while True:
+    while sid in background_tasks:
         socketio.sleep(1)  # 每秒輪詢一次
         # 獲取每個客戶端對應經緯度的最新地震資料
-        earthquake_data = getEarthData2(longitude,latitude,getStorageCity(userID))
+        earthquake_data = getEarthData(float(longitude),float(latitude),getStorageCity(userID))
         if last_earthquake_data is None:
-            last_earthquake_data = earthquake_data[len(earthquake_data)-1]
+            last_earthquake_data = earthquake_data[0]
             continue
+        print(last_earthquake_data["distance"])
         # 如果地震資料有變化，推送給該用戶
-        if earthquake_data and earthquake_data[len(earthquake_data)-1] != last_earthquake_data:
-            last_earthquake_data = earthquake_data[len(earthquake_data)-1]
+        if earthquake_data and earthquake_data[0] != last_earthquake_data:
+            last_earthquake_data = earthquake_data[0]
             result = {
                 "地震資訊" : last_earthquake_data["content"],
                 "深度" : last_earthquake_data["depth"],
@@ -85,6 +88,7 @@ def register_socketio_events(socketio):
         當客戶端斷開連接時，移除它的 socket id 和位置資料。
         """
         if request.sid in background_tasks:
+            background_tasks[request.sid]
         # 清理背景任務（可以用其他方式來終止任務）
             del background_tasks[request.sid]
             print(f'Client {request.sid} disconnected')
