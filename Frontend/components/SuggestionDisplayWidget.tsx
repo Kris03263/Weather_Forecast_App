@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 
-import { Selecter } from "@/app/(tabs)/_layout";
+import { Selecter, DailySug } from "@/app/(tabs)/_layout";
 
 interface SuggestionDisplayWidgetProps {
   type: string;
@@ -49,11 +49,16 @@ export function SuggestionDisplayWidget({
       },
     ],
   };
+  const dailySuggestions = useSelector(
+    (state: { dailySug: DailySug }) => state.dailySug
+  );
   const selecter = useSelector(
     (state: { selecter: Selecter }) => state.selecter
   );
 
-  if (Object.keys(testData).length === 0) {
+  console.log(dailySuggestions);
+
+  if (!dailySuggestions || Object.keys(dailySuggestions).length === 0) {
     return (
       <Widget style={styles.customWidgetStyle}>
         <View style={styles.layout}>
@@ -64,7 +69,7 @@ export function SuggestionDisplayWidget({
     );
   }
 
-  const suggestion = testData[type as keyof typeof testData];
+  const suggestion = dailySuggestions[type as keyof typeof dailySuggestions];
 
   return (
     <Widget style={styles.customWidgetStyle}>

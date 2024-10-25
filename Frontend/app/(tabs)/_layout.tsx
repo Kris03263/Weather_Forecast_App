@@ -17,7 +17,7 @@ import { setRegion } from "@/redux/regionListSlice";
 import { updateTimeInterval, updateRegion } from "@/redux/selecterSlice";
 import { setUser } from "@/redux/userSlice";
 import { setUserSettings } from "@/redux/userSettingsSlice";
-import { updateDailySportSug } from "@/redux/dailySportSugSlice";
+import { updateDailySug } from "@/redux/dailySugSlice";
 
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
@@ -104,10 +104,8 @@ export interface UserSettings {
   habit: Habit[];
 }
 
-export interface DailySportSug {
-  sportName: string;
-  id: number;
-  sportSuggestion: string;
+export interface DailySug {
+  [key: string]: { name: string; suggestion: string }[];
 }
 
 //////////////////////
@@ -543,12 +541,12 @@ const HandleGetWeatherData12h = async (
   return weatherData12h;
 };
 
-const HandleGetDailySportSug = async (
+const HandleGetDailySug = async (
   _userID: string,
   _latitude: string,
   _longitude: string
-): Promise<DailySportSug[]> => {
-  const data = await fetch(`${hostURL}/Users/GetDailySportsSuggestion`, {
+): Promise<DailySug> => {
+  const data = await fetch(`${hostURL}/Users/GetDailySuggestion`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -561,18 +559,14 @@ const HandleGetDailySportSug = async (
   })
     .then((response) => response.json())
     .then((data) => {
-      return data as DailySportSug[];
+      return data as DailySug;
     })
     .catch((error) => {
       throw new Error(error);
     });
 
-  if (!Array.isArray(data) || data.length === 0) {
-    return [];
-  }
-
-  if (data[0].id === -1) {
-    throw new Error(data?.[0]?.sportName ?? "Daily sport suggestion is empty");
+  if (!data) {
+    throw new Error("Daily suggestion is empty");
   }
 
   return data;
@@ -592,7 +586,7 @@ export default function TabLayout() {
         let region: Region | null = null;
         let weatherData3h: WeatherData[] = [];
         let weatherData12h: WeatherData[] = [];
-        let dailySportSuggestions: DailySportSug[] = [];
+        let dailySuggestions: DailySug = {};
 
         // Get time
         let time = new Date().toLocaleDateString();
@@ -612,25 +606,6 @@ export default function TabLayout() {
           console.log("Complete get current location");
         } catch (error) {
           console.error("Failed to get current location: " + error);
-        }
-
-        // Get user data
-        try {
-          user = await HandleGetUser(userID);
-          console.log("Complete get user data");
-        } catch (error) {
-          console.error("Failed to get user data: " + error);
-        }
-
-        // Get user settings data
-        try {
-          userSettings = {
-            sport: await HandleGetUserSports(userID),
-            habit: await HandleGetUserHabits(userID),
-          };
-          console.log("Complete get user settings data");
-        } catch (error) {
-          console.error("Failed to get user settings data: " + error);
         }
 
         // Set regions[0] to current location
@@ -661,16 +636,36 @@ export default function TabLayout() {
           console.error("Failed to update weather data: " + error);
         }
 
-        // Update daily sport suggestion
+        // Get user data
         try {
-          dailySportSuggestions = await HandleGetDailySportSug(
+          user = await HandleGetUser(userID);
+          console.log("Complete get user data");
+        } catch (error) {
+          console.error("Failed to get user data: " + error);
+        }
+
+        // Get user settings data
+        try {
+          userSettings = {
+            sport: await HandleGetUserSports(userID),
+            habit: await HandleGetUserHabits(userID),
+          };
+          console.log("Complete get user settings data");
+        } catch (error) {
+          console.error("Failed to get user settings data: " + error);
+        }
+
+        // Get daily suggestion
+        try {
+          dailySuggestions = await HandleGetDailySug(
             userID,
             regions[0].latitude,
             regions[0].longitude
           );
-          console.log("Complete update daily sport suggestion");
+          console.log(dailySuggestions);
+          console.log("Complete get daily sport suggestion");
         } catch (error) {
-          console.error("Failed to update daily sport suggestion: " + error);
+          console.error("Failed to get daily sport suggestion: " + error);
         }
 
         // Set store data
@@ -680,7 +675,7 @@ export default function TabLayout() {
         store.dispatch(setUserSettings(userSettings));
         store.dispatch(updateWeatherData3h(weatherData3h));
         store.dispatch(updateWeatherData12h(weatherData12h));
-        store.dispatch(updateDailySportSug(dailySportSuggestions));
+        store.dispatch(updateDailySug(dailySuggestions));
         console.log("Complete set store data");
 
         console.log(
@@ -698,7 +693,10 @@ export default function TabLayout() {
           store.getState().user,
           "\n",
           "userSettings: ",
-          store.getState().userSettings
+          store.getState().userSettings,
+          "\n",
+          "dailySuggestions: ",
+          store.getState().dailySuggestions
         );
       } catch (error) {
         console.error("Data update failed! " + error);

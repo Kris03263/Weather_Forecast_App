@@ -7,11 +7,13 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import { useRef, useState } from "react";
-import { LinearGradient } from "expo-linear-gradient";
+import { useRef, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-
-import { BackgroundGradient } from "@/constants/Colors";
+import {
+  useDerivedValue,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
@@ -21,6 +23,7 @@ import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { SvgImage } from "@/components/Svg";
 
 import { Selecter, WeatherDataList } from "./_layout";
+import { Background } from "@/components/Background";
 
 const { height: screenHeight } = Dimensions.get("window");
 
@@ -31,6 +34,8 @@ const { height: screenHeight } = Dimensions.get("window");
 // - [ ] Switch to use region name to fetch weather data
 // - [V] Switch to use Redux for global state management
 // - [V] Move weatherDataList, region, currentTime to index.tsx
+// - [ ] Use a global variable to save wrong msg
+// - [X] Move background color control to _layout.tsx (Instead moving to Background.tsx)
 
 export default function HomeScreen() {
   const selecter = useSelector(
@@ -40,8 +45,15 @@ export default function HomeScreen() {
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
   const weatherData = weatherDataList?.[selecter.region]?.[0]?.[0] ?? null;
+
+  // Header Control
   const [isSecendLayout, setIsSecendLayout] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  scrollY.addListener(({ value }) => {
+    setIsSecendLayout(value > screenHeight / 5);
+  });
+
   const headerHeight = scrollY.interpolate({
     inputRange: [0, screenHeight / 5],
     outputRange: [screenHeight * 0.2, screenHeight * 0.1],
@@ -54,102 +66,118 @@ export default function HomeScreen() {
   });
   const opacity = scrollY.interpolate({
     inputRange: [0, screenHeight / 5, screenHeight / 4],
-    outputRange: [1, 0, 1], // 從 1 漸變到 0.5
+    outputRange: [1, 0, 1],
     extrapolate: "clamp",
   });
 
-  scrollY.addListener(({ value }) => {
-    setIsSecendLayout(value > screenHeight / 5);
-  });
+  // Page Control
+  const [opacityValue_page, setOpacityValue_page] = useState(0);
+  const opacity_page = useSharedValue(0);
+
+  useEffect(() => {
+    const fetchWeatherData = async () => {
+      // Wait for weather data to load
+      if (weatherData) {
+        opacity_page.value = withTiming(1, { duration: 2000 });
+      }
+    };
+
+    fetchWeatherData();
+  }, [weatherData]);
+
+  useDerivedValue(() => {
+    setOpacityValue_page(opacity_page.value);
+  }, []);
 
   return (
     <View style={styles.container}>
       {/* Gradiant */}
-      <LinearGradient
-        colors={
-          !weatherData
-            ? ["#333333", "#333333"]
-            : weatherData.time.split(" ")[1] < "18:00:00" &&
-              weatherData.time.split(" ")[1] >= "06:00:00"
-            ? BackgroundGradient.day[
-                weatherData.weatherCode as keyof typeof BackgroundGradient.day
-              ]
-            : BackgroundGradient.night[
-                weatherData.weatherCode as keyof typeof BackgroundGradient.night
-              ]
-        }
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          height: "100%",
-        }}
-      ></LinearGradient>
+      <Background weatherData={weatherData} />
 
       {/* Top Section */}
       <View style={[styles.topSection]}>
-        <View style={styles.cityNameDisplay}>
-          <Text style={styles.cityName}>{selecter.region} </Text>
-          <TouchableOpacity>
-            <SvgImage style={{ width: 25, height: 25 }} name="list" />
-          </TouchableOpacity>
-        </View>
-        <Animated.View
-          style={[
-            {
-              flexDirection: "row",
-              width: "100%",
-              justifyContent: "flex-start",
-            },
-            { transform: [], opacity },
-            { height: headerHeight },
-          ]}
-        >
-          <WeatherDisplay isSecendLayout={isSecendLayout} />
-        </Animated.View>
+        {weatherData && [
+          <View style={styles.cityNameDisplay}>
+            <Text style={styles.cityName}>{selecter.region} </Text>
+            <TouchableOpacity>
+              <SvgImage style={{ width: 25, height: 25 }} name="list" />
+            </TouchableOpacity>
+          </View>,
+          <Animated.View
+            style={[
+              {
+                flexDirection: "row",
+                width: "100%",
+                justifyContent: "flex-start",
+                opacity,
+                height: headerHeight,
+              },
+            ]}
+          >
+            <WeatherDisplay isSecendLayout={isSecendLayout} />
+          </Animated.View>,
+        ]}
       </View>
 
       {/* Body Section */}
-      <ScrollView
-        style={styles.bodySection}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-        scrollEventThrottle={16}
-      >
-        <Animated.View style={{ gap: 20, height: contentHeight }}>
-          <ForecastDisplayWidget />
+      {!weatherData && (
+        <View style={styles.bodySection}>
+          <Text style={styles.loadingText}>
+            {
+              "載入資料中... \n 在這裡顯示錯誤訊息或提示 \n ex.(請開啟定位功能或新增一個地區)"
+            }
+          </Text>
+        </View>
+      )}
 
-          <View style={styles.row}>
-            <IndicatorsDisplayWidget_single type="wet" />
-            <IndicatorsDisplayWidget_single type="rainRate" />
-          </View>
+      {/* Body Section */}
+      {weatherData && (
+        <ScrollView
+          style={styles.bodySection}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+          scrollEventThrottle={16}
+        >
+          <Animated.View
+            style={{
+              gap: 20,
+              height: contentHeight,
+              opacity: opacityValue_page,
+            }}
+          >
+            <ForecastDisplayWidget />
 
-          <View style={styles.row}>
-            <IndicatorsDisplayWidget_double
-              type1="windSpeed"
-              type2="windDirection"
-            />
-          </View>
+            <View style={styles.row}>
+              <IndicatorsDisplayWidget_single type="wet" />
+              <IndicatorsDisplayWidget_single type="rainRate" />
+            </View>
 
-          <View style={styles.row}>
-            <SuggestionDisplayWidget type="dressing" />
-            <SuggestionDisplayWidget type="health" />
-          </View>
+            <View style={styles.row}>
+              <IndicatorsDisplayWidget_double
+                type1="windSpeed"
+                type2="windDirection"
+              />
+            </View>
 
-          <View style={styles.row}>
-            <SuggestionDisplayWidget type="sport" />
-            <SuggestionDisplayWidget type="transportation" />
-          </View>
+            <View style={styles.row}>
+              <SuggestionDisplayWidget type="dressing" />
+              <SuggestionDisplayWidget type="health" />
+            </View>
 
-          <View style={styles.row}>
-            <SuggestionDisplayWidget type="activity" />
-          </View>
-        </Animated.View>
-      </ScrollView>
+            <View style={styles.row}>
+              <SuggestionDisplayWidget type="sport" />
+              <SuggestionDisplayWidget type="transportation" />
+            </View>
+
+            <View style={styles.row}>
+              <SuggestionDisplayWidget type="activity" />
+            </View>
+          </Animated.View>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -157,11 +185,15 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#10202b",
+  },
+  loadingText: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   topSection: {
     marginTop: "10%",
-    // height: "30%",
     justifyContent: "center",
     position: "relative",
     padding: "3%",
@@ -173,6 +205,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   cityNameDisplay: {
+    paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     minWidth: "100%",

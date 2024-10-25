@@ -8,12 +8,9 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { Provider, useSelector } from "react-redux";
-import { LinearGradient } from "expo-linear-gradient";
+import { useSelector } from "react-redux";
 
 import { SvgImage } from "../../components/Svg";
-
-import { BackgroundGradient } from "../../constants/Colors";
 
 import {
   User,
@@ -31,6 +28,7 @@ import {
 
 import store from "../../redux/store";
 import { Widget } from "@/components/Widget";
+import { Background } from "@/components/Background";
 
 interface RadioButtonProps {
   label: string;
@@ -110,398 +108,351 @@ export default function SettingsScreen() {
     );
   };
 
-  if (user.id && user.id !== "-1") {
-    return (
-      <View style={styles.container}>
-        <LinearGradient
-          colors={
-            !weatherData
-              ? ["#333333", "#333333"]
-              : weatherData.time.split(" ")[1] < "18:00:00" &&
-                weatherData.time.split(" ")[1] >= "06:00:00"
-              ? BackgroundGradient.day[
-                  weatherData.weatherCode as keyof typeof BackgroundGradient.day
-                ]
-              : BackgroundGradient.night[
-                  weatherData.weatherCode as keyof typeof BackgroundGradient.night
-                ]
-          }
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: 0,
-            height: "100%",
-          }}
-        ></LinearGradient>
+  return (
+    <View style={styles.container}>
+      {/* Gradiant */}
+      <Background weatherData={weatherData} />
 
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerText}>設定</Text>
-          <View>
-            <TouchableOpacity
-              style={styles.avatar}
-              onPress={() => setUserInfoModalVisible(true)}
-            ></TouchableOpacity>
-          </View>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>設定</Text>
+        <View>
+          <TouchableOpacity
+            style={styles.avatar}
+            onPress={() => setUserInfoModalVisible(true)}
+          ></TouchableOpacity>
         </View>
+      </View>
 
-        {/* 天氣偏好區塊 */}
-        <View style={styles.body}>
+      {user.id &&
+        user.id !== "-1" && [
+          /* 天氣偏好區塊 */
+          <View style={styles.body}>
+            <Widget>
+              <Text style={styles.boxTitle}>天氣偏好</Text>
+              <View style={styles.boxInputLayout}>
+                <Text style={styles.inputLabel}>溫度偏好:</Text>
+                <TextInput style={styles.boxInput} placeholder="輸入溫度(°C)" />
+              </View>
+              <View style={styles.boxInputLayout}>
+                <Text style={styles.inputLabel}>濕度偏好:</Text>
+                <TextInput style={styles.boxInput} placeholder="輸入濕度" />
+              </View>
+            </Widget>
+          </View>,
+          /* 活動偏好區塊 */
           <Widget>
-            <Text style={styles.boxTitle}>天氣偏好</Text>
+            <Text style={styles.boxTitle}>活動偏好</Text>
             <View style={styles.boxInputLayout}>
-              <Text style={styles.inputLabel}>溫度偏好:</Text>
-              <TextInput style={styles.boxInput} placeholder="輸入溫度(°C)" />
+              <Text style={styles.inputLabel}>運動偏好:</Text>
+              <TouchableOpacity
+                style={styles.boxButton}
+                onPress={() => setSportModalVisible(true)}
+              >
+                <Text style={styles.buttonText}>選擇運動</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.boxInputLayout}>
-              <Text style={styles.inputLabel}>濕度偏好:</Text>
-              <TextInput style={styles.boxInput} placeholder="輸入濕度" />
+              <Text style={styles.inputLabel}>興趣偏好:</Text>
+              <TouchableOpacity
+                style={styles.boxButton}
+                onPress={() => setHabitModalVisible(true)}
+              >
+                <Text style={styles.buttonText}>選擇嗜好</Text>
+              </TouchableOpacity>
             </View>
-          </Widget>
-        </View>
-
-        {/* 活動偏好區塊 */}
-        <Widget>
-          <Text style={styles.boxTitle}>活動偏好</Text>
-          <View style={styles.boxInputLayout}>
-            <Text style={styles.inputLabel}>運動偏好:</Text>
-            <TouchableOpacity
-              style={styles.boxButton}
-              onPress={() => setSportModalVisible(true)}
-            >
-              <Text style={styles.buttonText}>選擇運動</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.boxInputLayout}>
-            <Text style={styles.inputLabel}>興趣偏好:</Text>
-            <TouchableOpacity
-              style={styles.boxButton}
-              onPress={() => setHabitModalVisible(true)}
-            >
-              <Text style={styles.buttonText}>選擇嗜好</Text>
-            </TouchableOpacity>
-          </View>
-        </Widget>
-
-        {/*選擇運動 Modal*/}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={sportModalVisible}
-          onRequestClose={() => {
-            setSportModalVisible(!sportModalVisible);
-          }}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalHeaderText}>選擇運動</Text>
-              </View>
-              <View style={styles.modalBody}>
-                <View style={styles.radioGroup}>
-                  {[
-                    "籃球",
-                    "羽球",
-                    "排球",
-                    "游泳",
-                    "公路車",
-                    "慢跑",
-                    "桌球",
-                  ].map((option, index) => (
-                    <RadioButton
-                      key={index}
-                      label={option}
-                      selected={sport.includes(index + 1)}
-                      onPress={() => toggleOption(index + 1, setSport)}
-                    />
-                  ))}
+          </Widget>,
+          /*選擇運動 Modal*/
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={sportModalVisible}
+            onRequestClose={() => {
+              setSportModalVisible(!sportModalVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalHeaderText}>選擇運動</Text>
                 </View>
-              </View>
-              <View style={styles.modalFooter}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={async () => {
-                    await userSetSports(sport);
-                    setSportModalVisible(!sportModalVisible);
-                  }}
-                >
-                  <Text style={styles.buttonText}>儲存&關閉</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {/*選擇嗜好 Modal*/}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={habitModalVisible}
-          onRequestClose={() => {
-            setHabitModalVisible(!habitModalVisible);
-          }}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalHeaderText}>選擇嗜好</Text>
-              </View>
-              <View style={styles.modalBody}>
-                <View style={styles.radioGroup}>
-                  {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
-                    (option, index) => (
+                <View style={styles.modalBody}>
+                  <View style={styles.radioGroup}>
+                    {[
+                      "籃球",
+                      "羽球",
+                      "排球",
+                      "游泳",
+                      "公路車",
+                      "慢跑",
+                      "桌球",
+                    ].map((option, index) => (
                       <RadioButton
                         key={index}
                         label={option}
-                        selected={habit.includes(index + 1)}
-                        onPress={() => toggleOption(index + 1, setHabit)}
+                        selected={sport.includes(index + 1)}
+                        onPress={() => toggleOption(index + 1, setSport)}
                       />
-                    )
-                  )}
+                    ))}
+                  </View>
                 </View>
-              </View>
-              <View style={styles.modalFooter}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={async () => {
-                    await userSetHabits(habit);
-                    setHabitModalVisible(!habitModalVisible);
-                  }}
-                >
-                  <Text style={styles.buttonText}>儲存&關閉</Text>
-                </TouchableOpacity>
+                <View style={styles.modalFooter}>
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={async () => {
+                      await userSetSports(sport);
+                      setSportModalVisible(!sportModalVisible);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>儲存&關閉</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </Modal>
-
-        {/*使用者顯示 Modal*/}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={userInfoModalVisible}
-          onRequestClose={() => {
-            setUserInfoModalVisible(!userInfoModalVisible);
-          }}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalHeaderText}>使用者</Text>
-              </View>
-              <View style={styles.modalBody}>
-                <View style={styles.modalInputLayout}>
-                  <Text style={styles.inputLabel}>使用者名稱:</Text>
-                  <Text style={styles.inputLabel}>{user.account}</Text>
+          </Modal>,
+          /*選擇嗜好 Modal*/
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={habitModalVisible}
+            onRequestClose={() => {
+              setHabitModalVisible(!habitModalVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalHeaderText}>選擇嗜好</Text>
                 </View>
-                <View style={styles.modalInputLayout}>
-                  <Text style={styles.inputLabel}>使用者密碼:</Text>
-                  <Text style={styles.inputLabel}>{user.password}</Text>
+                <View style={styles.modalBody}>
+                  <View style={styles.radioGroup}>
+                    {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
+                      (option, index) => (
+                        <RadioButton
+                          key={index}
+                          label={option}
+                          selected={habit.includes(index + 1)}
+                          onPress={() => toggleOption(index + 1, setHabit)}
+                        />
+                      )
+                    )}
+                  </View>
                 </View>
-              </View>
-              <View style={styles.modalFooter}>
-                <TouchableOpacity
-                  onPress={async () => {
-                    await userDelete();
-                    setUserInfoModalVisible(!userInfoModalVisible);
-                  }}
-                  style={styles.modalButton}
-                >
-                  <Text style={styles.buttonText}>刪除使用者</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={async () => {
-                    await userLogout();
-                    setUserInfoModalVisible(!userInfoModalVisible);
-                  }}
-                  style={styles.modalButton}
-                >
-                  <Text style={styles.buttonText}>登出</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => setUserInfoModalVisible(!userInfoModalVisible)}
-                >
-                  <Text style={styles.buttonText}>關閉</Text>
-                </TouchableOpacity>
+                <View style={styles.modalFooter}>
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={async () => {
+                      await userSetHabits(habit);
+                      setHabitModalVisible(!habitModalVisible);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>儲存&關閉</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </Modal>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={
-          !weatherData
-            ? ["#333333", "#333333"]
-            : weatherData.time.split(" ")[1] < "18:00:00" &&
-              weatherData.time.split(" ")[1] >= "06:00:00"
-            ? BackgroundGradient.day[
-                weatherData.weatherCode as keyof typeof BackgroundGradient.day
-              ]
-            : BackgroundGradient.night[
-                weatherData.weatherCode as keyof typeof BackgroundGradient.night
-              ]
-        }
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          height: "100%",
-        }}
-      ></LinearGradient>
-
-      {/* Login to use seetings */}
-      <View
-        style={{
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          gap: 20,
-        }}
-      >
-        <Text style={styles.headerText}>登入以使用設定</Text>
-        <TouchableOpacity
-          style={styles.modalButton}
-          onPress={() => setUserLoginVisible(true)}
-        >
-          <Text style={styles.buttonText}>登入</Text>
-        </TouchableOpacity>
-
-        {/*登入 Modal*/}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={userLoginVisible}
-          onRequestClose={() => {
-            setUserLoginVisible(!userLoginVisible);
-          }}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalHeaderText}>登入</Text>
-              </View>
-              <View style={styles.modalBody}>
-                <View style={styles.modalInputLayout}>
-                  <SvgImage style={styles.modalInputSvg} name="userAccount" />
-                  <Text style={styles.inputLabel}>使用者名稱:</Text>
+          </Modal>,
+          /*使用者顯示 Modal*/
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={userInfoModalVisible}
+            onRequestClose={() => {
+              setUserInfoModalVisible(!userInfoModalVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalHeaderText}>使用者</Text>
                 </View>
-                <TextInput
-                  style={styles.modalInput}
-                  ref={usernameLoginInputRef}
-                  placeholder="輸入名稱"
-                  onChangeText={setAccount}
-                />
-                <View style={styles.modalInputLayout}>
-                  <SvgImage style={styles.modalInputSvg} name="userPassword" />
-                  <Text style={styles.inputLabel}>使用者密碼:</Text>
+                <View style={styles.modalBody}>
+                  <View style={styles.modalInputLayout}>
+                    <Text style={styles.inputLabel}>使用者名稱:</Text>
+                    <Text style={styles.inputLabel}>{user.account}</Text>
+                  </View>
+                  <View style={styles.modalInputLayout}>
+                    <Text style={styles.inputLabel}>使用者密碼:</Text>
+                    <Text style={styles.inputLabel}>{user.password}</Text>
+                  </View>
                 </View>
-                <TextInput
-                  style={styles.modalInput}
-                  ref={passwordLoginInputRef}
-                  placeholder="輸入密碼"
-                  secureTextEntry={true}
-                  onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                  onPress={() => {
-                    setUserRegisVisible(true);
-                    setUserLoginVisible(!userLoginVisible);
-                  }}
-                >
-                  <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.modalFooter}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={async () => {
-                    await userLogin(account, password);
-                    usernameInput?.clear();
-                    passwordInput?.clear();
-                    setUserLoginVisible(!userLoginVisible);
-                  }}
-                >
-                  <Text style={styles.buttonText}>登入</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => setUserLoginVisible(!userLoginVisible)}
-                >
-                  <Text style={styles.buttonText}>關閉</Text>
-                </TouchableOpacity>
+                <View style={styles.modalFooter}>
+                  <TouchableOpacity
+                    onPress={async () => {
+                      await userDelete();
+                      setUserInfoModalVisible(!userInfoModalVisible);
+                    }}
+                    style={styles.modalButton}
+                  >
+                    <Text style={styles.buttonText}>刪除使用者</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={async () => {
+                      await userLogout();
+                      setUserInfoModalVisible(!userInfoModalVisible);
+                    }}
+                    style={styles.modalButton}
+                  >
+                    <Text style={styles.buttonText}>登出</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={() =>
+                      setUserInfoModalVisible(!userInfoModalVisible)
+                    }
+                  >
+                    <Text style={styles.buttonText}>關閉</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </Modal>
+          </Modal>,
+        ]}
 
-        {/*使用者註冊 Modal*/}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={userRegisVisible}
-          onRequestClose={() => {
-            setUserRegisVisible(!userRegisVisible);
-          }}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalHeaderText}>註冊</Text>
-              </View>
-              <View style={styles.modalBody}>
-                <View style={styles.modalInputLayout}>
-                  <SvgImage style={styles.modalInputSvg} name="userAccount" />
-                  <Text style={styles.inputLabel}>使用者名稱:</Text>
+      {!user.id &&
+        user.id === "-1" && [
+          /* Login to use seetings */
+          <Text style={styles.headerText}>登入以使用設定</Text>,
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={() => setUserLoginVisible(true)}
+          >
+            <Text style={styles.buttonText}>登入</Text>
+          </TouchableOpacity>,
+          /*登入 Modal*/
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={userLoginVisible}
+            onRequestClose={() => {
+              setUserLoginVisible(!userLoginVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalHeaderText}>登入</Text>
                 </View>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="輸入名稱"
-                  ref={usernameRegisterInputRef}
-                  onChangeText={setAccount}
-                />
-                <View style={styles.modalInputLayout}>
-                  <SvgImage style={styles.modalInputSvg} name="userPassword" />
-                  <Text style={styles.inputLabel}>使用者密碼:</Text>
+                <View style={styles.modalBody}>
+                  <View style={styles.modalInputLayout}>
+                    <SvgImage style={styles.modalInputSvg} name="userAccount" />
+                    <Text style={styles.inputLabel}>使用者名稱:</Text>
+                  </View>
+                  <TextInput
+                    style={styles.modalInput}
+                    ref={usernameLoginInputRef}
+                    placeholder="輸入名稱"
+                    onChangeText={setAccount}
+                  />
+                  <View style={styles.modalInputLayout}>
+                    <SvgImage
+                      style={styles.modalInputSvg}
+                      name="userPassword"
+                    />
+                    <Text style={styles.inputLabel}>使用者密碼:</Text>
+                  </View>
+                  <TextInput
+                    style={styles.modalInput}
+                    ref={passwordLoginInputRef}
+                    placeholder="輸入密碼"
+                    secureTextEntry={true}
+                    onChangeText={setPassword}
+                  />
+                  <TouchableOpacity
+                    onPress={() => {
+                      setUserRegisVisible(true);
+                      setUserLoginVisible(!userLoginVisible);
+                    }}
+                  >
+                    <Text style={styles.linkText}>
+                      沒有帳號嗎，點擊此以註冊
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="輸入密碼"
-                  ref={passwordRegisterInputRef}
-                  onChangeText={setPassword}
-                  secureTextEntry={true}
-                />
-              </View>
-              <View style={styles.modalFooter}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={async () => {
-                    await userRegister(account, password);
-                    usernameRegisterInput?.clear();
-                    passwordRegisterInput?.clear();
-                    setUserRegisVisible(!userRegisVisible);
-                  }}
-                >
-                  <Text style={styles.buttonText}>提交</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => setUserRegisVisible(!userRegisVisible)}
-                >
-                  <Text style={styles.buttonText}>關閉</Text>
-                </TouchableOpacity>
+                <View style={styles.modalFooter}>
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={async () => {
+                      await userLogin(account, password);
+                      usernameInput?.clear();
+                      passwordInput?.clear();
+                      setUserLoginVisible(!userLoginVisible);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>登入</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={() => setUserLoginVisible(!userLoginVisible)}
+                  >
+                    <Text style={styles.buttonText}>關閉</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </Modal>
-      </View>
+          </Modal>,
+          /*使用者註冊 Modal*/ <Modal
+            animationType="fade"
+            transparent={true}
+            visible={userRegisVisible}
+            onRequestClose={() => {
+              setUserRegisVisible(!userRegisVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalHeaderText}>註冊</Text>
+                </View>
+                <View style={styles.modalBody}>
+                  <View style={styles.modalInputLayout}>
+                    <SvgImage style={styles.modalInputSvg} name="userAccount" />
+                    <Text style={styles.inputLabel}>使用者名稱:</Text>
+                  </View>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="輸入名稱"
+                    ref={usernameRegisterInputRef}
+                    onChangeText={setAccount}
+                  />
+                  <View style={styles.modalInputLayout}>
+                    <SvgImage
+                      style={styles.modalInputSvg}
+                      name="userPassword"
+                    />
+                    <Text style={styles.inputLabel}>使用者密碼:</Text>
+                  </View>
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="輸入密碼"
+                    ref={passwordRegisterInputRef}
+                    onChangeText={setPassword}
+                    secureTextEntry={true}
+                  />
+                </View>
+                <View style={styles.modalFooter}>
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={async () => {
+                      await userRegister(account, password);
+                      usernameRegisterInput?.clear();
+                      passwordRegisterInput?.clear();
+                      setUserRegisVisible(!userRegisVisible);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>提交</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={() => setUserRegisVisible(!userRegisVisible)}
+                  >
+                    <Text style={styles.buttonText}>關閉</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>,
+        ]}
     </View>
   );
 }

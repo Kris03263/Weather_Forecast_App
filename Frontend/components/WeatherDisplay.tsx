@@ -27,8 +27,7 @@ export function WeatherDisplay({ isSecendLayout }: WeatherDisplayProps) {
   temp.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.temp ?? "--";
   const bodyTemp =
     indicatorsDictionary["bodyTemp" as keyof typeof indicatorsDictionary];
-  bodyTemp.value =
-    weatherDataList?.[selecter.region]?.[0]?.[0]?.bodyTemp ?? "--";
+  bodyTemp.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.bodyTemp ?? "";
 
   if (isSecendLayout) {
     return (
