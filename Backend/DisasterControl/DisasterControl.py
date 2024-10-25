@@ -10,6 +10,9 @@ from flask_cors import CORS
 disasterControl_blueprint = Blueprint('disasterControl_blueprint', __name__)
 CORS(disasterControl_blueprint)
 background_tasks = {}
+@disasterControl_blueprint.route('/test',methods=['GET'])
+def test():
+    return str(len(background_tasks))
 @disasterControl_blueprint.route('/TestEarthQuakeSimulation',methods=['GET','POST'])
 def testEarthQuakeSimulation():
     if request.method == 'GET':
@@ -33,17 +36,19 @@ def check_and_broadcast_updates(socketio,sid, latitude, longitude,userID):
     每秒檢查 API 是否有新的地震資訊，並根據經緯度推送給相關客戶端。
     """
     last_earthquake_data = None
+    print('I get into background')
     while sid in background_tasks:
         socketio.sleep(1)  # 每秒輪詢一次
         # 獲取每個客戶端對應經緯度的最新地震資料
-        earthquake_data = getEarthData(float(longitude),float(latitude),getStorageCity(userID))
-        if last_earthquake_data is None:
-            last_earthquake_data = earthquake_data[0]
+        print('Im polling')
+        earthquake_data = getEarthData2(float(longitude),float(latitude),getStorageCity(userID))
+        if last_earthquake_data is None and len(earthquake_data) > 0:
+            last_earthquake_data = earthquake_data[len(earthquake_data)-1]
             continue
-        print(last_earthquake_data["distance"])
         # 如果地震資料有變化，推送給該用戶
-        if earthquake_data and earthquake_data[0] != last_earthquake_data:
-            last_earthquake_data = earthquake_data[0]
+        if len(earthquake_data) > 0 and earthquake_data[len(earthquake_data)-1] != last_earthquake_data:
+            print("change data")
+            last_earthquake_data = earthquake_data[len(earthquake_data)-1]
             result = {
                 "地震資訊" : last_earthquake_data["content"],
                 "深度" : last_earthquake_data["depth"],
@@ -55,8 +60,6 @@ def check_and_broadcast_updates(socketio,sid, latitude, longitude,userID):
             socketio.emit('earthquake_update', result,to=sid)
     
 def register_socketio_events(socketio):
-    global counter
-    counter = 0
     @socketio.on('connect')
     def handle_connect():
         print(f'Client {request.sid} connected')
@@ -88,7 +91,6 @@ def register_socketio_events(socketio):
         當客戶端斷開連接時，移除它的 socket id 和位置資料。
         """
         if request.sid in background_tasks:
-            background_tasks[request.sid]
         # 清理背景任務（可以用其他方式來終止任務）
             del background_tasks[request.sid]
             print(f'Client {request.sid} disconnected')

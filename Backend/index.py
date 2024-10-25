@@ -1,11 +1,10 @@
-from flask import Flask,jsonify
+from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
-from flask_socketio import SocketIO,emit
+from flask_socketio import SocketIO
 from flask_swagger_ui import get_swaggerui_blueprint
 app = Flask(__name__)
-socketio = SocketIO(app)
-global earthquakeData
+socketio = SocketIO(app,async_mode='threading')
 api = Api(app)
 CORS(app)
 @app.route('/doc')

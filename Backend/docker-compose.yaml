@@ -4,8 +4,6 @@ services:
     container_name: redis_service
     ports:
       - "6379:6379" # 將Redis的默認端口映射到宿主機
-    volumes:
-      - redis_data:/data # 將數據保存到卷
     restart: always
 
   flask:
@@ -17,5 +15,3 @@ services:
       true
     depends_on:
       - redis # Flask服務依賴於Redis
-volumes:
-  redis_data:
