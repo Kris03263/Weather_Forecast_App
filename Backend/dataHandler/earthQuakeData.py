@@ -61,6 +61,7 @@ def getEarthData(lon,lat,city):
         resultData.append({
             "color":                earthquakeData[i]["ReportColor"],
             "content":              earthquakeData[i]["ReportContent"],
+            "nowLocation":          _city,
             "reportImg":            earthquakeData[i]["ReportImageURI"],
             "shakeImg":             earthquakeData[i]["ShakemapImageURI"],
             "time":                 earthquakeData[i]["EarthquakeInfo"]["OriginTime"],

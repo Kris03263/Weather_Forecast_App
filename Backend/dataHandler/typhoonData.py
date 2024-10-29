@@ -5,12 +5,16 @@ url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0034-005?Authorizati
 def getTyphoonData():
     typhoonData = requests.get(url).json()["records"]["tropicalCyclones"]["tropicalCyclone"]
     resultData = []
-
     for element in typhoonData:
+        for e in element["analysisData"]["fix"]:
+            if e["movingPrediction"] :del e["movingPrediction"][1]
+            else: del e["movingPrediction"]
         resultData.append({
             "name":element["typhoonName"],
             "cname":element["cwaTyphoonName"],
-            "pastPosition":[x for x in element["analysisData"]["fix"]],
-            "futurePosition":[x for x in element["forecastData"]["fix"]]
+            "pastPosition":element["analysisData"]["fix"],
+            "futurePosition":element["forecastData"]["fix"]
         })
     return resultData
+
+#print(getTyphoonData())

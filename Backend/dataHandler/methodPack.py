@@ -28,7 +28,7 @@ def getStorageCity(userID):
         return None
     return data[0][0]
 
-# print(setLocate(24.427552, 118.448752))
+# print(setLocate(10.375919347291584, 114.36556088669015))
 
 def haversine(lat1, lon1, lat2, lon2):
     # 將經緯度轉換為弧度
