@@ -7,13 +7,8 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import {
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
@@ -24,6 +19,7 @@ import { SvgImage } from "@/components/Svg";
 
 import { Selecter, WeatherDataList } from "./_layout";
 import { Background } from "@/components/Background";
+import { EarthQuakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
 
 const { height: screenHeight } = Dimensions.get("window");
 
@@ -61,7 +57,7 @@ export default function HomeScreen() {
   });
   const contentHeight = scrollY.interpolate({
     inputRange: [0, screenHeight / 5],
-    outputRange: [screenHeight * 0.7, screenHeight * 0.9],
+    outputRange: [screenHeight * 0.5, screenHeight * 0.6],
     extrapolate: "clamp",
   });
   const opacity = scrollY.interpolate({
@@ -70,25 +66,6 @@ export default function HomeScreen() {
     extrapolate: "clamp",
   });
 
-  // Page Control
-  const [opacityValue_page, setOpacityValue_page] = useState(0);
-  const opacity_page = useSharedValue(0);
-
-  useEffect(() => {
-    const fetchWeatherData = async () => {
-      // Wait for weather data to load
-      if (weatherData) {
-        opacity_page.value = withTiming(1, { duration: 2000 });
-      }
-    };
-
-    fetchWeatherData();
-  }, [weatherData]);
-
-  useDerivedValue(() => {
-    setOpacityValue_page(opacity_page.value);
-  }, []);
-
   return (
     <View style={styles.container}>
       {/* Gradiant */}
@@ -96,36 +73,31 @@ export default function HomeScreen() {
 
       {/* Top Section */}
       <View style={[styles.topSection]}>
-        {weatherData && [
-          <View style={styles.cityNameDisplay}>
-            <Text style={styles.cityName}>{selecter.region} </Text>
-            <TouchableOpacity>
-              <SvgImage style={{ width: 25, height: 25 }} name="list" />
-            </TouchableOpacity>
-          </View>,
-          <Animated.View
-            style={[
-              {
-                flexDirection: "row",
-                width: "100%",
-                justifyContent: "flex-start",
-                opacity,
-                height: headerHeight,
-              },
-            ]}
-          >
-            <WeatherDisplay isSecendLayout={isSecendLayout} />
-          </Animated.View>,
-        ]}
+        {weatherData && (
+          <>
+            <View style={styles.regionNameDisplay}>
+              <Text style={styles.regionName}>{selecter.region} </Text>
+            </View>
+            <Animated.View
+              style={[
+                styles.temperatureDisplay,
+                {
+                  opacity: opacity,
+                  height: headerHeight,
+                },
+              ]}
+            >
+              <WeatherDisplay isSecendLayout={isSecendLayout} />
+            </Animated.View>
+          </>
+        )}
       </View>
 
-      {/* Body Section */}
       {!weatherData && (
-        <View style={styles.bodySection}>
-          <Text style={styles.loadingText}>
-            {
-              "載入資料中... \n 在這裡顯示錯誤訊息或提示 \n ex.(請開啟定位功能或新增一個地區)"
-            }
+        <View style={styles.topSection}>
+          <Text style={styles.loadingText}>{"載入資料中..."}</Text>
+          <Text style={styles.hintText}>
+            {"(若長時間無法載入，請檢查網路連線或聯絡開發者)"}
           </Text>
         </View>
       )}
@@ -144,8 +116,6 @@ export default function HomeScreen() {
           <Animated.View
             style={{
               gap: 20,
-              height: contentHeight,
-              opacity: opacityValue_page,
             }}
           >
             <ForecastDisplayWidget />
@@ -175,6 +145,10 @@ export default function HomeScreen() {
             <View style={styles.row}>
               <SuggestionDisplayWidget type="activity" />
             </View>
+
+            <View style={styles.row}>
+              <EarthQuakeDisplayWidget />
+            </View>
           </Animated.View>
         </ScrollView>
       )}
@@ -192,34 +166,45 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
+  hintText: {
+    color: "white",
+    fontSize: 12,
+    textAlign: "center",
+  },
   topSection: {
     marginTop: "10%",
     justifyContent: "center",
     position: "relative",
     padding: "3%",
   },
-  cityName: {
+  regionName: {
     color: "white",
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "left",
   },
-  cityNameDisplay: {
+  regionNameDisplay: {
     paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     minWidth: "100%",
     flexDirection: "row",
   },
+  temperatureDisplay: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "flex-start",
+  },
   bodySection: {
     backgroundColor: "#FFFFFF01",
     height: "70%",
     padding: "3%",
+    paddingBottom: "20%",
   },
   row: {
     minWidth: "100%",
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "stretch",
     justifyContent: "center",
     gap: 20,
   },

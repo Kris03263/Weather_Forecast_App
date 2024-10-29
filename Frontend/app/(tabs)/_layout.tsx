@@ -1,11 +1,10 @@
 import { Tabs } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as Location from "expo-location";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 import store from "@/redux/store";
@@ -14,10 +13,12 @@ import {
   updateWeatherData12h,
 } from "@/redux/weatherDataSlice";
 import { setRegion } from "@/redux/regionListSlice";
-import { updateTimeInterval, updateRegion } from "@/redux/selecterSlice";
+import { updateRegion } from "@/redux/selecterSlice";
 import { setUser } from "@/redux/userSlice";
 import { setUserSettings } from "@/redux/userSettingsSlice";
 import { updateDailySug } from "@/redux/dailySugSlice";
+import { StyleSheet } from "react-native";
+import { addRegion } from "@/redux/regionListSlice";
 
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
@@ -75,6 +76,12 @@ export interface Region {
   name: string;
   longitude: string;
   latitude: string;
+}
+
+export interface RegionList {
+  city: {
+    [key: string]: string[];
+  };
 }
 
 export interface Selecter {
@@ -244,6 +251,84 @@ export const userSetHabits = async (_habitIDs: number[]) => {
   } catch (error) {
     console.error("Set habits fail: " + error);
   }
+};
+
+export const getRegionList = async () => {
+  try {
+    const regions = await HandleGetAllRegion();
+    if (!regions) {
+      throw new Error("Region list is empty");
+    }
+
+    return regions;
+  } catch (error) {
+    console.error("Get region list fail: " + error);
+  }
+};
+
+export const userAddRegion = async (_region: Region) => {
+  try {
+    const regions = store.getState().region;
+    if (regions.find((region) => region.id === _region.id)) {
+      throw new Error("Region already exists");
+    }
+
+    store.dispatch(addRegion(_region));
+    AsyncStorage.setItem("regions", JSON.stringify([...regions, _region]));
+
+    updateWeatherData([_region]);
+
+    console.log("Add region success");
+  } catch (error) {
+    console.error("Add region fail: " + error);
+  }
+};
+
+// Update regions[0] to current location
+const updateRegion0 = async (regions: Region[]) => {
+  const region = await HandleGetLocation();
+  regions[0] = region;
+
+  store.dispatch(setRegion(regions));
+  AsyncStorage.setItem("regions", JSON.stringify(regions));
+
+  updateWeatherData([region]);
+
+  console.log("Complete update region[0]");
+};
+
+// Update weather data
+const updateWeatherData = async (regions: Region[]) => {
+  for (let i = 0; i < regions.length; i++) {
+    const weatherData3h = await HandleGetWeatherData3h(regions[i]);
+    const weatherData12h = await HandleGetWeatherData12h(regions[i]);
+
+    store.dispatch(updateWeatherData3h(weatherData3h));
+    store.dispatch(updateWeatherData12h(weatherData12h));
+  }
+
+  console.log("Complete update weather data");
+};
+
+// Update user data
+const updateUserData = async (userID: string) => {
+  const regions = store.getState().region;
+  const user = await HandleGetUser(userID);
+  const userSettings = {
+    sport: await HandleGetUserSports(userID),
+    habit: await HandleGetUserHabits(userID),
+  };
+  const dailySuggestions = await HandleGetDailySug(
+    userID,
+    regions[0].latitude, // Werid, this shouldn't exist
+    regions[0].longitude // Maybe try to remove this from POST method
+  );
+
+  store.dispatch(setUser(user));
+  store.dispatch(setUserSettings(userSettings));
+  store.dispatch(updateDailySug(dailySuggestions));
+
+  console.log("Complete update user data");
 };
 
 //////////////////
@@ -470,7 +555,7 @@ const HandleGetLocation = async (): Promise<Region> => {
     throw new Error("Failed to get location");
   }
 
-  const weatherData = await HandleGetWeatherData3h(
+  const weatherData = await HandleGetWeatherDataCoords(
     position.coords.latitude.toString(),
     position.coords.longitude.toString()
   );
@@ -480,7 +565,7 @@ const HandleGetLocation = async (): Promise<Region> => {
   }
 
   const region: Region = {
-    id: `${weatherData[0].city}, ${weatherData[0].district}`,
+    id: "0",
     name: `${weatherData[0].city}, ${weatherData[0].district}`,
     longitude: position.coords.longitude.toString(),
     latitude: position.coords.latitude.toString(),
@@ -489,16 +574,52 @@ const HandleGetLocation = async (): Promise<Region> => {
   return region;
 };
 
-const HandleGetWeatherData3h = async (
+const HandleGetWeatherDataCoords = async (
   _latitude: string,
   _longitude: string
 ): Promise<WeatherData[]> => {
+  const weatherData = await fetch(`${hostURL}/Weather/Get3hData`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      longitude: _longitude,
+      latitude: _latitude,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      throw new Error(error);
+    });
+
+  if (!weatherData) {
+    throw new Error("Weather data (Coords) is empty");
+  }
+
+  return weatherData;
+};
+
+const HandleGetWeatherData3h = async (
+  _region: Region
+): Promise<WeatherData[]> => {
+  const [city, district] = _region.name.split(", ");
   const weatherData3h = await fetch(`${hostURL}/Weather/Get3hData`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ longitude: _longitude, latitude: _latitude }),
+    body: JSON.stringify({
+      longitude: "0",
+      latitude: "0",
+      cusloc: {
+        city: city,
+        district: district,
+      },
+    }),
   })
     .then((response) => response.json())
     .then((data) => {
@@ -516,15 +637,22 @@ const HandleGetWeatherData3h = async (
 };
 
 const HandleGetWeatherData12h = async (
-  _latitude: string,
-  _longitude: string
+  _region: Region
 ): Promise<WeatherData[]> => {
+  const [city, district] = _region.name.split(", ");
   const weatherData12h = await fetch(`${hostURL}/Weather/Get12hData`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ longitude: _longitude, latitude: _latitude }),
+    body: JSON.stringify({
+      longitude: "0",
+      latitude: "0",
+      cusloc: {
+        city: city,
+        district: district,
+      },
+    }),
   })
     .then((response) => response.json())
     .then((data) => {
@@ -572,139 +700,73 @@ const HandleGetDailySug = async (
   return data;
 };
 
+const HandleGetAllRegion = async (): Promise<Region[]> => {
+  const data = await fetch(`${hostURL}/Users/GetAllRegion`, {
+    method: "GET",
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data as RegionList;
+    })
+    .catch((error) => {
+      throw new Error(error);
+    });
+
+  if (!data) {
+    throw new Error("Region list is empty");
+  }
+
+  const regions: Region[] = [];
+
+  for (const key in data.city) {
+    data.city[key].forEach((district) => {
+      regions.push({
+        id: `${key}, ${district}`,
+        name: `${key}, ${district}`,
+        longitude: "0",
+        latitude: "0",
+      });
+    });
+  }
+
+  return regions;
+};
+
 export default function TabLayout() {
   useEffect(() => {
     // Update current location and current time every minute
     const Update = async () => {
-      try {
-        console.log("Updating data......");
+      console.log("Updating data......");
 
-        let userID: string = "-1";
-        let user: User = {} as User;
-        let userSettings: UserSettings = {} as UserSettings;
-        let regions: Region[] = [];
-        let region: Region | null = null;
-        let weatherData3h: WeatherData[] = [];
-        let weatherData12h: WeatherData[] = [];
-        let dailySuggestions: DailySug = {};
+      let userID: string = (await AsyncStorage.getItem("userID")) || "-1";
+      let regions: Region[] = JSON.parse(
+        (await AsyncStorage.getItem("regions")) || "[]"
+      );
 
-        // Get time
-        let time = new Date().toLocaleDateString();
-        console.log("Complete get time");
-
-        // Get regions from local storage
-        regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-        console.log("Complete get regions from local storage");
-
-        // Get user id from local storage
-        userID = (await AsyncStorage.getItem("userID")) || "-1";
-        console.log("Complete get userID from local storage");
-
-        // Get current location
-        try {
-          region = await HandleGetLocation();
-          console.log("Complete get current location");
-        } catch (error) {
-          console.error("Failed to get current location: " + error);
-        }
-
-        // Set regions[0] to current location
-        if (region) {
-          regions[0] = region;
-          await AsyncStorage.setItem("regions", JSON.stringify(regions));
-          console.log("Complete set regions[0] to current location");
-        } else {
-          console.log(
-            "Failed to set regions[0] to current location, use local storage location instead"
-          );
-        }
-
-        // Update weather data
-        try {
-          for (let i = 0; i < regions.length; i++) {
-            weatherData3h = await HandleGetWeatherData3h(
-              regions[i].latitude,
-              regions[i].longitude
-            );
-            weatherData12h = await HandleGetWeatherData12h(
-              regions[i].latitude,
-              regions[i].longitude
-            );
-          }
-          console.log("Complete update weather data");
-        } catch (error) {
-          console.error("Failed to update weather data: " + error);
-        }
-
-        // Get user data
-        try {
-          user = await HandleGetUser(userID);
-          console.log("Complete get user data");
-        } catch (error) {
-          console.error("Failed to get user data: " + error);
-        }
-
-        // Get user settings data
-        try {
-          userSettings = {
-            sport: await HandleGetUserSports(userID),
-            habit: await HandleGetUserHabits(userID),
-          };
-          console.log("Complete get user settings data");
-        } catch (error) {
-          console.error("Failed to get user settings data: " + error);
-        }
-
-        // Get daily suggestion
-        try {
-          dailySuggestions = await HandleGetDailySug(
-            userID,
-            regions[0].latitude,
-            regions[0].longitude
-          );
-          console.log(dailySuggestions);
-          console.log("Complete get daily sport suggestion");
-        } catch (error) {
-          console.error("Failed to get daily sport suggestion: " + error);
-        }
-
-        // Set store data
-        store.dispatch(setRegion(regions));
-        store.dispatch(updateRegion(regions[0].id));
-        store.dispatch(setUser(user));
-        store.dispatch(setUserSettings(userSettings));
-        store.dispatch(updateWeatherData3h(weatherData3h));
-        store.dispatch(updateWeatherData12h(weatherData12h));
-        store.dispatch(updateDailySug(dailySuggestions));
-        console.log("Complete set store data");
-
-        console.log(
-          "Data update completed! \n",
-          "time: ",
-          time,
-          "\n",
-          "regions: ",
-          store.getState().region,
-          "\n",
-          "weatherData: ",
-          store.getState().weatherData,
-          "\n",
-          "user: ",
-          store.getState().user,
-          "\n",
-          "userSettings: ",
-          store.getState().userSettings,
-          "\n",
-          "dailySuggestions: ",
-          store.getState().dailySuggestions
-        );
-      } catch (error) {
-        console.error("Data update failed! " + error);
+      if (regions.length !== 0) {
+        store.dispatch(updateRegion(regions[0].name));
+        AsyncStorage.setItem("regions", JSON.stringify(regions));
       }
-    };
-    Update();
-    store.dispatch(updateTimeInterval(0));
 
+      await Promise.all([
+        updateRegion0(regions),
+        updateWeatherData(regions),
+        updateUserData(userID),
+      ]);
+
+      console.log(
+        "Data update success! \n" +
+          "-------------------\n" +
+          `${regions[0].name}: ` +
+          new Date() +
+          "\n" +
+          "-------------------\n" +
+          "Data: " +
+          JSON.stringify(store.getState())
+      );
+    };
+
+    Update();
     const interval = setInterval(async () => {
       await Update();
     }, 60000); // Time gap (ms)
@@ -718,18 +780,34 @@ export default function TabLayout() {
     <Provider store={store}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+          tabBarActiveTintColor: "white", // 設置圖標為白色
+          tabBarInactiveTintColor: "white", // 未選中的圖標顏色
           headerShown: false,
+          tabBarStyle: styles.tabBar, // 應用自定義的樣式
         }}
       >
         <Tabs.Screen
+          name="menu"
+          options={{
+            title: "",
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon
+                name={focused ? "menu" : "menu-outline"}
+                color={color}
+                size={20} // 縮小圖標
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="index"
           options={{
-            title: "Home",
+            title: "",
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
                 name={focused ? "home" : "home-outline"}
                 color={color}
+                size={20} // 縮小圖標
               />
             ),
           }}
@@ -737,11 +815,12 @@ export default function TabLayout() {
         <Tabs.Screen
           name="setting"
           options={{
-            title: "Settings",
+            title: "",
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
                 name={focused ? "settings-sharp" : "settings-outline"}
                 color={color}
+                size={20} // 縮小圖標
               />
             ),
           }}
@@ -750,3 +829,15 @@ export default function TabLayout() {
     </Provider>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // 黑色半透明背景
+    position: "absolute", // 讓背景浮動
+    height: "8%", // 調整高度以便縮小圖標居中
+    paddingHorizontal: 120,
+    paddingBottom: 30,
+    paddingTop: 10,
+    borderTopWidth: 0,
+  },
+});

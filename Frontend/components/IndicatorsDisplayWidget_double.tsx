@@ -1,8 +1,10 @@
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { useSelector } from "react-redux";
+import { useState } from "react";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
+import { SlideModal } from "@/components/SlideModal";
 
 import {
   Selecter,
@@ -19,6 +21,8 @@ export function IndicatorsDisplayWidget_double({
   type1,
   type2,
 }: IndicatorsDisplayWidgetProps_double) {
+  const [modalVisible, setModalVisible] = useState(false);
+
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
@@ -30,38 +34,19 @@ export function IndicatorsDisplayWidget_double({
   const indicator2 =
     indicatorsDictionary[type2 as keyof typeof indicatorsDictionary];
 
-  if (Object.keys(weatherDataList).length === 0) {
-    return (
-      <TouchableOpacity style={{ flex: 1, width: "100%" }}>
-        <Widget style={styles.customWidgetStyle}>
-          <View style={styles.layout}>
-            <View style={styles.titleDisplay}>
-              <SvgImage style={styles.svgImage} name={type1} />
-              <Text style={styles.title}>{indicator1.title}</Text>
-            </View>
-            <Text style={styles.value}>--</Text>
-          </View>
-
-          <View style={styles.layout}>
-            <View style={styles.titleDisplay}>
-              <SvgImage style={styles.svgImage} name={type2} />
-              <Text style={styles.title}>{indicator2.title}</Text>
-            </View>
-            <Text style={styles.value}>--</Text>
-          </View>
-        </Widget>
-      </TouchableOpacity>
-    );
-  }
-
   indicator1.value =
     weatherDataList?.[selecter.region]?.[0]?.[0]?.[type1] ?? ""; // region - timeInterval - index
   indicator2.value =
     weatherDataList?.[selecter.region]?.[0]?.[0]?.[type2] ?? "";
 
   return (
-    <TouchableOpacity style={{ flex: 1, width: "100%" }}>
-      <Widget style={styles.customWidgetStyle}>
+    <TouchableOpacity
+      style={{ flex: 1, width: "100%" }}
+      onPress={() => {
+        setModalVisible(!modalVisible);
+      }}
+    >
+      <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
         <View style={styles.layout}>
           <View style={styles.titleDisplay}>
             <SvgImage style={styles.svgImage} name={type1} />
@@ -78,6 +63,13 @@ export function IndicatorsDisplayWidget_double({
           <Text style={styles.value}>{indicator2.value + indicator2.unit}</Text>
         </View>
       </Widget>
+      <SlideModal
+        isModalShow={modalVisible}
+        onClose={() => {
+          setModalVisible(false);
+        }}
+        content={<Text>here put content</Text>}
+      />
     </TouchableOpacity>
   );
 }

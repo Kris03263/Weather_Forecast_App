@@ -460,9 +460,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#10202b",
-    padding: 20,
-    gap: 20,
   },
   inputLabel: {
     fontSize: 16,

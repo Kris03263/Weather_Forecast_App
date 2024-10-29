@@ -3,7 +3,7 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const tintColorLight = "#0a7ea4";
+const tintColorLight = "#FFFFFF";
 const tintColorDark = "#fff";
 
 export const Colors = {
@@ -25,8 +25,10 @@ export const Colors = {
   },
 };
 
+// ["rgba(51, 51, 51, 1)", "rgba(51, 51, 51, 1)"];
+
 export const BackgroundGradient = {
-  default: ["rgba(51, 51, 51, 1)", "rgba(51, 51, 51, 1)"],
+  default: ["rgba(3, 132, 226, 1)", "rgba(104, 181, 238, 1)"],
   day: {
     "01": ["rgba(3, 132, 226, 1)", "rgba(104, 181, 238, 1)"],
     "02": ["rgba(3, 132, 226, 1)", "rgba(104, 181, 238, 1)"],

@@ -1,53 +1,56 @@
-import { StyleSheet, View,TouchableOpacity,Text} from "react-native"
+import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { Widget } from "@/components/Widget";
 import { useState } from "react";
-import { SlideModal } from "@/components/slideModal";
+import { SlideModal } from "@/components/SlideModal";
+import { WeatherDataList } from "@/app/(tabs)/_layout";
+import { useSelector } from "react-redux";
 
+export function EarthQuakeDisplayWidget() {
+  const [modalVisible, setModalVisible] = useState(false);
 
-export function EarthQuakeDisplayWidget(){
-  const [earthquakeModalVisible, setEarthquakeModalVisible] = useState(false);
+  const weatherDataList = useSelector(
+    (state: { weatherData: WeatherDataList }) => state.weatherData
+  );
 
-  const handleCoseModal = () =>{
-    setEarthquakeModalVisible(false);
-  }
-    return(
-        <TouchableOpacity 
-        style={{ flex: 1, width: "100%" }}
-        onPress={() => setEarthquakeModalVisible(!earthquakeModalVisible)}
-        >
-        <Widget style={styles.customWidgetStyle}>
-          <View style={styles.layout}>
-            <View style={styles.titleDisplay}>
-              <Text style={styles.title}>地震資訊</Text>
-            </View>
-            <Text style={styles.value}>--</Text>
+  return (
+    <TouchableOpacity
+      style={{ flex: 1, width: "100%" }}
+      onPress={() => setModalVisible(!modalVisible)}
+    >
+      <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
+        <View style={styles.layout}>
+          <View style={styles.titleDisplay}>
+            <Text style={styles.title}>地震資訊</Text>
           </View>
-        </Widget>
-        <SlideModal isModalShow = {earthquakeModalVisible} onClose={handleCoseModal}
-      content = {
-        <Text style = {styles.modalText}>
-            地震資訊
-        </Text>
-      }/>
-      </TouchableOpacity>
-    );
+          <Text style={styles.value}>--</Text>
+        </View>
+      </Widget>
+      <SlideModal
+        isModalShow={modalVisible}
+        onClose={() => {
+          setModalVisible(false);
+        }}
+        content={<Text style={styles.modalText}>地震資訊</Text>}
+      />
+    </TouchableOpacity>
+  );
 }
 
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
   modalView: {
-    width: '100%',
-    height: '90%', // 占满屏幕的 90%
-    backgroundColor: 'white',
+    width: "100%",
+    height: "90%", // 占满屏幕的 90%
+    backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -59,57 +62,55 @@ const styles = StyleSheet.create({
   modalHandle: {
     width: 40,
     height: 5,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     borderRadius: 2.5,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginVertical: 10,
   },
   modalText: {
     marginBottom: 15,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: "#2196F3",
     borderRadius: 20,
     padding: 10,
     elevation: 2,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
-    customWidgetStyle: {
-        alignItems: "center",
-        justifyContent: "center",
-      },
-      layout: {
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 10,
-      },
-      titleDisplay: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        gap: 10,
-      },
-      title: {
-        color: "white",
-        fontSize: 20,
-        textAlign: "left",
-      },
-      value: {
-        color: "white",
-        fontSize: 32,
-        fontWeight: "bold",
-        textAlign: "left",
-      },
-      svgImage: {
-        width: 30,
-        height: 30,
-      },
-})
-
-
+  customWidgetStyle: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  layout: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  titleDisplay: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 10,
+  },
+  title: {
+    color: "white",
+    fontSize: 20,
+    textAlign: "left",
+  },
+  value: {
+    color: "white",
+    fontSize: 32,
+    fontWeight: "bold",
+    textAlign: "left",
+  },
+  svgImage: {
+    width: 30,
+    height: 30,
+  },
+});

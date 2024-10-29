@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
-import { SlideModal } from "@/components/slideModal";
+import { SlideModal } from "@/components/SlideModal";
 
 import {
   WeatherDataList,
@@ -20,11 +20,7 @@ interface IndicatorsDisplayWidgetProps_single {
 export function IndicatorsDisplayWidget_single({
   type,
 }: IndicatorsDisplayWidgetProps_single) {
-
-  const [earthquakeModalVisible, setEarthquakeModalVisible] = useState(false);
-  const handleCoseModal = () =>{
-    setEarthquakeModalVisible(false);
-  }
+  const [modalVisible, setModalVisible] = useState(false);
 
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
@@ -35,27 +31,14 @@ export function IndicatorsDisplayWidget_single({
   const indicator =
     indicatorsDictionary[type as keyof typeof indicatorsDictionary];
 
-  if (Object.keys(weatherDataList).length === 0) {
-    return (
-      <TouchableOpacity style={{ flex: 1, width: "100%" }}>
-        <Widget style={styles.customWidgetStyle}>
-          <View style={styles.layout}>
-            <View style={styles.titleDisplay}>
-              <SvgImage style={styles.svgImage} name={type} />
-              <Text style={styles.title}>{indicator.title}</Text>
-            </View>
-            <Text style={styles.value}>--</Text>
-          </View>
-        </Widget>
-      </TouchableOpacity>
-    );
-  }
-
   indicator.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.[type] ?? ""; // region - timeInterval - index
 
   return (
-    <TouchableOpacity style={{ flex: 1, width: "100%" }} onPress={() => setEarthquakeModalVisible(!earthquakeModalVisible)}>
-      <Widget style={styles.customWidgetStyle}>
+    <TouchableOpacity
+      style={{ flex: 1, width: "100%" }}
+      onPress={() => setModalVisible(!modalVisible)}
+    >
+      <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
         <View style={styles.layout}>
           <View style={styles.titleDisplay}>
             <SvgImage style={styles.svgImage} name={type} />
@@ -65,9 +48,11 @@ export function IndicatorsDisplayWidget_single({
         </View>
       </Widget>
       <SlideModal
-      isModalShow = {earthquakeModalVisible} 
-      onClose={handleCoseModal}
-      content = {<Text>here put content</Text>}
+        isModalShow={modalVisible}
+        onClose={() => {
+          setModalVisible(false);
+        }}
+        content={<Text>here put content</Text>}
       />
     </TouchableOpacity>
   );

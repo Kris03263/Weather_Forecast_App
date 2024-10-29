@@ -23,7 +23,7 @@ export function ForecastDisplayWidget() {
 
   return (
     <TouchableOpacity>
-      <Widget style={styles.customWidgetStyle}>
+      <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
         <View style={styles.titleDisplay}>
           <SvgImage style={{ width: 30, height: 30 }} name="weather" />
           <Text style={styles.title}>天氣預報</Text>

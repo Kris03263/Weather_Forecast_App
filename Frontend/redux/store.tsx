@@ -14,7 +14,7 @@ const store = configureStore({
     selecter: selecterSlice,
     user: userSlice,
     userSettings: userSettingsSlice,
-    dailySuggestions: dailySugSlice,
+    dailySug: dailySugSlice,
   },
 });
 

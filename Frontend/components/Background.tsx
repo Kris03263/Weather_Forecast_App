@@ -11,9 +11,10 @@ import { WeatherData } from "@/app/(tabs)/_layout";
 
 interface BackgroundProps {
   weatherData: WeatherData | null;
+  style?: object;
 }
 
-export const Background = ({ weatherData }: BackgroundProps) => {
+export const Background = ({ weatherData, style }: BackgroundProps) => {
   // Background Control
   const [backgroundColor, setBackgroundColor] = useState(
     BackgroundGradient.default
@@ -43,13 +44,16 @@ export const Background = ({ weatherData }: BackgroundProps) => {
   return (
     <LinearGradient
       colors={backgroundColor}
-      style={{
-        position: "absolute",
-        left: 0,
-        right: 0,
-        top: 0,
-        height: "100%",
-      }}
+      style={[
+        {
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: "100%",
+        },
+        style,
+      ]}
     />
   );
 };
