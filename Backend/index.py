@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from flask_swagger_ui import get_swaggerui_blueprint
 app = Flask(__name__)
-socketio = SocketIO(app,async_mode='threading')
+socketio = SocketIO(app,async_mode='gevent')
 api = Api(app)
 CORS(app)
 @app.route('/doc')
@@ -31,4 +31,4 @@ app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 register_socketio_events(socketio)
 
 if __name__ == '__main__':
-    socketio.run(app, host= "0.0.0.0", port=8000, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host= "0.0.0.0", port=8000, debug=True, allow_unsafe_werkzeug=True,use_reloader=False)

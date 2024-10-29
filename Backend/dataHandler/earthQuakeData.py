@@ -2,7 +2,39 @@ import requests
 from .methodPack import haversine,setLocate
 
 url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorization=CWA-3D385D45-EFD5-4BD3-9677-9100AD39A4A2&limit=10"
-testData = []
+testData = [{
+        "color": "testColor",
+        "content": "這是初始化的地震",
+        "depth": "100",
+        "distance": "50",
+        "intensity": [
+            {
+                "AreaDesc": "最大震度1級地區",
+                "AreaIntensity": "1級",
+                "CountyName": "臺北市、臺東縣、嘉義市、臺南市"
+            },
+            {
+                "AreaDesc": "最大震度2級地區",
+                "AreaIntensity": "2級",
+                "CountyName": "臺中市、新北市、桃園市、新竹市、苗栗縣、彰化縣、雲林縣、嘉義縣"
+            },
+            {
+                "AreaDesc": "最大震度3級地區",
+                "AreaIntensity": "3級",
+                "CountyName": "南投縣、新竹縣"
+            },
+            {
+                "AreaDesc": "最大震度4級地區",
+                "AreaIntensity": "4級",
+                "CountyName": "花蓮縣、宜蘭縣"
+            },
+        ],
+        "location": "花蓮縣政府東北方  31.8  公里 (位於臺灣東部海域)",
+        "magnitude": "6.0",
+        "nowLocationIntensity": "3級",
+        "reportImg": "https://scweb.cwa.gov.tw/webdata/OLDEQ/202410/2024101421171650480_H.png",
+        "shakeImg": "https://scweb.cwa.gov.tw/webdata/drawTrace/plotContour/2024/2024480i.png",
+        "time": "2024-10-14 21:19:16"}]
 def getEarthData2(lon,lat,city):
     return testData
 
