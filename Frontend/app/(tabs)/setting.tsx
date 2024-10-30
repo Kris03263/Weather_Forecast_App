@@ -30,7 +30,6 @@ import store from "../../redux/store";
 import { Widget } from "@/components/Widget";
 import { Background } from "@/components/Background";
 import CustomModal from "@/components/CustomModal";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 interface RadioButtonProps {
   label: string;
@@ -55,8 +54,9 @@ export default function SettingsScreen() {
   // Modal's visiblility control
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalHeader, setModalHeader] = useState("");
-  const [modalContent, setModalContent] = useState((<></>) as ReactNode);
-  const [modalFooter, setModalFooter] = useState((<></>) as ReactNode);
+  const [modalContent, setModalContent] = useState<ReactNode>();
+  const [modalFooter, setModalFooter] = useState<ReactNode>();
+  const [modalType, setModalType] = useState<ModalType>();
 
   // Temp data
   const [account, setAccount] = useState("");
@@ -96,10 +96,6 @@ export default function SettingsScreen() {
     );
   }, [userSettings]);
 
-  useEffect(() => {
-    console.log("NMSL");
-  }, [habit, sport]);
-
   const toggleOption = (
     option: number,
     setSelected: React.Dispatch<React.SetStateAction<number[]>>
@@ -112,252 +108,267 @@ export default function SettingsScreen() {
     );
   };
 
-  const openModal = (modal: {
-    header: string;
-    content: ReactNode;
-    footer: ReactNode;
-  }) => {
-    setModalHeader(modal.header);
-    setModalContent(modal.content);
-    setModalFooter(modal.footer);
+  const openModal = (ModalType: ModalType) => {
+    setModalHeader(ModalType);
+    setModalContent(getModalContent(ModalType));
+    setModalFooter(getModalFooter(ModalType));
+    setModalType(ModalType);
     setModalVisible(true);
   };
 
+  useEffect(() => {
+    if (isModalVisible) {
+      switch (modalType) {
+        case ModalType.LOGIN:
+          openModal(ModalType.LOGIN);
+          break;
+        case ModalType.REGISTER:
+          openModal(ModalType.REGISTER);
+          break;
+        case ModalType.USER:
+          openModal(ModalType.USER);
+          break;
+        case ModalType.SPORT:
+          openModal(ModalType.SPORT);
+          break;
+        case ModalType.HABIT:
+          openModal(ModalType.HABIT);
+          break;
+        default:
+          break;
+      }
+    }
+  }, [sport, habit, account, password]);
+
   enum ModalType {
-    LOGIN = "login",
-    REGISTER = "register",
-    USER = "user",
-    SPORT = "sport",
-    HABIT = "habit",
+    LOGIN = "登入",
+    REGISTER = "註冊",
+    USER = "使用者",
+    SPORT = "運動",
+    HABIT = "嗜好",
   }
 
-  const getModalByType = (type: ModalType) => {
+  const getModalContent = (type: ModalType) => {
     switch (type) {
       case ModalType.LOGIN:
-        return {
-          header: "登入",
-          content: (
-            <>
-              <View style={styles.modalInputLayout}>
-                <SvgImage style={styles.modalInputSvg} name="userAccount" />
-                <Text style={styles.modalInputLabel}>使用者名稱: </Text>
-              </View>
-              <TextInput
-                style={styles.modalInput}
-                ref={usernameLoginInputRef}
-                placeholder="輸入名稱"
-                onChangeText={setAccount}
-              />
-              <View style={styles.modalInputLayout}>
-                <SvgImage style={styles.modalInputSvg} name="userPassword" />
-                <Text style={styles.modalInputLabel}>使用者密碼: </Text>
-              </View>
-              <TextInput
-                style={styles.modalInput}
-                ref={passwordLoginInputRef}
-                placeholder="輸入密碼"
-                secureTextEntry={true}
-                onChangeText={setPassword}
-              />
-              <TouchableOpacity
-                onPress={() => {
-                  openModal(getModalByType(ModalType.REGISTER));
-                }}
-              >
-                <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
-              </TouchableOpacity>
-            </>
-          ),
-          footer: (
-            <>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={async () => {
-                  await userLogin(account, password);
-                  usernameInput?.clear();
-                  passwordInput?.clear();
-                  setModalVisible(false);
-                }}
-              >
-                <Text style={styles.buttonText}>登入</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.buttonText}>關閉</Text>
-              </TouchableOpacity>
-            </>
-          ),
-        };
+        return (
+          <>
+            <View style={styles.modalInputLayout}>
+              <SvgImage style={styles.modalInputSvg} name="userAccount" />
+              <Text style={styles.modalInputLabel}>使用者名稱: </Text>
+            </View>
+            <TextInput
+              style={styles.modalInput}
+              ref={usernameLoginInputRef}
+              placeholder="輸入名稱"
+              onChangeText={setAccount}
+            />
+            <View style={styles.modalInputLayout}>
+              <SvgImage style={styles.modalInputSvg} name="userPassword" />
+              <Text style={styles.modalInputLabel}>使用者密碼: </Text>
+            </View>
+            <TextInput
+              style={styles.modalInput}
+              ref={passwordLoginInputRef}
+              placeholder="輸入密碼"
+              secureTextEntry={true}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity
+              onPress={() => {
+                openModal(ModalType.REGISTER);
+              }}
+            >
+              <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
+            </TouchableOpacity>
+          </>
+        );
       case ModalType.REGISTER:
-        return {
-          header: "註冊",
-          content: (
-            <>
-              <View style={styles.modalInputLayout}>
-                <SvgImage style={styles.modalInputSvg} name="userAccount" />
-                <Text style={styles.modalInputLabel}>使用者名稱: </Text>
-              </View>
-              <TextInput
-                style={styles.modalInput}
-                placeholder="輸入名稱"
-                ref={usernameRegisterInputRef}
-                onChangeText={setAccount}
-              />
-              <View style={styles.modalInputLayout}>
-                <SvgImage style={styles.modalInputSvg} name="userPassword" />
-                <Text style={styles.modalInputLabel}>使用者密碼: </Text>
-              </View>
-              <TextInput
-                style={styles.modalInput}
-                placeholder="輸入密碼"
-                ref={passwordRegisterInputRef}
-                onChangeText={setPassword}
-                secureTextEntry={true}
-              />
-            </>
-          ),
-          footer: (
-            <>
-              {" "}
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={async () => {
-                  await userRegister(account, password);
-                  usernameRegisterInput?.clear();
-                  passwordRegisterInput?.clear();
-                  setModalVisible(false);
-                }}
-              >
-                <Text style={styles.buttonText}>提交</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.buttonText}>關閉</Text>
-              </TouchableOpacity>
-            </>
-          ),
-        };
+        return (
+          <>
+            <View style={styles.modalInputLayout}>
+              <SvgImage style={styles.modalInputSvg} name="userAccount" />
+              <Text style={styles.modalInputLabel}>使用者名稱: </Text>
+            </View>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="輸入名稱"
+              ref={usernameRegisterInputRef}
+              onChangeText={setAccount}
+            />
+            <View style={styles.modalInputLayout}>
+              <SvgImage style={styles.modalInputSvg} name="userPassword" />
+              <Text style={styles.modalInputLabel}>使用者密碼: </Text>
+            </View>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="輸入密碼"
+              ref={passwordRegisterInputRef}
+              onChangeText={setPassword}
+              secureTextEntry={true}
+            />
+          </>
+        );
       case ModalType.USER:
-        return {
-          header: "使用者",
-          content: (
-            <>
-              <Text style={styles.modalInputLabel}>
-                {"使用者名稱: " + user.account}
-              </Text>
-              <Text style={styles.modalInputLabel}>
-                {"使用者密碼: " + user.password}
-              </Text>
-            </>
-          ),
-          footer: (
-            <>
-              {" "}
-              <TouchableOpacity
-                onPress={async () => {
-                  await userDelete();
-                  setModalVisible(false);
-                }}
-                style={styles.modalButton}
-              >
-                <Text style={styles.buttonText}>刪除使用者</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={async () => {
-                  await userLogout();
-                  setModalVisible(false);
-                }}
-                style={styles.modalButton}
-              >
-                <Text style={styles.buttonText}>登出</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.buttonText}>關閉</Text>
-              </TouchableOpacity>
-            </>
-          ),
-        };
+        return (
+          <>
+            <Text style={styles.modalInputLabel}>
+              {"使用者名稱: " + user.account}
+            </Text>
+            <Text style={styles.modalInputLabel}>
+              {"使用者密碼: " + user.password}
+            </Text>
+          </>
+        );
       case ModalType.SPORT:
-        return {
-          header: "選擇運動",
-          content: (
-            <>
-              <View style={styles.radioGroupLayout}>
-                {["不小心刪掉忘記了"].map(
-                  // Temp data (replace with all sport request from API)
-                  (option, index) => (
-                    <RadioButton
-                      key={index}
-                      label={option}
-                      selected={sport.includes(index + 1)}
-                      onPress={() => {
-                        toggleOption(index + 1, setSport);
-                        openModal(getModalByType(ModalType.SPORT));
-                      }}
-                    />
-                  )
-                )}
-              </View>
-            </>
-          ),
-          footer: (
-            <>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={async () => {
-                  await userSetSports(sport);
-                  setModalVisible(false);
-                }}
-              >
-                <Text style={styles.buttonText}>儲存&關閉</Text>
-              </TouchableOpacity>
-            </>
-          ),
-        };
+        return (
+          <>
+            <View style={styles.radioGroupLayout}>
+              {["不小心刪掉忘記了"].map(
+                // Temp data (replace with all sport request from API)
+                (option, index) => (
+                  <RadioButton
+                    key={index}
+                    label={option}
+                    selected={sport.includes(index + 1)}
+                    onPress={() => {
+                      toggleOption(index + 1, setSport);
+                    }}
+                  />
+                )
+              )}
+            </View>
+          </>
+        );
       case ModalType.HABIT:
-        return {
-          header: "選擇嗜好",
-          content: (
-            <>
-              <View style={styles.radioGroupLayout}>
-                {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
-                  // Temp data (replace with all habit request from API)
-                  (option, index) => (
-                    <RadioButton
-                      key={index}
-                      label={option}
-                      selected={habit.includes(index + 1)}
-                      onPress={() => {
-                        toggleOption(index + 1, setHabit);
-                        openModal(getModalByType(ModalType.HABIT));
-                      }}
-                    />
-                  )
-                )}
-              </View>
-            </>
-          ),
-          footer: (
-            <>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={async () => {
-                  await userSetHabits(habit);
-                  setModalVisible(false);
-                }}
-              >
-                <Text style={styles.buttonText}>儲存&關閉</Text>
-              </TouchableOpacity>
-            </>
-          ),
-        };
+        return (
+          <>
+            <View style={styles.radioGroupLayout}>
+              {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
+                // Temp data (replace with all habit request from API)
+                (option, index) => (
+                  <RadioButton
+                    key={index}
+                    label={option}
+                    selected={habit.includes(index + 1)}
+                    onPress={() => {
+                      toggleOption(index + 1, setHabit);
+                    }}
+                  />
+                )
+              )}
+            </View>
+          </>
+        );
+      default:
+        return <></>;
+    }
+  };
+  const getModalFooter = (type: ModalType) => {
+    switch (type) {
+      case ModalType.LOGIN:
+        return (
+          <>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                usernameInput?.clear();
+                passwordInput?.clear();
+                console.log(account, password);
+                userLogin(account, password);
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.buttonText}>登入</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>關閉</Text>
+            </TouchableOpacity>
+          </>
+        );
+      case ModalType.REGISTER:
+        return (
+          <>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                usernameRegisterInput?.clear();
+                passwordRegisterInput?.clear();
+                userRegister(account, password);
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.buttonText}>提交</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>關閉</Text>
+            </TouchableOpacity>
+          </>
+        );
+      case ModalType.USER:
+        return (
+          <>
+            <TouchableOpacity
+              onPress={() => {
+                userDelete();
+                setModalVisible(false);
+              }}
+              style={styles.modalButton}
+            >
+              <Text style={styles.buttonText}>刪除使用者</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                userLogout();
+                setModalVisible(false);
+              }}
+              style={styles.modalButton}
+            >
+              <Text style={styles.buttonText}>登出</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>關閉</Text>
+            </TouchableOpacity>
+          </>
+        );
+      case ModalType.SPORT:
+        return (
+          <>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                console.log(sport);
+                userSetSports(sport);
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.buttonText}>儲存&關閉</Text>
+            </TouchableOpacity>
+          </>
+        );
+      case ModalType.HABIT:
+        return (
+          <>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                userSetHabits(habit);
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.buttonText}>儲存&關閉</Text>
+            </TouchableOpacity>
+          </>
+        );
     }
   };
 
@@ -375,8 +386,8 @@ export default function SettingsScreen() {
               style={styles.avatar}
               onPress={() => {
                 user.id && user.id !== "-1"
-                  ? openModal(getModalByType(ModalType.USER))
-                  : openModal(getModalByType(ModalType.LOGIN));
+                  ? openModal(ModalType.USER)
+                  : openModal(ModalType.LOGIN);
               }}
             ></TouchableOpacity>
           </View>
@@ -404,7 +415,7 @@ export default function SettingsScreen() {
               <Text style={styles.boxInputLabel}>運動偏好:</Text>
               <TouchableOpacity
                 style={styles.boxButton}
-                onPress={() => openModal(getModalByType(ModalType.SPORT))}
+                onPress={() => openModal(ModalType.SPORT)}
               >
                 <Text style={styles.buttonText}>選擇運動</Text>
               </TouchableOpacity>
@@ -413,7 +424,7 @@ export default function SettingsScreen() {
               <Text style={styles.boxInputLabel}>興趣偏好:</Text>
               <TouchableOpacity
                 style={styles.boxButton}
-                onPress={() => openModal(getModalByType(ModalType.HABIT))}
+                onPress={() => openModal(ModalType.HABIT)}
               >
                 <Text style={styles.buttonText}>選擇嗜好</Text>
               </TouchableOpacity>
@@ -428,7 +439,7 @@ export default function SettingsScreen() {
             <Text style={styles.boxTitle}>登入以使用設定</Text>
             <TouchableOpacity
               style={styles.modalButton}
-              onPress={() => openModal(getModalByType(ModalType.LOGIN))}
+              onPress={() => openModal(ModalType.LOGIN)}
             >
               <Text style={styles.buttonText}>登入</Text>
             </TouchableOpacity>
@@ -439,11 +450,9 @@ export default function SettingsScreen() {
       <CustomModal
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
-        modal={{
-          header: modalHeader,
-          content: modalContent,
-          footer: modalFooter,
-        }}
+        header={modalHeader}
+        content={modalContent}
+        footer={modalFooter}
       />
     </View>
   );

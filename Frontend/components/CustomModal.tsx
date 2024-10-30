@@ -1,20 +1,20 @@
 import { Modal, StyleSheet, Text, View } from "react-native";
 import { ReactNode } from "react";
 
-interface CustomModalProps {
+export interface CustomModalProps {
   isVisible: boolean;
   onClose: () => void;
-  modal: {
-    header: string;
-    content: ReactNode;
-    footer: ReactNode;
-  };
+  header: string;
+  content: ReactNode;
+  footer: ReactNode;
 }
 
 export default function CustomModal({
   isVisible,
   onClose,
-  modal: { header, content, footer },
+  header,
+  content,
+  footer,
 }: CustomModalProps) {
   return (
     <Modal

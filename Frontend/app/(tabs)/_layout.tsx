@@ -13,12 +13,11 @@ import {
   updateWeatherData12h,
 } from "@/redux/weatherDataSlice";
 import { setRegion } from "@/redux/regionListSlice";
-import { updateRegion } from "@/redux/selecterSlice";
-import { setUser } from "@/redux/userSlice";
+import { updateRegion, updateTimeInterval } from "@/redux/selecterSlice";
+import { removeUser, setUser } from "@/redux/userSlice";
 import { setUserSettings } from "@/redux/userSettingsSlice";
 import { updateDailySug } from "@/redux/dailySugSlice";
 import { StyleSheet } from "react-native";
-import { addRegion } from "@/redux/regionListSlice";
 
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
@@ -121,19 +120,15 @@ export interface DailySug {
 
 export const userLogin = async (_account: string, _password: string) => {
   try {
+    // FETCH
     const user = await HandleUserLogin(_account, _password);
-    if (!user || user.id === "-1") {
-      throw new Error(user?.status ?? "User data is empty");
-    }
 
-    const userSettings = {
-      sport: await HandleGetUserSports(user.id),
-      habit: await HandleGetUserHabits(user.id),
-    };
-
-    AsyncStorage.setItem("userID", JSON.stringify(user.id));
+    // STORE
     store.dispatch(setUser(user));
-    store.dispatch(setUserSettings(userSettings));
+    AsyncStorage.setItem("userID", JSON.stringify(user.id));
+
+    // UPDATE
+    await Promise.all([updateUserSettings(), updateDailySuggestions()]);
 
     console.log("Login success");
   } catch (error) {
@@ -143,11 +138,12 @@ export const userLogin = async (_account: string, _password: string) => {
 
 export const userLogout = async () => {
   try {
-    AsyncStorage.removeItem("userID");
-    store.dispatch(
-      setUser({ account: "", password: "", id: "-1", status: "" })
-    );
-    store.dispatch(setUserSettings({ sport: [], habit: [] }));
+    // STORE
+    AsyncStorage.setItem("userID", "-1");
+    store.dispatch(removeUser());
+
+    // UPDATE
+    await Promise.all([updateUserSettings(), updateDailySuggestions()]);
 
     console.log("Logout success");
   } catch (error) {
@@ -157,18 +153,21 @@ export const userLogout = async () => {
 
 export const userDelete = async () => {
   try {
-    const userID = store.getState().user.id;
-    const response = await HandleDeleteUser(userID);
-
-    if (!response) {
-      throw new Error("Failed to delete user");
+    // GET
+    let userID = store.getState().user?.id ?? "";
+    if (!userID) {
+      userID = (await AsyncStorage.getItem("userID")) || "-1";
     }
 
-    AsyncStorage.removeItem("userID");
-    store.dispatch(
-      setUser({ account: "", password: "", id: "-1", status: "" })
-    );
-    store.dispatch(setUserSettings({ sport: [], habit: [] }));
+    // FETCH
+    const response = await HandleDeleteUser(userID);
+
+    // STORE
+    AsyncStorage.setItem("userID", "-1");
+    store.dispatch(removeUser());
+
+    // AFTER
+    await Promise.all([updateUserSettings(), updateDailySuggestions()]);
 
     console.log("Delete success");
   } catch (error) {
@@ -178,26 +177,15 @@ export const userDelete = async () => {
 
 export const userRegister = async (_account: string, _password: string) => {
   try {
+    // FETCH
     const user = await HandleSetUser(_account, _password);
-    if (!user || user.id === "-1") {
-      throw new Error(user?.status ?? "User data is empty");
-    }
 
-    const response =
-      (await HandleSetUserSports(user.id, [])) &&
-      (await HandleSetUserHabits(user.id, []));
-    if (!response) {
-      throw new Error("Failed to set user settings");
-    }
-
-    const userSettings = {
-      sport: await HandleGetUserSports(user.id),
-      habit: await HandleGetUserHabits(user.id),
-    };
-
-    AsyncStorage.setItem("userID", JSON.stringify(user.id));
+    // STORE
     store.dispatch(setUser(user));
-    store.dispatch(setUserSettings(userSettings));
+    AsyncStorage.setItem("userID", JSON.stringify(user.id));
+
+    // UPDATE
+    await Promise.all([updateUserSettings(), updateDailySuggestions()]);
 
     console.log("Register success");
   } catch (error) {
@@ -207,19 +195,22 @@ export const userRegister = async (_account: string, _password: string) => {
 
 export const userSetSports = async (_sportIDs: number[]) => {
   try {
-    const userID = store.getState().user.id;
-
-    const response = await HandleSetUserSports(userID, _sportIDs);
-    if (!response) {
-      throw new Error("Failed to set sports");
+    // GET
+    const habit = store.getState().userSettings?.habit ?? [];
+    let userID = store.getState().user?.id ?? "";
+    if (!userID) {
+      userID = (await AsyncStorage.getItem("userID")) || "-1";
     }
 
+    // FETCH
+    const response = await HandleSetUserSports(userID, _sportIDs);
     const sports = await HandleGetUserSports(userID);
 
+    // STORE
     store.dispatch(
       setUserSettings({
         sport: sports,
-        habit: store.getState().userSettings.habit,
+        habit: habit,
       })
     );
 
@@ -231,18 +222,21 @@ export const userSetSports = async (_sportIDs: number[]) => {
 
 export const userSetHabits = async (_habitIDs: number[]) => {
   try {
-    const userID = store.getState().user.id;
-
-    const response = await HandleSetUserHabits(userID, _habitIDs);
-    if (!response) {
-      throw new Error("Failed to set habits");
+    // GET
+    const sport = store.getState().userSettings?.sport ?? [];
+    let userID = store.getState().user?.id ?? "";
+    if (!userID) {
+      userID = (await AsyncStorage.getItem("userID")) || "-1";
     }
 
+    // FETCH
+    const response = await HandleSetUserHabits(userID, _habitIDs);
     const habits = await HandleGetUserHabits(userID);
 
+    // STORE
     store.dispatch(
       setUserSettings({
-        sport: store.getState().userSettings.sport,
+        sport: sport,
         habit: habits,
       })
     );
@@ -255,11 +249,10 @@ export const userSetHabits = async (_habitIDs: number[]) => {
 
 export const getRegionList = async () => {
   try {
+    // FETCH
     const regions = await HandleGetAllRegion();
-    if (!regions) {
-      throw new Error("Region list is empty");
-    }
 
+    // RETURN
     return regions;
   } catch (error) {
     console.error("Get region list fail: " + error);
@@ -268,15 +261,25 @@ export const getRegionList = async () => {
 
 export const userAddRegion = async (_region: Region) => {
   try {
-    const regions = store.getState().region;
-    if (regions.find((region) => region.id === _region.id)) {
-      throw new Error("Region already exists");
+    // GET
+    let regions = store.getState().region ?? [];
+    if (regions.length === 0) {
+      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
     }
 
-    store.dispatch(addRegion(_region));
-    AsyncStorage.setItem("regions", JSON.stringify([...regions, _region]));
+    // PROCESS
+    if (regions.find((region) => region.id === _region.id)) {
+      throw new Error("Region already exists");
+    } else {
+      regions.push(_region);
+    }
 
-    updateWeatherData([_region]);
+    // STORE
+    store.dispatch(setRegion(regions));
+    AsyncStorage.setItem("regions", JSON.stringify(regions));
+
+    // BEFORE UPDATE
+    await Promise.all([updateWeatherData_3h(), updateWeatherData_12h()]);
 
     console.log("Add region success");
   } catch (error) {
@@ -284,54 +287,151 @@ export const userAddRegion = async (_region: Region) => {
   }
 };
 
-// Update regions[0] to current location
-const updateRegion0 = async (regions: Region[]) => {
-  const region = await HandleGetLocation();
-  regions[0] = region ?? regions[0];
+export const updateRegion0 = async () => {
+  try {
+    // GET
+    let regions = store.getState().region ?? [];
+    if (regions.length === 0) {
+      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
+    }
 
-  store.dispatch(setRegion(regions));
-  AsyncStorage.setItem("regions", JSON.stringify(regions));
+    // FETCH
+    const region = await HandleGetLocation();
 
-  updateWeatherData([region]);
+    // PROCESS
+    regions[0] = region ?? regions[0];
 
-  console.log("Complete update region[0]");
-};
+    // STORE
+    store.dispatch(setRegion(regions));
+    AsyncStorage.setItem("regions", JSON.stringify(regions));
 
-// Update weather data
-const updateWeatherData = async (regions: Region[]) => {
-  for (let i = 0; i < regions.length; i++) {
-    const weatherData3h = await HandleGetWeatherData3h(regions[i]);
-    const weatherData12h = await HandleGetWeatherData12h(regions[i]);
+    // BEFORE UPDATE
+    await Promise.all([updateWeatherData_3h(), updateWeatherData_12h()]);
 
-    store.dispatch(updateWeatherData3h(weatherData3h));
-    store.dispatch(updateWeatherData12h(weatherData12h));
+    console.log("Update region[0] success");
+  } catch (error) {
+    console.error("Update region[0] fail: " + error);
   }
-
-  console.log("Complete update weather data");
 };
 
-// Update user data
-const updateUserData = async (userID: string) => {
-  const regions = store.getState().region;
-  const user = await HandleGetUser(userID);
-  const userSettings = {
-    sport: await HandleGetUserSports(userID),
-    habit: await HandleGetUserHabits(userID),
-  };
-  const dailySuggestions = await HandleGetDailySug(
-    userID,
-    regions[0]?.latitude ?? "0", // Werid, this shouldn't exist
-    regions[0]?.longitude ?? "0" // Maybe try to remove this from POST method
-  );
+export const updateWeatherData_3h = async () => {
+  try {
+    // GET
+    let regions = store.getState().region ?? [];
+    if (regions.length === 0) {
+      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
+    }
 
-  store.dispatch(setUser(user));
-  store.dispatch(setUserSettings(userSettings));
-  store.dispatch(updateDailySug(dailySuggestions));
+    for (let i = 0; i < regions.length; i++) {
+      // FETCH
+      const weatherData3h = await HandleGetWeatherData3h(regions[i]);
 
-  console.log("Complete update user data");
+      // STORE
+      store.dispatch(updateWeatherData3h(weatherData3h));
+    }
+
+    console.log("Update weather data (3h) success");
+  } catch (error) {
+    console.error("Update weather data (3h) fail: " + error);
+  }
 };
 
-const requestLocationPermission = async () => {
+export const updateWeatherData_12h = async () => {
+  try {
+    // GET
+    let regions = store.getState().region ?? [];
+    if (regions.length === 0) {
+      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
+    }
+
+    for (let i = 0; i < regions.length; i++) {
+      // FETCH
+      const weatherData12h = await HandleGetWeatherData12h(regions[i]);
+
+      // STORE
+      store.dispatch(updateWeatherData12h(weatherData12h));
+    }
+
+    console.log("Update weather data (12h) success");
+  } catch (error) {
+    console.error("Update weather data (12h) fail: " + error);
+  }
+};
+
+export const updateUser = async () => {
+  try {
+    // GET
+    let userID = store.getState().user?.id ?? "";
+    if (!userID) {
+      userID = (await AsyncStorage.getItem("userID")) || "-1";
+    }
+
+    // FETCH
+    const user = await HandleGetUser(userID);
+
+    // STORE
+    store.dispatch(setUser(user));
+    AsyncStorage.setItem("userID", JSON.stringify(user.id));
+
+    console.log("Update user data success");
+  } catch (error) {
+    console.error("Update user data fail: " + error);
+  }
+};
+
+export const updateDailySuggestions = async () => {
+  try {
+    // GET
+    let userID = store.getState().user?.id ?? "";
+    let regions = store.getState().region ?? [];
+    if (!userID) {
+      userID = (await AsyncStorage.getItem("userID")) || "-1";
+    }
+    if (regions.length === 0) {
+      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
+    }
+
+    // FETCH
+    const dailySuggestions = await HandleGetDailySug(
+      userID,
+      regions[0]?.latitude ?? "0",
+      regions[0]?.longitude ?? "0"
+    );
+
+    // STORE
+    store.dispatch(updateDailySug(dailySuggestions));
+
+    console.log("Update daily suggestions success");
+  } catch (error) {
+    console.error("Update daily suggestions fail: " + error);
+  }
+};
+
+export const updateUserSettings = async () => {
+  try {
+    // GET
+    let userID = store.getState().user?.id ?? "";
+    if (!userID) {
+      userID = (await AsyncStorage.getItem("userID")) || "-1";
+    }
+
+    // FETCH
+    const userSettings = {
+      sport: await HandleGetUserSports(userID),
+      habit: await HandleGetUserHabits(userID),
+    };
+
+    // STORE
+    store.dispatch(setUserSettings(userSettings));
+    AsyncStorage.setItem("userSettings", JSON.stringify(userSettings));
+
+    console.log("Update user settings success");
+  } catch (error) {
+    console.error("Update user settings fail: " + error);
+  }
+};
+
+export const requestLocationPermission = async () => {
   let { status } = await Location.requestForegroundPermissionsAsync();
   return status == "granted";
 };
@@ -340,7 +440,7 @@ const requestLocationPermission = async () => {
 // API fetching //
 //////////////////
 
-const hostURL = "https://weather-2-10.onrender.com"; //`${hostURL}/`
+const hostURL = "http://35.194.187.105:80"; //`${hostURL}/`
 
 const HandleSetUser = async (
   _account: string,
@@ -360,14 +460,11 @@ const HandleSetUser = async (
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!data) {
-    throw new Error("Data is empty");
-  }
-  if (data.id === "-1") {
-    console.error(data.status); // Set to global error message
+  if (data!.id === "-1") {
+    throw new Error(data!.status);
   }
 
-  return data;
+  return data!;
 };
 
 const HandleGetUser = async (_userID: string): Promise<User> => {
@@ -380,17 +477,14 @@ const HandleGetUser = async (_userID: string): Promise<User> => {
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!data) {
-    throw new Error("Data is empty");
-  }
-  if (data.id === "-1") {
-    console.error(data.status); // Set to global error message
+  if (data!.id === "-1") {
+    throw new Error(data!.status);
   }
 
-  return data;
+  return data!;
 };
 
-const HandleDeleteUser = async (_userID: string): Promise<boolean> => {
+const HandleDeleteUser = async (_userID: string): Promise<any> => {
   const response = await fetch(`${hostURL}/Users/`, {
     headers: {
       "Content-Type": "application/json",
@@ -402,15 +496,11 @@ const HandleDeleteUser = async (_userID: string): Promise<boolean> => {
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.status === "Successful") {
-        return true;
-      } else {
-        return false;
-      }
+      return data;
     })
     .catch((error) => console.error("Error:", error));
 
-  return !!response;
+  return response;
 };
 
 const HandleUserLogin = async (
@@ -433,20 +523,17 @@ const HandleUserLogin = async (
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!data) {
-    throw new Error("Data is empty");
-  }
-  if (data.id === "-1") {
-    console.error(data.status); // Set to global error message
+  if (data!.id === "-1") {
+    throw new Error(data!.status);
   }
 
-  return data;
+  return data!;
 };
 
 const HandleSetUserSports = async (
   _userID: string,
   _sportIDs: number[]
-): Promise<boolean> => {
+): Promise<any> => {
   const response = await fetch(`${hostURL}/Users/UserSports`, {
     headers: {
       "Content-Type": "application/json",
@@ -459,15 +546,11 @@ const HandleSetUserSports = async (
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.Stats === "Update Successful !") {
-        return true;
-      } else {
-        return false;
-      }
+      return data;
     })
     .catch((error) => console.error("Error:", error));
 
-  return !!response;
+  return response;
 };
 
 const HandleGetUserSports = async (_userID: string): Promise<Sport[]> => {
@@ -483,23 +566,17 @@ const HandleGetUserSports = async (_userID: string): Promise<Sport[]> => {
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!Array.isArray(data)) {
-    throw new Error("Data type is not [array]");
-  }
-  if (data.length === 0) {
-    return [];
-  }
-  if (data[0].id === -1) {
-    console.error(data[0].sportName); // Set to global error message
+  if (data?.[0]?.id === -1) {
+    console.error(data?.[0].sportName); // Set to global error message
   }
 
-  return data;
+  return data!;
 };
 
 const HandleSetUserHabits = async (
   _userID: string,
   _habitIDs: number[]
-): Promise<boolean> => {
+): Promise<any> => {
   const response = await fetch(`${hostURL}/Users/UserHabits`, {
     headers: {
       "Content-Type": "application/json",
@@ -512,15 +589,11 @@ const HandleSetUserHabits = async (
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.Stats === "Update Successful !") {
-        return true;
-      } else {
-        return false;
-      }
+      return data;
     })
     .catch((error) => console.error("Error:", error));
 
-  return !!response;
+  return response;
 };
 
 const HandleGetUserHabits = async (_userID: string): Promise<Habit[]> => {
@@ -538,17 +611,11 @@ const HandleGetUserHabits = async (_userID: string): Promise<Habit[]> => {
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!Array.isArray(data)) {
-    throw new Error("Data type is not [array]");
-  }
-  if (data.length === 0) {
-    return [];
-  }
-  if (data[0].id === -1) {
-    console.error(data[0].habitName); // Set to global error message
+  if (data?.[0]?.id === -1) {
+    console.error(data?.[0].habitName); // Set to global error message
   }
 
-  return data;
+  return data!;
 };
 
 // Need fix
@@ -587,7 +654,7 @@ const HandleGetWeatherDataCoords = async (
   _latitude: string,
   _longitude: string
 ): Promise<WeatherData[]> => {
-  const weatherData = await fetch(`${hostURL}/Weather/Get3hData`, {
+  const data = await fetch(`${hostURL}/Weather/Get3hData`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -599,24 +666,20 @@ const HandleGetWeatherDataCoords = async (
   })
     .then((response) => response.json())
     .then((data) => {
-      return data;
+      return data as WeatherData[];
     })
     .catch((error) => {
-      throw new Error(error);
+      console.error("Error:", error);
     });
 
-  if (!weatherData) {
-    throw new Error("Weather data (Coords) is empty");
-  }
-
-  return weatherData;
+  return data!;
 };
 
 const HandleGetWeatherData3h = async (
   _region: Region
 ): Promise<WeatherData[]> => {
   const [city, district] = _region.name.split(", ");
-  const weatherData3h = await fetch(`${hostURL}/Weather/Get3hData`, {
+  const data = await fetch(`${hostURL}/Weather/Get3hData`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -632,17 +695,13 @@ const HandleGetWeatherData3h = async (
   })
     .then((response) => response.json())
     .then((data) => {
-      return data;
+      return data as WeatherData[];
     })
     .catch((error) => {
-      throw new Error(error);
+      console.error("Error:", error);
     });
 
-  if (!weatherData3h) {
-    throw new Error("Weather data (3h) is empty");
-  }
-
-  return weatherData3h;
+  return data!;
 };
 
 const HandleGetWeatherData12h = async (
@@ -699,14 +758,10 @@ const HandleGetDailySug = async (
       return data as DailySug;
     })
     .catch((error) => {
-      throw new Error(error);
+      console.error("Error:", error);
     });
 
-  if (!data) {
-    throw new Error("Daily suggestion is empty");
-  }
-
-  return data;
+  return data!;
 };
 
 const HandleGetAllRegion = async (): Promise<Region[]> => {
@@ -718,17 +773,13 @@ const HandleGetAllRegion = async (): Promise<Region[]> => {
       return data as RegionList;
     })
     .catch((error) => {
-      throw new Error(error);
+      console.error("Error:", error);
     });
-
-  if (!data) {
-    throw new Error("Region list is empty");
-  }
 
   const regions: Region[] = [];
 
-  for (const key in data.city) {
-    data.city[key].forEach((district) => {
+  for (const key in data!.city) {
+    data!.city[key].forEach((district) => {
       regions.push({
         id: `${key}, ${district}`,
         name: `${key}, ${district}`,
@@ -747,21 +798,16 @@ export default function TabLayout() {
     const Update = async () => {
       console.log("Updating data......");
 
-      let userID: string = (await AsyncStorage.getItem("userID")) || "-1";
-      let regions: Region[] = JSON.parse(
-        (await AsyncStorage.getItem("regions")) || "[]"
-      );
-
-      if (regions.length !== 0) {
-        store.dispatch(updateRegion(regions[0].name));
-        AsyncStorage.setItem("regions", JSON.stringify(regions));
-      }
-
       await Promise.all([
-        updateRegion0(regions),
-        updateWeatherData(regions),
-        updateUserData(userID),
+        updateRegion0(),
+        updateWeatherData_3h(),
+        updateWeatherData_12h(),
+        updateUser(),
+        updateDailySuggestions(),
+        updateUserSettings(),
       ]);
+
+      const regions = store.getState().region;
 
       console.log(
         "Data update success! \n" +
@@ -771,10 +817,20 @@ export default function TabLayout() {
           "\n" +
           "-------------------\n" +
           "Data: " +
-          JSON.stringify(store.getState())
+          JSON.stringify(store.getState().user)
       );
     };
 
+    const init = async () => {
+      let regions: Region[] = JSON.parse(
+        (await AsyncStorage.getItem("regions")) || "[]"
+      );
+
+      store.dispatch(updateRegion(regions[0]?.name ?? ""));
+      store.dispatch(updateTimeInterval(0));
+    };
+
+    init();
     Update();
     const interval = setInterval(async () => {
       await Update();
