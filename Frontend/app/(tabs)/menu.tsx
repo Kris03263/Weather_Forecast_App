@@ -1,24 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
-  Modal,
   StyleSheet,
-  Alert,
   ScrollView,
   FlatList,
 } from "react-native";
 import { useSelector } from "react-redux";
 
-import {
-  Selecter,
-  WeatherDataList,
-  WeatherData,
-  Region,
-  userAddRegion,
-} from "./_layout";
+import { WeatherDataList, WeatherData, Region, userAddRegion } from "./_layout";
 
 import { Background } from "@/components/Background";
 import { SvgImage } from "@/components/Svg";
@@ -117,27 +108,6 @@ function regionCard(region: string, weatherData: WeatherData) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  inputLabel: {
-    fontSize: 16,
-    color: "white",
-    marginRight: 10,
-  },
-  buttonText: {
-    fontSize: 16,
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  linkText: {
-    color: "gray",
-    textDecorationLine: "underline",
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
   },
   topSection: {
     flexDirection: "row",

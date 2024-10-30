@@ -113,43 +113,37 @@ export default function HomeScreen() {
           )}
           scrollEventThrottle={16}
         >
-          <Animated.View
-            style={{
-              gap: 20,
-            }}
-          >
-            <ForecastDisplayWidget />
+          <ForecastDisplayWidget />
 
-            <View style={styles.row}>
-              <IndicatorsDisplayWidget_single type="wet" />
-              <IndicatorsDisplayWidget_single type="rainRate" />
-            </View>
+          <View style={styles.row}>
+            <IndicatorsDisplayWidget_single type="wet" />
+            <IndicatorsDisplayWidget_single type="rainRate" />
+          </View>
 
-            <View style={styles.row}>
-              <IndicatorsDisplayWidget_double
-                type1="windSpeed"
-                type2="windDirection"
-              />
-            </View>
+          <View style={styles.row}>
+            <IndicatorsDisplayWidget_double
+              type1="windSpeed"
+              type2="windDirection"
+            />
+          </View>
 
-            <View style={styles.row}>
-              <SuggestionDisplayWidget type="dressing" />
-              <SuggestionDisplayWidget type="health" />
-            </View>
+          <View style={styles.row}>
+            <SuggestionDisplayWidget type="dressing" />
+            <SuggestionDisplayWidget type="health" />
+          </View>
 
-            <View style={styles.row}>
-              <SuggestionDisplayWidget type="sport" />
-              <SuggestionDisplayWidget type="transportation" />
-            </View>
+          <View style={styles.row}>
+            <SuggestionDisplayWidget type="sport" />
+            <SuggestionDisplayWidget type="transportation" />
+          </View>
 
-            <View style={styles.row}>
-              <SuggestionDisplayWidget type="activity" />
-            </View>
+          <View style={styles.row}>
+            <SuggestionDisplayWidget type="activity" />
+          </View>
 
-            <View style={styles.row}>
-              <EarthQuakeDisplayWidget />
-            </View>
-          </Animated.View>
+          <View style={styles.row}>
+            <EarthQuakeDisplayWidget />
+          </View>
         </ScrollView>
       )}
     </View>
@@ -206,7 +200,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "stretch",
     justifyContent: "center",
-    gap: 20,
   },
   dropdown: {
     marginLeft: 20,

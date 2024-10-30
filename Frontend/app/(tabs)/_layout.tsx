@@ -287,7 +287,7 @@ export const userAddRegion = async (_region: Region) => {
 // Update regions[0] to current location
 const updateRegion0 = async (regions: Region[]) => {
   const region = await HandleGetLocation();
-  regions[0] = region;
+  regions[0] = region ?? regions[0];
 
   store.dispatch(setRegion(regions));
   AsyncStorage.setItem("regions", JSON.stringify(regions));
@@ -320,8 +320,8 @@ const updateUserData = async (userID: string) => {
   };
   const dailySuggestions = await HandleGetDailySug(
     userID,
-    regions[0].latitude, // Werid, this shouldn't exist
-    regions[0].longitude // Maybe try to remove this from POST method
+    regions[0]?.latitude ?? "0", // Werid, this shouldn't exist
+    regions[0]?.longitude ?? "0" // Maybe try to remove this from POST method
   );
 
   store.dispatch(setUser(user));
@@ -329,6 +329,11 @@ const updateUserData = async (userID: string) => {
   store.dispatch(updateDailySug(dailySuggestions));
 
   console.log("Complete update user data");
+};
+
+const requestLocationPermission = async () => {
+  let { status } = await Location.requestForegroundPermissionsAsync();
+  return status == "granted";
 };
 
 //////////////////
@@ -355,8 +360,11 @@ const HandleSetUser = async (
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!data || data.id === "-1") {
-    throw new Error(data?.status ?? "Data is empty");
+  if (!data) {
+    throw new Error("Data is empty");
+  }
+  if (data.id === "-1") {
+    console.error(data.status); // Set to global error message
   }
 
   return data;
@@ -372,8 +380,11 @@ const HandleGetUser = async (_userID: string): Promise<User> => {
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!data || data.id === "-1") {
-    throw new Error(data?.status ?? "Data is empty");
+  if (!data) {
+    throw new Error("Data is empty");
+  }
+  if (data.id === "-1") {
+    console.error(data.status); // Set to global error message
   }
 
   return data;
@@ -422,8 +433,11 @@ const HandleUserLogin = async (
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!data || data.id === "-1") {
-    throw new Error(data?.status ?? "Data is empty");
+  if (!data) {
+    throw new Error("Data is empty");
+  }
+  if (data.id === "-1") {
+    console.error(data.status); // Set to global error message
   }
 
   return data;
@@ -469,12 +483,14 @@ const HandleGetUserSports = async (_userID: string): Promise<Sport[]> => {
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!Array.isArray(data) || data.length === 0) {
+  if (!Array.isArray(data)) {
+    throw new Error("Data type is not [array]");
+  }
+  if (data.length === 0) {
     return [];
   }
-
   if (data[0].id === -1) {
-    throw new Error(data?.[0]?.sportName ?? "Data is empty");
+    console.error(data[0].sportName); // Set to global error message
   }
 
   return data;
@@ -522,39 +538,32 @@ const HandleGetUserHabits = async (_userID: string): Promise<Habit[]> => {
     })
     .catch((error) => console.error("Error:", error));
 
-  if (!Array.isArray(data) || data.length === 0) {
+  if (!Array.isArray(data)) {
+    throw new Error("Data type is not [array]");
+  }
+  if (data.length === 0) {
     return [];
   }
-
   if (data[0].id === -1) {
-    throw new Error(data?.[0]?.habitName ?? "Data is empty");
+    console.error(data[0].habitName); // Set to global error message
   }
 
   return data;
 };
 
+// Need fix
 const HandleGetLocation = async (): Promise<Region> => {
-  // Request location permission
-  const requestLocationPermission = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    return status == "granted";
-  };
-
-  // Get current location
-  const getCurrentLocation = async (): Promise<Location.LocationObject> => {
-    return await Location.getCurrentPositionAsync({});
-  };
-
   if (!(await requestLocationPermission())) {
     throw new Error("Location permission denied");
   }
 
-  const position = await getCurrentLocation();
+  const position = await Location.getCurrentPositionAsync({});
 
   if (!position) {
     throw new Error("Failed to get location");
   }
 
+  // Make HandleGetRegionCoords() instead of this
   const weatherData = await HandleGetWeatherDataCoords(
     position.coords.latitude.toString(),
     position.coords.longitude.toString()

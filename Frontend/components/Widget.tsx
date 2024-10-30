@@ -49,12 +49,12 @@ export function Widget({
 const styles = StyleSheet.create({
   emptyWidget: {
     flex: 1,
-    width: "100%",
+    width: "auto",
     paddingVertical: 20,
     paddingHorizontal: "5%",
+    margin: 5,
     backgroundColor: "#0000000A",
     borderRadius: 15,
-    padding: 10,
     gap: 10,
   },
 });
