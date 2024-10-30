@@ -11,6 +11,8 @@ import {
   WeatherDataList,
   indicatorsDictionary,
 } from "@/app/(tabs)/_layout";
+import { useState } from "react";
+import { SlideModal } from "@/components/slideModal";
 
 interface IndicatorsDisplayWidgetProps_double {
   type1: string;

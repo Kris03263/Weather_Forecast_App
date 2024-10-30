@@ -12,8 +12,16 @@ import { SvgImage } from "@/components/Svg";
 import { DynamicImage } from "@/components/DynamicImage";
 
 import { WeatherDataList, Selecter } from "@/app/(tabs)/_layout";
+import { SlideModal } from "@/components/slideModal";
+import { useState } from "react";
+import { withDecay } from "react-native-reanimated";
 
 export function ForecastDisplayWidget() {
+  const [weatherModalVisible, setweatherModalVisible] = useState(false);
+  const handleCoseModal = () => {
+    setweatherModalVisible(false);
+  };
+
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
@@ -57,6 +65,17 @@ export function ForecastDisplayWidget() {
           />
         </View>
       </Widget>
+      <SlideModal
+        isModalShow={weatherModalVisible}
+        onClose={handleCoseModal}
+        title={
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <SvgImage style={{ width: 30, height: 30 }} name="weather" />
+            <Text style={styles.title}>天氣預報</Text>
+          </View>
+        }
+        content={<Text>天氣預報</Text>}
+      />
     </TouchableOpacity>
   );
 }

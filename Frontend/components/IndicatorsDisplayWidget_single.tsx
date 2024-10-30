@@ -90,5 +90,6 @@ const styles = StyleSheet.create({
   svgImage: {
     width: 30,
     height: 30,
+    color: "#9ca8b7",
   },
 });
