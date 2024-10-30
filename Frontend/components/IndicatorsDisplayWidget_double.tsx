@@ -4,15 +4,13 @@ import { useState } from "react";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
-import { SlideModal } from "@/components/SlideModal";
+import { SlideModal } from "@/components/slideModal";
 
 import {
   Selecter,
   WeatherDataList,
   indicatorsDictionary,
 } from "@/app/(tabs)/_layout";
-import { useState } from "react";
-import { SlideModal } from "@/components/slideModal";
 
 interface IndicatorsDisplayWidgetProps_double {
   type1: string;
@@ -67,6 +65,7 @@ export function IndicatorsDisplayWidget_double({
       </Widget>
       <SlideModal
         isModalShow={modalVisible}
+        title={<Text>title</Text>}
         onClose={() => {
           setModalVisible(false);
         }}

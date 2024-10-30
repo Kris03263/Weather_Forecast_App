@@ -1,7 +1,7 @@
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { Widget } from "@/components/Widget";
 import { useState } from "react";
-import { SlideModal } from "@/components/SlideModal";
+import { SlideModal } from "@/components/slideModal";
 import { WeatherDataList } from "@/app/(tabs)/_layout";
 import { useSelector } from "react-redux";
 
@@ -27,6 +27,7 @@ export function EarthQuakeDisplayWidget() {
       </Widget>
       <SlideModal
         isModalShow={modalVisible}
+        title={<Text>title</Text>}
         onClose={() => {
           setModalVisible(false);
         }}
