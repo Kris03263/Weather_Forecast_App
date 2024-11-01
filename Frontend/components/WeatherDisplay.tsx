@@ -7,7 +7,6 @@ import {
   indicatorsDictionary,
 } from "@/app/(tabs)/_layout";
 
-import { SvgImage } from "./Svg";
 import { DynamicImage } from "./DynamicImage";
 
 interface WeatherDisplayProps {

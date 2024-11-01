@@ -1,9 +1,10 @@
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { Widget } from "@/components/Widget";
 import { useState } from "react";
-import { SlideModal } from "@/components/slideModal";
+import { SlideModal } from "@/components/SlideModal";
 import { WeatherDataList } from "@/app/(tabs)/_layout";
 import { useSelector } from "react-redux";
+import { SvgImage } from "./Svg";
 
 export function EarthQuakeDisplayWidget() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -20,6 +21,7 @@ export function EarthQuakeDisplayWidget() {
       <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
         <View style={styles.layout}>
           <View style={styles.titleDisplay}>
+            <SvgImage style={{ width: 30, height: 30 }} name="weather" />
             <Text style={styles.title}>地震資訊</Text>
           </View>
           <Text style={styles.value}>--</Text>

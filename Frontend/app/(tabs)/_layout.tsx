@@ -12,21 +12,25 @@ import {
   updateWeatherData3h,
   updateWeatherData12h,
 } from "@/redux/weatherDataSlice";
-import { setRegion } from "@/redux/regionListSlice";
-import { updateRegion, updateTimeInterval } from "@/redux/selecterSlice";
+import { setRegion, updateRegion } from "@/redux/regionListSlice";
+import {
+  setSelectedRegion,
+  setSelectedTimeInterval,
+} from "@/redux/selecterSlice";
 import { removeUser, setUser } from "@/redux/userSlice";
 import { setUserSettings } from "@/redux/userSettingsSlice";
 import { updateDailySug } from "@/redux/dailySugSlice";
 import { StyleSheet } from "react-native";
 
+// todo list
+// 1. Change region-selector to number
+
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
 }
-
 export interface WeatherData {
   [key: string]: string;
 }
-
 export const indicatorsDictionary = {
   aqi: {
     title: "空氣品質",
@@ -69,47 +73,39 @@ export const indicatorsDictionary = {
     value: "",
   },
 };
-
 export interface Region {
   id: string;
   name: string;
   longitude: string;
   latitude: string;
 }
-
 export interface RegionList {
   city: {
     [key: string]: string[];
   };
 }
-
 export interface Selecter {
   region: string;
   timeInterval: number;
 }
-
 export interface User {
   account: string;
   password: string;
   id: string;
   status: string;
 }
-
 export interface Sport {
   sportName: string;
   id: number;
 }
-
 export interface Habit {
   habitName: string;
   id: number;
 }
-
 export interface UserSettings {
   sport: Sport[];
   habit: Habit[];
 }
-
 export interface DailySug {
   [key: string]: { name: string; suggestion: string }[];
 }
@@ -119,677 +115,699 @@ export interface DailySug {
 //////////////////////
 
 export const userLogin = async (_account: string, _password: string) => {
-  try {
-    // FETCH
-    const user = await HandleUserLogin(_account, _password);
+  // FETCH
+  const user = await HandleUserLogin(_account, _password);
 
-    // STORE
-    store.dispatch(setUser(user));
-    AsyncStorage.setItem("userID", JSON.stringify(user.id));
-
-    // UPDATE
-    await Promise.all([updateUserSettings(), updateDailySuggestions()]);
-
-    console.log("Login success");
-  } catch (error) {
-    console.error("Login fail: " + error);
+  // ERROR HANDLE
+  if (!user) {
+    return;
   }
-};
 
+  // STORE
+  store.dispatch(setUser(user));
+  AsyncStorage.setItem("userID", user.id);
+
+  // UPDATE
+  await Promise.all([updateUserSettings(), updateDailySuggestions()]);
+
+  console.log("Login as " + user.account);
+};
 export const userLogout = async () => {
-  try {
-    // STORE
-    AsyncStorage.setItem("userID", "-1");
-    store.dispatch(removeUser());
+  // STORE
+  AsyncStorage.setItem("userID", "-1");
+  store.dispatch(removeUser());
 
-    // UPDATE
-    await Promise.all([updateUserSettings(), updateDailySuggestions()]);
-
-    console.log("Logout success");
-  } catch (error) {
-    console.error("Logout fail: " + error);
-  }
+  console.log("Logged out");
 };
-
 export const userDelete = async () => {
-  try {
-    // GET
-    let userID = store.getState().user?.id ?? "";
-    if (!userID) {
-      userID = (await AsyncStorage.getItem("userID")) || "-1";
-    }
-
-    // FETCH
-    const response = await HandleDeleteUser(userID);
-
-    // STORE
-    AsyncStorage.setItem("userID", "-1");
-    store.dispatch(removeUser());
-
-    // AFTER
-    await Promise.all([updateUserSettings(), updateDailySuggestions()]);
-
-    console.log("Delete success");
-  } catch (error) {
-    console.error("Delete fail: " + error);
+  // GET
+  let userID = store.getState().user?.id ?? "";
+  if (!userID) {
+    userID = (await AsyncStorage.getItem("userID")) || "-1";
   }
-};
 
+  // FETCH
+  const response = await HandleDeleteUser(userID);
+
+  // ERROR HANDLE
+  if (!response) {
+    return;
+  }
+
+  // STORE
+  AsyncStorage.setItem("userID", "-1");
+  store.dispatch(removeUser());
+
+  // AFTER
+  await Promise.all([userLogout()]);
+
+  console.log("Delete with response: " + response.status);
+};
 export const userRegister = async (_account: string, _password: string) => {
-  try {
-    // FETCH
-    const user = await HandleSetUser(_account, _password);
+  // FETCH
+  const user = await HandleSetUser(_account, _password);
 
-    // STORE
-    store.dispatch(setUser(user));
-    AsyncStorage.setItem("userID", JSON.stringify(user.id));
-
-    // UPDATE
-    await Promise.all([updateUserSettings(), updateDailySuggestions()]);
-
-    console.log("Register success");
-  } catch (error) {
-    console.error("Register fail: " + error);
+  // ERROR HANDLE
+  if (!user) {
+    return;
   }
-};
 
+  // STORE
+  store.dispatch(setUser(user));
+  AsyncStorage.setItem("userID", user.id);
+
+  // UPDATE
+  await Promise.all([userLogin(_account, _password)]);
+
+  console.log("Register as " + user.account);
+};
 export const userSetSports = async (_sportIDs: number[]) => {
-  try {
-    // GET
-    const habit = store.getState().userSettings?.habit ?? [];
-    let userID = store.getState().user?.id ?? "";
-    if (!userID) {
-      userID = (await AsyncStorage.getItem("userID")) || "-1";
-    }
-
-    // FETCH
-    const response = await HandleSetUserSports(userID, _sportIDs);
-    const sports = await HandleGetUserSports(userID);
-
-    // STORE
-    store.dispatch(
-      setUserSettings({
-        sport: sports,
-        habit: habit,
-      })
-    );
-
-    console.log("Set sports success");
-  } catch (error) {
-    console.error("Set sports fail: " + error);
+  // GET
+  const habit = store.getState().userSettings?.habit ?? [];
+  let userID = store.getState().user?.id ?? "";
+  if (!userID) {
+    userID = (await AsyncStorage.getItem("userID")) || "-1";
   }
-};
 
+  // FETCH
+  const response = await HandleSetUserSports(userID, _sportIDs);
+  const sports = await HandleGetUserSports(userID);
+
+  // ERROR HANDLE
+  if (!sports || !response) {
+    return;
+  }
+
+  // STORE
+  store.dispatch(
+    setUserSettings({
+      sport: sports,
+      habit: habit,
+    })
+  );
+
+  console.log("Set sports with response: " + response.status);
+};
 export const userSetHabits = async (_habitIDs: number[]) => {
-  try {
-    // GET
-    const sport = store.getState().userSettings?.sport ?? [];
-    let userID = store.getState().user?.id ?? "";
-    if (!userID) {
-      userID = (await AsyncStorage.getItem("userID")) || "-1";
-    }
-
-    // FETCH
-    const response = await HandleSetUserHabits(userID, _habitIDs);
-    const habits = await HandleGetUserHabits(userID);
-
-    // STORE
-    store.dispatch(
-      setUserSettings({
-        sport: sport,
-        habit: habits,
-      })
-    );
-
-    console.log("Set habits success");
-  } catch (error) {
-    console.error("Set habits fail: " + error);
+  // GET
+  const sport = store.getState().userSettings?.sport ?? [];
+  let userID = store.getState().user?.id ?? "";
+  if (!userID) {
+    userID = (await AsyncStorage.getItem("userID")) || "-1";
   }
-};
 
-export const getRegionList = async () => {
-  try {
-    // FETCH
-    const regions = await HandleGetAllRegion();
+  // FETCH
+  const response = await HandleSetUserHabits(userID, _habitIDs);
+  const habits = await HandleGetUserHabits(userID);
 
-    // RETURN
-    return regions;
-  } catch (error) {
-    console.error("Get region list fail: " + error);
+  // ERROR HANDLE
+  if (!habits || !response) {
+    return;
   }
-};
 
+  // STORE
+  store.dispatch(
+    setUserSettings({
+      sport: sport,
+      habit: habits,
+    })
+  );
+
+  console.log("Set habits with response: " + response.status);
+};
 export const userAddRegion = async (_region: Region) => {
-  try {
-    // GET
-    let regions = store.getState().region ?? [];
-    if (regions.length === 0) {
-      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-    }
-
-    // PROCESS
-    if (regions.find((region) => region.id === _region.id)) {
-      throw new Error("Region already exists");
-    } else {
-      regions.push(_region);
-    }
-
-    // STORE
-    store.dispatch(setRegion(regions));
-    AsyncStorage.setItem("regions", JSON.stringify(regions));
-
-    // BEFORE UPDATE
-    await Promise.all([updateWeatherData_3h(), updateWeatherData_12h()]);
-
-    console.log("Add region success");
-  } catch (error) {
-    console.error("Add region fail: " + error);
+  // GET
+  let regions = store.getState().region ?? [];
+  if (regions.length === 0) {
+    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
   }
-};
 
+  // ERROR HANDLE
+  if (regions.find((region) => region.id === _region.id)) {
+    console.error("Region already exists");
+    return;
+  }
+
+  // STORE
+  store.dispatch(setRegion([...regions, _region]));
+  AsyncStorage.setItem("regions", JSON.stringify([...regions, _region]));
+
+  // BEFORE UPDATE
+  await Promise.all([
+    updateWeatherData_3h(_region),
+    updateWeatherData_12h(_region),
+  ]);
+
+  console.log("Added region: " + _region.name);
+  console.log("Region list: " + JSON.stringify(store.getState().region));
+};
+export const getAllRegionList = async (): Promise<RegionList> => {
+  // FETCH
+  const regionList = await HandleGetAllRegion();
+
+  // ERROR HANDLE
+  if (!regionList) {
+    return { city: {} } as RegionList;
+  }
+
+  // RETURN
+  return regionList;
+};
 export const updateRegion0 = async () => {
-  try {
-    // GET
-    let regions = store.getState().region ?? [];
-    if (regions.length === 0) {
-      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-    }
-
-    // FETCH
-    const region = await HandleGetLocation();
-
-    // PROCESS
-    regions[0] = region ?? regions[0];
-
-    // STORE
-    store.dispatch(setRegion(regions));
-    AsyncStorage.setItem("regions", JSON.stringify(regions));
-
-    // BEFORE UPDATE
-    await Promise.all([updateWeatherData_3h(), updateWeatherData_12h()]);
-
-    console.log("Update region[0] success");
-  } catch (error) {
-    console.error("Update region[0] fail: " + error);
+  // GET
+  let regions = store.getState().region ?? [];
+  if (regions.length === 0) {
+    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
   }
+
+  // FETCH
+  const region = await HandleGetLocation();
+
+  // ERROR HANDLE
+  if (!region) {
+    return;
+  }
+
+  // STORE
+  store.dispatch(updateRegion(region));
+  AsyncStorage.setItem(
+    "regions",
+    JSON.stringify([region, ...regions.filter((_, i) => i !== 0)])
+  );
+
+  // BEFORE UPDATE
+  await Promise.all([updateWeatherData_3h(), updateWeatherData_12h()]);
+
+  console.log("Updated region[0] to: " + region.name);
+  console.log("Region list: " + JSON.stringify(store.getState().region));
 };
+export const updateWeatherData_3h = async (_region?: Region) => {
+  // GET
+  let regions = _region ? [_region] : store.getState().region ?? [];
+  if (regions.length === 0) {
+    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
+  }
 
-export const updateWeatherData_3h = async () => {
-  try {
-    // GET
-    let regions = store.getState().region ?? [];
-    if (regions.length === 0) {
-      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-    }
-
-    for (let i = 0; i < regions.length; i++) {
+  await Promise.all(
+    regions.map(async (region) => {
       // FETCH
-      const weatherData3h = await HandleGetWeatherData3h(regions[i]);
+      const weatherData3h = await HandleGetWeatherData3h(region);
+
+      // ERROR HANDLING
+      if (!weatherData3h) return null;
 
       // STORE
       store.dispatch(updateWeatherData3h(weatherData3h));
-    }
+    })
+  );
 
-    console.log("Update weather data (3h) success");
-  } catch (error) {
-    console.error("Update weather data (3h) fail: " + error);
-  }
+  console.log(
+    "Updated weather data (3h) for: " + (_region ? _region.name : "all regions")
+  );
 };
+export const updateWeatherData_12h = async (_region?: Region) => {
+  // GET
+  let regions = _region ? [_region] : store.getState().region ?? [];
+  if (regions.length === 0) {
+    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
+  }
 
-export const updateWeatherData_12h = async () => {
-  try {
-    // GET
-    let regions = store.getState().region ?? [];
-    if (regions.length === 0) {
-      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-    }
-
-    for (let i = 0; i < regions.length; i++) {
+  await Promise.all(
+    regions.map(async (region) => {
       // FETCH
-      const weatherData12h = await HandleGetWeatherData12h(regions[i]);
+      const weatherData12h = await HandleGetWeatherData12h(region);
+
+      // ERROR HANDLING
+      if (!weatherData12h) return null;
 
       // STORE
       store.dispatch(updateWeatherData12h(weatherData12h));
-    }
+    })
+  );
 
-    console.log("Update weather data (12h) success");
-  } catch (error) {
-    console.error("Update weather data (12h) fail: " + error);
-  }
+  console.log(
+    "Updated weather data (12h) for: " +
+      (_region ? _region.name : "all regions")
+  );
 };
-
 export const updateUser = async () => {
-  try {
-    // GET
-    let userID = store.getState().user?.id ?? "";
-    if (!userID) {
-      userID = (await AsyncStorage.getItem("userID")) || "-1";
-    }
-
-    // FETCH
-    const user = await HandleGetUser(userID);
-
-    // STORE
-    store.dispatch(setUser(user));
-    AsyncStorage.setItem("userID", JSON.stringify(user.id));
-
-    console.log("Update user data success");
-  } catch (error) {
-    console.error("Update user data fail: " + error);
+  // GET
+  let userID = store.getState().user?.id ?? "";
+  if (!userID) {
+    userID = (await AsyncStorage.getItem("userID")) || "-1";
   }
-};
 
+  // FETCH
+  const user = await HandleGetUser(userID);
+
+  // ERROR HANDLING
+  if (!user) {
+    return;
+  }
+
+  // STORE
+  store.dispatch(setUser(user));
+  AsyncStorage.setItem("userID", JSON.stringify(user.id));
+
+  // AFTER
+  await Promise.all([updateUserSettings(), updateDailySuggestions()]);
+
+  console.log("Updated user");
+};
 export const updateDailySuggestions = async () => {
-  try {
-    // GET
-    let userID = store.getState().user?.id ?? "";
-    let regions = store.getState().region ?? [];
-    if (!userID) {
-      userID = (await AsyncStorage.getItem("userID")) || "-1";
-    }
-    if (regions.length === 0) {
-      regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-    }
-
-    // FETCH
-    const dailySuggestions = await HandleGetDailySug(
-      userID,
-      regions[0]?.latitude ?? "0",
-      regions[0]?.longitude ?? "0"
-    );
-
-    // STORE
-    store.dispatch(updateDailySug(dailySuggestions));
-
-    console.log("Update daily suggestions success");
-  } catch (error) {
-    console.error("Update daily suggestions fail: " + error);
+  // GET
+  let userID = store.getState().user?.id ?? "";
+  let regions = store.getState().region ?? [];
+  if (!userID) {
+    userID = (await AsyncStorage.getItem("userID")) || "-1";
   }
-};
+  if (regions.length === 0) {
+    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
+  }
 
+  // FETCH
+  const dailySuggestions = (await HandleGetDailySug(userID, regions[0])) ?? {};
+
+  // STORE
+  store.dispatch(updateDailySug(dailySuggestions));
+
+  console.log("Updated daily suggestions");
+};
 export const updateUserSettings = async () => {
-  try {
-    // GET
-    let userID = store.getState().user?.id ?? "";
-    if (!userID) {
-      userID = (await AsyncStorage.getItem("userID")) || "-1";
-    }
-
-    // FETCH
-    const userSettings = {
-      sport: await HandleGetUserSports(userID),
-      habit: await HandleGetUserHabits(userID),
-    };
-
-    // STORE
-    store.dispatch(setUserSettings(userSettings));
-    AsyncStorage.setItem("userSettings", JSON.stringify(userSettings));
-
-    console.log("Update user settings success");
-  } catch (error) {
-    console.error("Update user settings fail: " + error);
+  // GET
+  let userID = store.getState().user?.id ?? "";
+  if (!userID) {
+    userID = (await AsyncStorage.getItem("userID")) || "-1";
   }
-};
 
+  // FETCH
+  const userSettings = {
+    sport: (await HandleGetUserSports(userID)) ?? [],
+    habit: (await HandleGetUserHabits(userID)) ?? [],
+  };
+
+  // STORE
+  store.dispatch(setUserSettings(userSettings));
+  AsyncStorage.setItem("userSettings", JSON.stringify(userSettings));
+
+  console.log("Updated user settings");
+};
 export const requestLocationPermission = async () => {
   let { status } = await Location.requestForegroundPermissionsAsync();
+
   return status == "granted";
 };
 
 //////////////////
-// API fetching //
+// API fetching // (Return null & set global err msg if catch error)
 //////////////////
 
-const hostURL = "http://35.194.187.105:80"; //`${hostURL}/`
+const hostURL = "https://weather-2-10.onrender.com"; //`${hostURL}/`
 
 const HandleSetUser = async (
   _account: string,
   _password: string
-): Promise<User> => {
-  const data = await fetch(`${hostURL}/Users/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userAccount: _account,
-      password: _password,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data as User;
+): Promise<User | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Users/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userAccount: _account,
+        password: _password,
+      }),
     })
-    .catch((error) => console.error("Error:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        return data as User;
+      });
 
-  if (data!.id === "-1") {
-    throw new Error(data!.status);
+    if (data.id == "-1") {
+      throw new Error(data.status);
+    }
+
+    return data;
+  } catch (e) {
+    console.error(e);
+    return null;
   }
-
-  return data!;
 };
-
-const HandleGetUser = async (_userID: string): Promise<User> => {
-  const data = await fetch(`${hostURL}/Users/?id=${_userID}`, {
-    method: "GET",
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data as User;
+const HandleGetUser = async (_userID: string): Promise<User | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Users/?id=${_userID}`, {
+      method: "GET",
     })
-    .catch((error) => console.error("Error:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        return data as User;
+      });
 
-  if (data!.id === "-1") {
-    throw new Error(data!.status);
+    if (data.id == "-1") {
+      throw new Error(data.status);
+    }
+
+    return data;
+  } catch (e) {
+    console.error(e);
+    return null;
   }
-
-  return data!;
 };
-
 const HandleDeleteUser = async (_userID: string): Promise<any> => {
-  const response = await fetch(`${hostURL}/Users/`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "DELETE",
-    body: JSON.stringify({
-      userID: _userID,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data;
+  try {
+    const response = await fetch(`${hostURL}/Users/`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "DELETE",
+      body: JSON.stringify({
+        userID: _userID,
+      }),
     })
-    .catch((error) => console.error("Error:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        return data;
+      });
 
-  return response;
+    if (response.status !== "Successful") {
+      throw new Error(response.status);
+    }
+
+    return response;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 };
-
 const HandleUserLogin = async (
   _account: string,
   _password: string
-): Promise<User> => {
-  const data = await fetch(`${hostURL}/Users/Login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userAccount: _account,
-      password: _password,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data as User;
+): Promise<User | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Users/Login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userAccount: _account,
+        password: _password,
+      }),
     })
-    .catch((error) => console.error("Error:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        return data as User;
+      });
 
-  if (data!.id === "-1") {
-    throw new Error(data!.status);
+    if (data.id == "-1") {
+      throw new Error(data.status);
+    }
+
+    return data;
+  } catch (e) {
+    console.error(e);
+    return null;
   }
-
-  return data!;
 };
-
 const HandleSetUserSports = async (
   _userID: string,
   _sportIDs: number[]
 ): Promise<any> => {
-  const response = await fetch(`${hostURL}/Users/UserSports`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-    body: JSON.stringify({
-      userID: _userID,
-      sportIDs: _sportIDs,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data;
+  try {
+    const response = await fetch(`${hostURL}/Users/UserSports`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        userID: _userID,
+        sportIDs: _sportIDs,
+      }),
     })
-    .catch((error) => console.error("Error:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        return data;
+      });
 
-  return response;
-};
+    if (response.status !== "Successful") {
+      throw new Error(response.status);
+    }
 
-const HandleGetUserSports = async (_userID: string): Promise<Sport[]> => {
-  const data = await fetch(`${hostURL}/Users/UserSports?ID=${_userID}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data as Sport[];
-    })
-    .catch((error) => console.error("Error:", error));
-
-  if (data?.[0]?.id === -1) {
-    console.error(data?.[0].sportName); // Set to global error message
+    return response;
+  } catch (e) {
+    console.error(e);
+    return null;
   }
-
-  return data!;
 };
+const HandleGetUserSports = async (
+  _userID: string
+): Promise<Sport[] | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Users/UserSports?ID=${_userID}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data as Sport[];
+      });
 
+    if (data[0]?.id == -1) {
+      throw new Error(data[0].sportName);
+    }
+
+    return data;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
 const HandleSetUserHabits = async (
   _userID: string,
   _habitIDs: number[]
 ): Promise<any> => {
-  const response = await fetch(`${hostURL}/Users/UserHabits`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-    body: JSON.stringify({
-      userID: _userID,
-      habitIDs: _habitIDs,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data;
+  try {
+    const response = await fetch(`${hostURL}/Users/UserHabits`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        userID: _userID,
+        habitIDs: _habitIDs,
+      }),
     })
-    .catch((error) => console.error("Error:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        return data;
+      });
 
-  return response;
-};
+    if (response.status !== "Successful") {
+      throw new Error(response.status);
+    }
 
-const HandleGetUserHabits = async (_userID: string): Promise<Habit[]> => {
-  const data = await fetch(`${hostURL}/Users/UserHabits?ID=${_userID}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => {
-      return response.json();
-    })
-    .then((data) => {
-      return data as Habit[];
-    })
-    .catch((error) => console.error("Error:", error));
-
-  if (data?.[0]?.id === -1) {
-    console.error(data?.[0].habitName); // Set to global error message
+    return response;
+  } catch (e) {
+    console.error(e);
+    return null;
   }
-
-  return data!;
 };
+const HandleGetUserHabits = async (
+  _userID: string
+): Promise<Habit[] | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Users/UserHabits?ID=${_userID}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        return data as Habit[];
+      });
 
+    if (data[0]?.id == -1) {
+      throw new Error(data[0].habitName);
+    }
+
+    return data;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
 // Need fix
-const HandleGetLocation = async (): Promise<Region> => {
-  if (!(await requestLocationPermission())) {
-    throw new Error("Location permission denied");
+const HandleGetLocation = async (): Promise<Region | null> => {
+  try {
+    if (!(await requestLocationPermission())) {
+      throw new Error("Location permission denied");
+    }
+
+    const position = await Location.getCurrentPositionAsync({});
+
+    if (!position) {
+      throw new Error("Location not found");
+    }
+
+    // Make HandleGetRegionCoords() instead of this
+    const weatherData = await HandleGetWeatherDataCoords(
+      position.coords.latitude.toString(),
+      position.coords.longitude.toString()
+    );
+
+    if (!weatherData) {
+      throw new Error("Weather data is empty");
+    }
+
+    const region: Region = {
+      id: "0",
+      name: `${weatherData[0].city}, ${weatherData[0].district}`,
+      longitude: position.coords.longitude.toString(),
+      latitude: position.coords.latitude.toString(),
+    };
+
+    return region;
+  } catch (error) {
+    console.error(error);
+    return null;
   }
-
-  const position = await Location.getCurrentPositionAsync({});
-
-  if (!position) {
-    throw new Error("Failed to get location");
-  }
-
-  // Make HandleGetRegionCoords() instead of this
-  const weatherData = await HandleGetWeatherDataCoords(
-    position.coords.latitude.toString(),
-    position.coords.longitude.toString()
-  );
-
-  if (!weatherData) {
-    throw new Error("Failed to get weather data");
-  }
-
-  const region: Region = {
-    id: "0",
-    name: `${weatherData[0].city}, ${weatherData[0].district}`,
-    longitude: position.coords.longitude.toString(),
-    latitude: position.coords.latitude.toString(),
-  };
-
-  return region;
 };
-
+// Change to HandleGetRegionCoords()
 const HandleGetWeatherDataCoords = async (
   _latitude: string,
   _longitude: string
-): Promise<WeatherData[]> => {
-  const data = await fetch(`${hostURL}/Weather/Get3hData`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      longitude: _longitude,
-      latitude: _latitude,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data as WeatherData[];
+): Promise<WeatherData[] | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Weather/Get3hData`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        longitude: _longitude,
+        latitude: _latitude,
+      }),
     })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        return data as WeatherData[];
+      });
 
-  return data!;
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
-
 const HandleGetWeatherData3h = async (
   _region: Region
-): Promise<WeatherData[]> => {
-  const [city, district] = _region.name.split(", ");
-  const data = await fetch(`${hostURL}/Weather/Get3hData`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      longitude: "0",
-      latitude: "0",
-      cusloc: {
-        city: city,
-        district: district,
+): Promise<WeatherData[] | null> => {
+  try {
+    const [city, district] = _region.name.split(", ");
+    const data = await fetch(`${hostURL}/Weather/Get3hData`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data as WeatherData[];
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-
-  return data!;
-};
-
-const HandleGetWeatherData12h = async (
-  _region: Region
-): Promise<WeatherData[]> => {
-  const [city, district] = _region.name.split(", ");
-  const weatherData12h = await fetch(`${hostURL}/Weather/Get12hData`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      longitude: "0",
-      latitude: "0",
-      cusloc: {
-        city: city,
-        district: district,
-      },
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => {
-      throw new Error(error);
-    });
-
-  if (!weatherData12h) {
-    throw new Error("Weather data (12h) is empty");
-  }
-
-  return weatherData12h;
-};
-
-const HandleGetDailySug = async (
-  _userID: string,
-  _latitude: string,
-  _longitude: string
-): Promise<DailySug> => {
-  const data = await fetch(`${hostURL}/Users/GetDailySuggestion`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userID: _userID,
-      longitude: _longitude,
-      latitude: _latitude,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data as DailySug;
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-
-  return data!;
-};
-
-const HandleGetAllRegion = async (): Promise<Region[]> => {
-  const data = await fetch(`${hostURL}/Users/GetAllRegion`, {
-    method: "GET",
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data as RegionList;
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-
-  const regions: Region[] = [];
-
-  for (const key in data!.city) {
-    data!.city[key].forEach((district) => {
-      regions.push({
-        id: `${key}, ${district}`,
-        name: `${key}, ${district}`,
+      body: JSON.stringify({
         longitude: "0",
         latitude: "0",
+        cusloc: {
+          city: city,
+          district: district,
+        },
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data as WeatherData[];
       });
-    });
-  }
 
-  return regions;
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+const HandleGetWeatherData12h = async (
+  _region: Region
+): Promise<WeatherData[] | null> => {
+  try {
+    const [city, district] = _region.name.split(", ");
+    const data = await fetch(`${hostURL}/Weather/Get12hData`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        longitude: "0",
+        latitude: "0",
+        cusloc: {
+          city: city,
+          district: district,
+        },
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data;
+      });
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+const HandleGetDailySug = async (
+  _userID: string,
+  _region: Region
+): Promise<DailySug | null> => {
+  try {
+    const [city, district] = _region.name.split(", ");
+    const data = await fetch(`${hostURL}/Users/GetDailySuggestion`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userID: _userID,
+        cusloc: {
+          city: city,
+          district: district,
+        },
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data as DailySug;
+      });
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+const HandleGetAllRegion = async (): Promise<RegionList | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Users/GetAllRegion`, {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data as RegionList;
+      });
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
 export default function TabLayout() {
@@ -803,21 +821,16 @@ export default function TabLayout() {
         updateWeatherData_3h(),
         updateWeatherData_12h(),
         updateUser(),
-        updateDailySuggestions(),
-        updateUserSettings(),
       ]);
 
-      const regions = store.getState().region;
-
       console.log(
-        "Data update success! \n" +
-          "-------------------\n" +
-          `${regions[0].name}: ` +
-          new Date() +
+        "-----------------------------------------------------\n" +
+          `| ${new Date()} \t|` +
           "\n" +
-          "-------------------\n" +
-          "Data: " +
-          JSON.stringify(store.getState().user)
+          "----------------------------------------------------\n" +
+          "| Data update success! \t\t\t\t\t\t\t\t|" +
+          "\n" +
+          "----------------------------------------------------\n"
       );
     };
 
@@ -826,8 +839,11 @@ export default function TabLayout() {
         (await AsyncStorage.getItem("regions")) || "[]"
       );
 
-      store.dispatch(updateRegion(regions[0]?.name ?? ""));
-      store.dispatch(updateTimeInterval(0));
+      store.dispatch(setRegion(regions));
+
+      // Set default region and time interval
+      store.dispatch(setSelectedRegion(regions[0]?.name ?? ""));
+      store.dispatch(setSelectedTimeInterval(0));
     };
 
     init();

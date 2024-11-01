@@ -51,7 +51,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
 );
 
 export default function SettingsScreen() {
-  // Modal's visiblility control
+  // Modal control
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalHeader, setModalHeader] = useState("");
   const [modalContent, setModalContent] = useState<ReactNode>();
@@ -74,6 +74,7 @@ export default function SettingsScreen() {
   const passwordRegisterInputRef = useRef<TextInput>(null);
   const passwordRegisterInput = passwordRegisterInputRef.current;
 
+  // Data from Redux
   const user = useSelector((state: { user: User }) => state.user);
   const userSettings = useSelector(
     (state: { userSettings: { sport: Sport[]; habit: Habit[] } }) =>
@@ -108,11 +109,19 @@ export default function SettingsScreen() {
     );
   };
 
-  const openModal = (ModalType: ModalType) => {
-    setModalHeader(ModalType);
-    setModalContent(getModalContent(ModalType));
-    setModalFooter(getModalFooter(ModalType));
-    setModalType(ModalType);
+  enum ModalType {
+    LOGIN = "登入",
+    REGISTER = "註冊",
+    USER = "使用者",
+    SPORT = "運動",
+    HABIT = "嗜好",
+  }
+
+  const openModal = (modalType: ModalType) => {
+    setModalHeader(modalType);
+    setModalContent(getModalContent(modalType));
+    setModalFooter(getModalFooter(modalType));
+    setModalType(modalType);
     setModalVisible(true);
   };
 
@@ -139,14 +148,6 @@ export default function SettingsScreen() {
       }
     }
   }, [sport, habit, account, password]);
-
-  enum ModalType {
-    LOGIN = "登入",
-    REGISTER = "註冊",
-    USER = "使用者",
-    SPORT = "運動",
-    HABIT = "嗜好",
-  }
 
   const getModalContent = (type: ModalType) => {
     switch (type) {

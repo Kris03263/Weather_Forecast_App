@@ -12,9 +12,8 @@ import { SvgImage } from "@/components/Svg";
 import { DynamicImage } from "@/components/DynamicImage";
 
 import { WeatherDataList, Selecter } from "@/app/(tabs)/_layout";
-import { SlideModal } from "@/components/slideModal";
+import { SlideModal } from "@/components/SlideModal";
 import { useState } from "react";
-import { withDecay } from "react-native-reanimated";
 
 export function ForecastDisplayWidget() {
   const [weatherModalVisible, setweatherModalVisible] = useState(false);

@@ -55,11 +55,6 @@ export default function HomeScreen() {
     outputRange: [screenHeight * 0.2, screenHeight * 0.1],
     extrapolate: "clamp",
   });
-  const contentHeight = scrollY.interpolate({
-    inputRange: [0, screenHeight / 5],
-    outputRange: [screenHeight * 0.5, screenHeight * 0.6],
-    extrapolate: "clamp",
-  });
   const opacity = scrollY.interpolate({
     inputRange: [0, screenHeight / 5, screenHeight / 4],
     outputRange: [1, 0, 1],
@@ -121,10 +116,8 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.row}>
-            <IndicatorsDisplayWidget_double
-              type1="windSpeed"
-              type2="windDirection"
-            />
+            <IndicatorsDisplayWidget_single type="windSpeed" />
+            <IndicatorsDisplayWidget_single type="windDirection" />
           </View>
 
           <View style={styles.row}>
