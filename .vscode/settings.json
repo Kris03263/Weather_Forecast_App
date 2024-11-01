@@ -1,3 +1,4 @@
 {
-  "eslint.nodeEnv": ""
+  "eslint.nodeEnv": "",
+  "files.autoSave": "onFocusChange"
 }
