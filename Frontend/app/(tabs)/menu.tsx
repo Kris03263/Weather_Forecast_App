@@ -8,6 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
 import {
   WeatherDataList,
@@ -21,9 +22,13 @@ import {
 import { Background } from "@/components/Background";
 import { SvgImage } from "@/components/Svg";
 import CustomModal from "@/components/CustomModal";
+
 import store from "@/redux/store";
+import { setSelectedRegion } from "@/redux/selecterSlice";
 
 export default function MenuScreen() {
+  const navigation = useNavigation();
+
   // Modal control
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalHeader, setModalHeader] = useState("");
@@ -183,7 +188,8 @@ export default function MenuScreen() {
               regionCard(
                 item.name,
                 weatherDataList[item.name]?.[0]?.[0] ?? null,
-                item.id === "0"
+                item.id === "0",
+                () => navigation.navigate("index" as never)
               )
             }
             keyExtractor={(item) => item.name}
@@ -202,9 +208,20 @@ export default function MenuScreen() {
   );
 }
 
-function regionCard(region: string, weatherData: WeatherData, isLocal = false) {
+function regionCard(
+  region: string,
+  weatherData: WeatherData,
+  isLocal = false,
+  onPress: () => void
+) {
   return (
-    <TouchableOpacity>
+    <TouchableOpacity
+      onPress={() => {
+        console.log("click");
+        store.dispatch(setSelectedRegion(region));
+        onPress();
+      }}
+    >
       <View style={styles.regionCard}>
         <Background weatherData={weatherData} style={{ borderRadius: 12 }} />
 

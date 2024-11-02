@@ -704,7 +704,8 @@ const HandleGetWeatherDataCoords = async (
   }
 };
 const HandleGetWeatherData3h = async (
-  _region: Region
+  _region: Region,
+  _userID?: string
 ): Promise<WeatherData[] | null> => {
   try {
     const [city, district] = _region.name.split(", ");
@@ -714,6 +715,7 @@ const HandleGetWeatherData3h = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        userID: _userID ?? "-1",
         longitude: "0",
         latitude: "0",
         cusloc: {
@@ -734,7 +736,8 @@ const HandleGetWeatherData3h = async (
   }
 };
 const HandleGetWeatherData12h = async (
-  _region: Region
+  _region: Region,
+  _userID?: string
 ): Promise<WeatherData[] | null> => {
   try {
     const [city, district] = _region.name.split(", ");
@@ -744,6 +747,7 @@ const HandleGetWeatherData12h = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        userID: _userID ?? "-1",
         longitude: "0",
         latitude: "0",
         cusloc: {
@@ -759,7 +763,20 @@ const HandleGetWeatherData12h = async (
 
     return data;
   } catch (error) {
-    console.error(error);
+    const [city, district] = _region.name.split(", ");
+    console.error(`Getting ${_region} 12h data failed: ` + error);
+    console.log(
+      "Data: " +
+        JSON.stringify({
+          userID: _userID ?? "-1",
+          longitude: "0",
+          latitude: "0",
+          cusloc: {
+            city: city,
+            district: district,
+          },
+        })
+    );
     return null;
   }
 };
@@ -776,6 +793,8 @@ const HandleGetDailySug = async (
       },
       body: JSON.stringify({
         userID: _userID,
+        longitude: "0",
+        latitude: "0",
         cusloc: {
           city: city,
           district: district,
