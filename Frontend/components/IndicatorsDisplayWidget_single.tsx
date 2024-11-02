@@ -5,7 +5,8 @@ import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
-import { SlideModal } from "@/components/SlideModal";
+import { SlideModal } from "@/components/slideModal";
+import { Chart } from "@/components/Chart";
 
 import {
   WeatherDataList,
@@ -32,7 +33,7 @@ export function IndicatorsDisplayWidget_single({
     indicatorsDictionary[type as keyof typeof indicatorsDictionary];
 
   indicator.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.[type] ?? ""; // region - timeInterval - index
-
+  console.log(weatherDataList?.[selecter.region]?.[0]?.[0]);
   return (
     <TouchableOpacity
       style={{ flex: 1, width: "100%" }}
@@ -49,10 +50,16 @@ export function IndicatorsDisplayWidget_single({
       </Widget>
       <SlideModal
         isModalShow={modalVisible}
+        title={
+          <View style={styles.titleDisplay}>
+            <SvgImage style={styles.svgImage} name={type} />
+            <Text style={styles.title}>{indicator.title}</Text>
+          </View>
+        }
         onClose={() => {
           setModalVisible(false);
         }}
-        content={<Text>here put content</Text>}
+        content={<Chart type="wet"></Chart>}
       />
     </TouchableOpacity>
   );

@@ -8,10 +8,12 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { SvgImage } from "@/components/Svg";
 
 interface modalVisibleCrontrollProps {
   isModalShow: boolean;
+  title: React.ReactNode;
   content: React.ReactNode;
   onClose: () => void;
 }
@@ -19,6 +21,7 @@ interface modalVisibleCrontrollProps {
 export function SlideModal({
   isModalShow,
   content,
+  title,
   onClose,
 }: modalVisibleCrontrollProps) {
   const [ModalVisible, setModalVisible] = useState(isModalShow);
@@ -77,19 +80,21 @@ export function SlideModal({
             style={[styles.modalView, { transform: [{ translateY: pan.y }] }]}
             {...panResponder.panHandlers}
           >
-            <View style={styles.modalHandle} />
+            <View style={styles.header}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => {
+                  setModalVisible(!ModalVisible);
+                  onClose();
+                }}
+              >
+                <SvgImage style={styles.svgImage} name="close" />
+              </TouchableOpacity>
+              {title}
+            </View>
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
               {content}
             </ScrollView>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                setModalVisible(!ModalVisible);
-                onClose();
-              }}
-            >
-              <Text style={styles.buttonText}>關閉</Text>
-            </TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
@@ -102,6 +107,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
+  },
+  header: {
+    width: "100%",
+    height: "10%",
+    backgroundColor: "#21262c",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   modalView: {
     width: "100%",
@@ -148,5 +165,26 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  closeButtonText: {
+    color: "#9ca8b7",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 20,
+    right: 30,
+    backgroundColor: "#2f363e",
+    borderRadius: 30,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+  },
+  svgImage: {
+    width: 20,
+    height: 20,
   },
 });

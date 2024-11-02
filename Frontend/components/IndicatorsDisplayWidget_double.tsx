@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
-import { SlideModal } from "@/components/SlideModal";
+import { SlideModal } from "@/components/slideModal";
 
 import {
   Selecter,

@@ -12,14 +12,11 @@ import { SvgImage } from "@/components/Svg";
 import { DynamicImage } from "@/components/DynamicImage";
 
 import { WeatherDataList, Selecter } from "@/app/(tabs)/_layout";
-import { SlideModal } from "@/components/SlideModal";
+import { SlideModal } from "@/components/slideModal";
 import { useState } from "react";
 
 export function ForecastDisplayWidget() {
-  const [weatherModalVisible, setweatherModalVisible] = useState(false);
-  const handleCoseModal = () => {
-    setweatherModalVisible(false);
-  };
+  const [ModalVisible, setModalVisible] = useState(false);
 
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
@@ -29,7 +26,7 @@ export function ForecastDisplayWidget() {
   );
 
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={() => setModalVisible(!ModalVisible)}>
       <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
         <View style={styles.titleDisplay}>
           <SvgImage style={{ width: 30, height: 30 }} name="weather" />
@@ -65,8 +62,8 @@ export function ForecastDisplayWidget() {
         </View>
       </Widget>
       <SlideModal
-        isModalShow={weatherModalVisible}
-        onClose={handleCoseModal}
+        isModalShow={ModalVisible}
+        onClose={() => setModalVisible(false)}
         title={
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <SvgImage style={{ width: 30, height: 30 }} name="weather" />
