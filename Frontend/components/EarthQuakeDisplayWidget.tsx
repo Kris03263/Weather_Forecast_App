@@ -14,19 +14,21 @@ export function EarthQuakeDisplayWidget() {
   );
 
   return (
-    <TouchableOpacity
-      style={{ flex: 1, width: "100%" }}
-      onPress={() => setModalVisible(!modalVisible)}
-    >
-      <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
-        <View style={styles.layout}>
-          <View style={styles.titleDisplay}>
-            <SvgImage style={{ width: 30, height: 30 }} name="weather" />
-            <Text style={styles.title}>地震資訊</Text>
+    <>
+      <TouchableOpacity
+        style={{ flex: 1, width: "100%" }}
+        onPress={() => setModalVisible(true)}
+      >
+        <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
+          <View style={styles.layout}>
+            <View style={styles.titleDisplay}>
+              <SvgImage style={{ width: 30, height: 30 }} name="weather" />
+              <Text style={styles.title}>地震資訊</Text>
+            </View>
+            <Text style={styles.value}>--</Text>
           </View>
-          <Text style={styles.value}>--</Text>
-        </View>
-      </Widget>
+        </Widget>
+      </TouchableOpacity>
       <SlideModal
         isModalShow={modalVisible}
         title={<Text>title</Text>}
@@ -35,7 +37,7 @@ export function EarthQuakeDisplayWidget() {
         }}
         content={<Text style={styles.modalText}>地震資訊</Text>}
       />
-    </TouchableOpacity>
+    </>
   );
 }
 

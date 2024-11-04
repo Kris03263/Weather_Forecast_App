@@ -33,21 +33,22 @@ export function IndicatorsDisplayWidget_single({
     indicatorsDictionary[type as keyof typeof indicatorsDictionary];
 
   indicator.value = weatherDataList?.[selecter.region]?.[0]?.[0]?.[type] ?? ""; // region - timeInterval - index
-  console.log(weatherDataList?.[selecter.region]?.[0]?.[0]);
   return (
-    <TouchableOpacity
-      style={{ flex: 1, width: "100%" }}
-      onPress={() => setModalVisible(!modalVisible)}
-    >
-      <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
-        <View style={styles.layout}>
-          <View style={styles.titleDisplay}>
-            <SvgImage style={styles.svgImage} name={type} />
-            <Text style={styles.title}>{indicator.title}</Text>
+    <>
+      <TouchableOpacity
+        style={{ flex: 1, width: "100%" }}
+        onPress={() => setModalVisible(true)}
+      >
+        <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
+          <View style={styles.layout}>
+            <View style={styles.titleDisplay}>
+              <SvgImage style={styles.svgImage} name={type} />
+              <Text style={styles.title}>{indicator.title}</Text>
+            </View>
+            <Text style={styles.value}>{indicator.value + indicator.unit}</Text>
           </View>
-          <Text style={styles.value}>{indicator.value + indicator.unit}</Text>
-        </View>
-      </Widget>
+        </Widget>
+      </TouchableOpacity>
       <SlideModal
         isModalShow={modalVisible}
         title={
@@ -61,7 +62,7 @@ export function IndicatorsDisplayWidget_single({
         }}
         content={<Chart type="wet"></Chart>}
       />
-    </TouchableOpacity>
+    </>
   );
 }
 

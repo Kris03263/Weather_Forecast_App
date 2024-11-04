@@ -26,41 +26,43 @@ export function ForecastDisplayWidget() {
   );
 
   return (
-    <TouchableOpacity onPress={() => setModalVisible(!ModalVisible)}>
-      <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
-        <View style={styles.titleDisplay}>
-          <SvgImage style={{ width: 30, height: 30 }} name="weather" />
-          <Text style={styles.title}>天氣預報</Text>
-        </View>
+    <>
+      <TouchableOpacity onPress={() => setModalVisible(true)}>
+        <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
+          <View style={styles.titleDisplay}>
+            <SvgImage style={{ width: 30, height: 30 }} name="weather" />
+            <Text style={styles.title}>天氣預報</Text>
+          </View>
 
-        <View style={styles.cityView}>
-          <FlatList
-            horizontal
-            style={{ width: "100%" }}
-            data={weatherDataList?.[selecter.region]?.[0] ?? []}
-            renderItem={({ item }) => (
-              <View style={styles.weatherCard}>
-                <Text style={styles.weatherTime}>
-                  {item.time.split(" ")[1].split(":")[0] + "時"}
-                </Text>
-                <DynamicImage
-                  style={styles.weatherIcon}
-                  path={
-                    item.time.split(" ")[1] < "18:00:00" &&
-                    item.time.split(" ")[1] >= "06:00:00"
-                      ? `day/${item.weatherCode}.png`
-                      : `night/${item.weatherCode}.png`
-                  }
-                />
-                <Text style={styles.weatherTemperature}>
-                  {item.temp + "°C"}
-                </Text>
-              </View>
-            )}
-            keyExtractor={(item) => item.time}
-          />
-        </View>
-      </Widget>
+          <View style={styles.cityView}>
+            <FlatList
+              horizontal
+              style={{ width: "100%" }}
+              data={weatherDataList?.[selecter.region]?.[0] ?? []}
+              renderItem={({ item }) => (
+                <View style={styles.weatherCard}>
+                  <Text style={styles.weatherTime}>
+                    {item.time.split(" ")[1].split(":")[0] + "時"}
+                  </Text>
+                  <DynamicImage
+                    style={styles.weatherIcon}
+                    path={
+                      item.time.split(" ")[1] < "18:00:00" &&
+                      item.time.split(" ")[1] >= "06:00:00"
+                        ? `day/${item.weatherCode}.png`
+                        : `night/${item.weatherCode}.png`
+                    }
+                  />
+                  <Text style={styles.weatherTemperature}>
+                    {item.temp + "°C"}
+                  </Text>
+                </View>
+              )}
+              keyExtractor={(item) => item.time}
+            />
+          </View>
+        </Widget>
+      </TouchableOpacity>
       <SlideModal
         isModalShow={ModalVisible}
         onClose={() => setModalVisible(false)}
@@ -72,7 +74,7 @@ export function ForecastDisplayWidget() {
         }
         content={<Text>天氣預報</Text>}
       />
-    </TouchableOpacity>
+    </>
   );
 }
 

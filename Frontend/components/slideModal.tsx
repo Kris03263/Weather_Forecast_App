@@ -40,10 +40,10 @@ export function SlideModal({
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
-        return gestureState.dy > 0;
+        return gestureState.dy > 10;
       },
       onPanResponderMove: (evt, gestureState) => {
-        if (gestureState.dy > 0) {
+        if (gestureState.dy > 10) {
           Animated.event([null, { dy: pan.y }], { useNativeDriver: false })(
             evt,
             gestureState
@@ -70,17 +70,13 @@ export function SlideModal({
         animationType="slide"
         transparent={true}
         visible={ModalVisible}
-        onRequestClose={() => {
-          setModalVisible(!ModalVisible);
-          onClose();
-        }}
+        onRequestClose={() => {}}
       >
         <View style={styles.centeredView}>
           <Animated.View
             style={[styles.modalView, { transform: [{ translateY: pan.y }] }]}
-            {...panResponder.panHandlers}
           >
-            <View style={styles.header}>
+            <View style={styles.header} {...panResponder.panHandlers}>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => {
