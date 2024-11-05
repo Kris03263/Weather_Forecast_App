@@ -14,7 +14,7 @@ import os
 redis_host = os.getenv('REDIS_HOST', 'localhost')  # 默認為 localhost
 try:
     r = redis.Redis(host=redis_host, port=6379, db=0)
-except ConnectionError:
+except ConnectionError as e:
     print("Connect to Redis failed:", e)
 
 
