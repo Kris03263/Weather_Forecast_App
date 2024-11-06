@@ -1,12 +1,13 @@
-import { Tabs } from "expo-router";
 import React, { useEffect, useState } from "react";
 import * as Location from "expo-location";
+import { StyleSheet } from "react-native";
 import { Provider, useSelector } from "react-redux";
+import { Tabs } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import io from "socket.io-client";
 
-import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { useColorScheme } from "@/hooks/useColorScheme";
-
+import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import store from "@/redux/store";
 import {
   updateWeatherData3h,
@@ -20,7 +21,9 @@ import {
 import { removeUser, setUser } from "@/redux/userSlice";
 import { setUserSettings } from "@/redux/userSettingsSlice";
 import { updateDailySug } from "@/redux/dailySugSlice";
-import { StyleSheet } from "react-native";
+import CustomModal from "@/components/CustomModal";
+import { MessageModal } from "@/components/MessageModal";
+import { setMessage, setVisible } from "@/redux/globalMessageSlice";
 
 // todo list
 // 1. Change region-selector to number
@@ -108,6 +111,10 @@ export interface UserSettings {
 }
 export interface DailySug {
   [key: string]: { name: string; suggestion: string }[];
+}
+export interface GlobalMessage {
+  message: string;
+  isVisible: boolean;
 }
 
 //////////////////////
@@ -273,6 +280,30 @@ export const getAllRegionList = async (): Promise<RegionList> => {
   // RETURN
   return regionList;
 };
+export const getAllSportList = async (): Promise<Sport[]> => {
+  // FETCH
+  const sportList = await HandleGetAllSport();
+
+  // ERROR HANDLE
+  if (!sportList) {
+    return [] as Sport[];
+  }
+
+  // RETURN
+  return sportList;
+};
+export const getAllHabitList = async (): Promise<Habit[]> => {
+  // FETCH
+  const habitList = await HandleGetAllHabit();
+
+  // ERROR HANDLE
+  if (!habitList) {
+    return [] as Habit[];
+  }
+
+  // RETURN
+  return habitList;
+};
 export const updateRegion0 = async () => {
   // GET
   let regions = store.getState().region ?? [];
@@ -296,7 +327,10 @@ export const updateRegion0 = async () => {
   );
 
   // BEFORE UPDATE
-  await Promise.all([updateWeatherData_3h(), updateWeatherData_12h()]);
+  await Promise.all([
+    updateWeatherData_3h(region),
+    updateWeatherData_12h(region),
+  ]);
 
   console.log("Updated region[0] to: " + region.name);
   console.log("Region list: " + JSON.stringify(store.getState().region));
@@ -417,12 +451,16 @@ export const requestLocationPermission = async () => {
 
   return status == "granted";
 };
+export const setNotification = async (message: string) => {
+  store.dispatch(setMessage(message));
+  store.dispatch(setVisible(true));
+};
 
 //////////////////
 // API fetching // (Return null & set global err msg if catch error)
 //////////////////
 
-const hostURL = "https://weather-2-10.onrender.com"; //`${hostURL}/`
+const hostURL = "http://34.49.99.63/"; //`https://weather-2-10.onrender.com/` `http://34.49.99.63/`
 
 const HandleSetUser = async (
   _account: string,
@@ -448,7 +486,7 @@ const HandleSetUser = async (
 
     return data;
   } catch (e) {
-    console.error(e);
+    setNotification(String(e));
     return null;
   }
 };
@@ -468,7 +506,7 @@ const HandleGetUser = async (_userID: string): Promise<User | null> => {
 
     return data;
   } catch (e) {
-    console.error(e);
+    setNotification(String(e));
     return null;
   }
 };
@@ -494,7 +532,7 @@ const HandleDeleteUser = async (_userID: string): Promise<any> => {
 
     return response;
   } catch (e) {
-    console.error(e);
+    setNotification(String(e));
     return null;
   }
 };
@@ -524,7 +562,7 @@ const HandleUserLogin = async (
 
     return data;
   } catch (e) {
-    console.error(e);
+    setNotification(String(e));
     return null;
   }
 };
@@ -554,7 +592,7 @@ const HandleSetUserSports = async (
 
     return response;
   } catch (e) {
-    console.error(e);
+    setNotification(String(e));
     return null;
   }
 };
@@ -579,7 +617,7 @@ const HandleGetUserSports = async (
 
     return data;
   } catch (e) {
-    console.error(e);
+    setNotification(String(e));
     return null;
   }
 };
@@ -609,7 +647,7 @@ const HandleSetUserHabits = async (
 
     return response;
   } catch (e) {
-    console.error(e);
+    setNotification(String(e));
     return null;
   }
 };
@@ -636,7 +674,7 @@ const HandleGetUserHabits = async (
 
     return data;
   } catch (e) {
-    console.error(e);
+    setNotification(String(e));
     return null;
   }
 };
@@ -671,8 +709,8 @@ const HandleGetLocation = async (): Promise<Region | null> => {
     };
 
     return region;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    setNotification(String(e));
     return null;
   }
 };
@@ -698,8 +736,8 @@ const HandleGetWeatherDataCoords = async (
       });
 
     return data;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    setNotification(String(e));
     return null;
   }
 };
@@ -730,8 +768,8 @@ const HandleGetWeatherData3h = async (
       });
 
     return data;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    setNotification(`獲取 ${_region} 3h 資料失敗 \n錯誤訊息: ` + String(e));
     return null;
   }
 };
@@ -762,21 +800,8 @@ const HandleGetWeatherData12h = async (
       });
 
     return data;
-  } catch (error) {
-    const [city, district] = _region.name.split(", ");
-    console.error(`Getting ${_region} 12h data failed: ` + error);
-    console.log(
-      "Data: " +
-        JSON.stringify({
-          userID: _userID ?? "-1",
-          longitude: "0",
-          latitude: "0",
-          cusloc: {
-            city: city,
-            district: district,
-          },
-        })
-    );
+  } catch (e) {
+    setNotification(`獲取 ${_region} 12h 資料失敗 \n錯誤訊息: ` + String(e));
     return null;
   }
 };
@@ -807,8 +832,8 @@ const HandleGetDailySug = async (
       });
 
     return data;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    setNotification(String(e));
     return null;
   }
 };
@@ -823,13 +848,52 @@ const HandleGetAllRegion = async (): Promise<RegionList | null> => {
       });
 
     return data;
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    setNotification(String(e));
+    return null;
+  }
+};
+const HandleGetAllSport = async (): Promise<Sport[] | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Users/GetAllSportsOption`, {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data as Sport[];
+      });
+
+    return data;
+  } catch (e) {
+    setNotification(String(e));
+    return null;
+  }
+};
+const HandleGetAllHabit = async (): Promise<Habit[] | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Users/GetAllHabitsOption`, {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data as Habit[];
+      });
+
+    return data;
+  } catch (e) {
+    setNotification(String(e));
     return null;
   }
 };
 
+///////////////
+// Socket.io //
+///////////////
+
 export default function TabLayout() {
+  const [socket, setSocket] = useState<any>(null);
+  const [connectionStatus, setConnectionStatus] = useState("Disconnected");
+
   useEffect(() => {
     // Update current location and current time every minute
     const Update = async () => {
@@ -846,22 +910,72 @@ export default function TabLayout() {
         "-----------------------------------------------------\n" +
           `| ${new Date()} \t|` +
           "\n" +
-          "----------------------------------------------------\n" +
+          "-----------------------------------------------------\n" +
           "| Data update success! \t\t\t\t\t\t\t\t|" +
           "\n" +
-          "----------------------------------------------------\n"
+          "-----------------------------------------------------\n"
       );
     };
 
     const init = async () => {
+      const socket = io(hostURL, {
+        transports: ["websocket", "polling"], // 首选 WebSocket
+        reconnectionAttempts: 5, // 设置最大重连次数
+        timeout: 10000, // 设置连接超时时间为10秒
+      });
+
+      // 連接成功事件
+      socket.on("connect", () => {
+        setNotification("Connected to server");
+        setConnectionStatus("Connected");
+        // 設置位置（選擇真實或假資料）
+        // socket.emit("set_location", {
+        //   userID: 1,
+        //   longitude: "120.62343304881064",
+        //   latitude: "24.21694034808",
+        // });
+        // 或者
+        // socket.emit("set_location_fake", {
+        //   userID: 1,
+        //   longitude: "120.62343304881064",
+        //   latitude: "24.21694034808",
+        // });
+      });
+      // 連接失敗事件
+      socket.on("connect_error", () => {
+        setNotification("連接WebSocket失敗");
+        setConnectionStatus("Disconnected");
+      });
+      // 註冊成功事件
+      socket.on("registration_success", (data) => {
+        setNotification(data.message);
+      });
+      // 地震更新事件（真實資料）
+      socket.on("earthquake_update", (data) => {
+        setNotification(`Received earthquake update: ${data}`); // 更新 UI 或顯示地震通知
+      });
+      // 地震更新事件（假資料）
+      socket.on("earthquake_update_fake", (data) => {
+        setNotification(`Received earthquake update: ${data}`);
+      });
+      // 錯誤事件
+      socket.on("error", (error) => {
+        setNotification(error.message);
+      });
+      // 斷開連接事件
+      socket.on("disconnect", () => {
+        setNotification("Disconnected from WebSocket");
+        setConnectionStatus("Disconnected");
+      });
+      setSocket(socket);
+
       let regions: Region[] = JSON.parse(
         (await AsyncStorage.getItem("regions")) || "[]"
       );
-
       store.dispatch(setRegion(regions));
 
       // Set default region and time interval
-      store.dispatch(setSelectedRegion(regions[0]?.name ?? ""));
+      store.dispatch(setSelectedRegion(regions[0]?.name ?? "")); // Change to number
       store.dispatch(setSelectedTimeInterval(0));
     };
 
@@ -869,7 +983,7 @@ export default function TabLayout() {
     Update();
     const interval = setInterval(async () => {
       await Update();
-    }, 60000); // Time gap (ms)
+    }, 300000); // Time gap (ms)
 
     return () => clearInterval(interval);
   }, []);
@@ -926,15 +1040,16 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
+      <MessageModal />
     </Provider>
   );
 }
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // 黑色半透明背景
-    position: "absolute", // 讓背景浮動
-    height: "8%", // 調整高度以便縮小圖標居中
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    position: "absolute",
+    height: 60,
     paddingHorizontal: 120,
     paddingBottom: 30,
     paddingTop: 10,

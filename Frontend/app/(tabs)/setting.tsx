@@ -4,13 +4,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Modal,
   StyleSheet,
-  Alert,
 } from "react-native";
 import { useSelector } from "react-redux";
-
-import { SvgImage } from "../../components/Svg";
 
 import {
   User,
@@ -24,31 +20,16 @@ import {
   userLogout,
   userDelete,
   userRegister,
+  getAllHabitList,
+  getAllSportList,
 } from "./_layout";
 
-import store from "../../redux/store";
+import store from "@/redux/store";
 import { Widget } from "@/components/Widget";
 import { Background } from "@/components/Background";
 import CustomModal from "@/components/CustomModal";
-
-interface RadioButtonProps {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}
-
-const RadioButton: React.FC<RadioButtonProps> = ({
-  label,
-  selected,
-  onPress,
-}) => (
-  <TouchableOpacity style={styles.radioButtonLayout} onPress={onPress}>
-    <View
-      style={[styles.radioButton, selected && styles.radioButtonSelected]}
-    />
-    <Text style={styles.radioLabel}>{label}</Text>
-  </TouchableOpacity>
-);
+import { SvgImage } from "@/components/Svg";
+import { RadioButton } from "@/components/RadioButton";
 
 export default function SettingsScreen() {
   // Modal control
@@ -63,6 +44,8 @@ export default function SettingsScreen() {
   const [password, setPassword] = useState("");
   const [sport, setSport] = useState<number[]>([]); // Start from 1
   const [habit, setHabit] = useState<number[]>([]); // Start from 1
+  const [sportList, setSportList] = useState<Sport[]>([]);
+  const [habitList, setHabitList] = useState<Habit[]>([]);
 
   // Define ref (element ID)
   const usernameLoginInputRef = useRef<TextInput>(null);
@@ -89,6 +72,15 @@ export default function SettingsScreen() {
   const weatherData = weatherDataList?.[selecter.region]?.[0]?.[0] ?? null;
 
   useEffect(() => {
+    getAllHabitList().then((data) => {
+      setHabitList(data);
+    });
+    getAllSportList().then((data) => {
+      setSportList(data);
+    });
+  }, []);
+
+  useEffect(() => {
     setSport(
       store.getState().userSettings?.sport?.map((sport) => sport.id) ?? []
     );
@@ -96,18 +88,6 @@ export default function SettingsScreen() {
       store.getState().userSettings?.habit?.map((habit) => habit.id) ?? []
     );
   }, [userSettings]);
-
-  const toggleOption = (
-    option: number,
-    setSelected: React.Dispatch<React.SetStateAction<number[]>>
-  ) => {
-    setSelected(
-      (prevSelectedOptions) =>
-        prevSelectedOptions.includes(option)
-          ? prevSelectedOptions.filter((item) => item !== option) // Remove from list
-          : [...prevSelectedOptions, option] // Add to list
-    );
-  };
 
   enum ModalType {
     LOGIN = "登入",
@@ -224,41 +204,39 @@ export default function SettingsScreen() {
       case ModalType.SPORT:
         return (
           <>
-            <View style={styles.radioGroupLayout}>
-              {["不小心刪掉忘記了"].map(
-                // Temp data (replace with all sport request from API)
-                (option, index) => (
-                  <RadioButton
-                    key={index}
-                    label={option}
-                    selected={sport.includes(index + 1)}
-                    onPress={() => {
-                      toggleOption(index + 1, setSport);
-                    }}
-                  />
-                )
-              )}
-            </View>
+            {sportList.map((option) => (
+              <RadioButton
+                key={option.id}
+                label={option.sportName}
+                selected={sport.includes(option.id)}
+                onPress={() => {
+                  setSport((pre) =>
+                    pre.includes(option.id)
+                      ? pre.filter((item) => item !== option.id)
+                      : [...pre, option.id]
+                  );
+                }}
+              />
+            ))}
           </>
         );
       case ModalType.HABIT:
         return (
           <>
-            <View style={styles.radioGroupLayout}>
-              {["做甜點", "健行", "登山", "玩遊戲", "出遊", "閱讀"].map(
-                // Temp data (replace with all habit request from API)
-                (option, index) => (
-                  <RadioButton
-                    key={index}
-                    label={option}
-                    selected={habit.includes(index + 1)}
-                    onPress={() => {
-                      toggleOption(index + 1, setHabit);
-                    }}
-                  />
-                )
-              )}
-            </View>
+            {habitList.map((option) => (
+              <RadioButton
+                key={option.id}
+                label={option.habitName}
+                selected={habit.includes(option.id)}
+                onPress={() => {
+                  setHabit((pre) =>
+                    pre.includes(option.id)
+                      ? pre.filter((item) => item !== option.id)
+                      : [...pre, option.id]
+                  );
+                }}
+              />
+            ))}
           </>
         );
       default:
@@ -275,7 +253,6 @@ export default function SettingsScreen() {
               onPress={() => {
                 usernameInput?.clear();
                 passwordInput?.clear();
-                console.log(account, password);
                 userLogin(account, password);
                 setModalVisible(false);
               }}
@@ -347,7 +324,6 @@ export default function SettingsScreen() {
             <TouchableOpacity
               style={styles.modalButton}
               onPress={() => {
-                console.log(sport);
                 userSetSports(sport);
                 setModalVisible(false);
               }}
@@ -500,9 +476,8 @@ const styles = StyleSheet.create({
   },
   bodySection: {
     backgroundColor: "#FFFFFF01",
-    height: "70%",
     padding: "3%",
-    paddingBottom: "20%",
+    paddingBottom: 80,
   },
 
   // Box
@@ -563,31 +538,5 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 5,
-  },
-
-  // Radio button
-  radioGroupLayout: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  radioButtonLayout: {
-    flexDirection: "row",
-    alignItems: "center",
-    margin: 10,
-  },
-  radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "gray",
-    marginRight: 10,
-  },
-  radioButtonSelected: {
-    backgroundColor: "blue",
-  },
-  radioLabel: {
-    fontSize: 16,
   },
 });

@@ -22,7 +22,6 @@ import {
 import { Background } from "@/components/Background";
 import { SvgImage } from "@/components/Svg";
 import CustomModal from "@/components/CustomModal";
-
 import store from "@/redux/store";
 import { setSelectedRegion } from "@/redux/selecterSlice";
 
@@ -275,9 +274,8 @@ const styles = StyleSheet.create({
   },
   bodySection: {
     backgroundColor: "#FFFFFF01",
-    height: "70%",
     padding: "3%",
-    paddingBottom: "20%",
+    paddingBottom: 80,
   },
 
   // Region Card

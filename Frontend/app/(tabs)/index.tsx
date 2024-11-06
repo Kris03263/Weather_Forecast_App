@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -5,19 +6,16 @@ import {
   Animated,
   Dimensions,
   Text,
-  TouchableOpacity,
 } from "react-native";
-import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
+
+import { Selecter, WeatherDataList } from "./_layout";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
 import { IndicatorsDisplayWidget_single } from "@/components/IndicatorsDisplayWidget_single";
 import { IndicatorsDisplayWidget_double } from "@/components/IndicatorsDisplayWidget_double";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
-import { SvgImage } from "@/components/Svg";
-
-import { Selecter, WeatherDataList } from "./_layout";
 import { Background } from "@/components/Background";
 import { EarthQuakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
 
@@ -52,7 +50,7 @@ export default function HomeScreen() {
 
   const headerHeight = scrollY.interpolate({
     inputRange: [0, screenHeight / 5],
-    outputRange: [screenHeight * 0.2, screenHeight * 0.1],
+    outputRange: [150, 80],
     extrapolate: "clamp",
   });
   const opacity = scrollY.interpolate({
@@ -159,7 +157,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   topSection: {
-    marginTop: "10%",
+    marginTop: 40,
     justifyContent: "center",
     position: "relative",
     padding: "3%",
@@ -184,9 +182,8 @@ const styles = StyleSheet.create({
   },
   bodySection: {
     backgroundColor: "#FFFFFF01",
-    height: "70%",
     padding: "3%",
-    paddingBottom: "20%",
+    paddingBottom: 80,
   },
   row: {
     minWidth: "100%",

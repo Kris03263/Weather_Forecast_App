@@ -49,6 +49,7 @@ export function Widget({
 const styles = StyleSheet.create({
   emptyWidget: {
     flex: 1,
+    minHeight: 150,
     width: "auto",
     paddingVertical: 20,
     paddingHorizontal: "5%",
