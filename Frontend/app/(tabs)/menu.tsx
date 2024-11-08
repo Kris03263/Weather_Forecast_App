@@ -9,6 +9,13 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+  MenuProvider,
+} from "react-native-popup-menu";
 
 import {
   WeatherDataList,
@@ -17,16 +24,22 @@ import {
   userAddRegion,
   getAllRegionList,
   RegionList,
+  userRemoveRegion,
+  setNotification,
 } from "./_layout";
 
 import { Background } from "@/components/Background";
 import { SvgImage } from "@/components/Svg";
 import CustomModal from "@/components/CustomModal";
 import store from "@/redux/store";
-import { setSelectedRegion } from "@/redux/selecterSlice";
+import { setSelectedRegionIndex } from "@/redux/selecterSlice";
+import { removeRegion } from "@/redux/regionListSlice";
 
 export default function MenuScreen() {
   const navigation = useNavigation();
+
+  // Popup menu control
+  const [selectedMenu, setSelectedMenu] = useState("-1");
 
   // Modal control
   const [isModalVisible, setModalVisible] = useState(false);
@@ -122,7 +135,7 @@ export default function MenuScreen() {
               onPress={() => {
                 userAddRegion({
                   name: `${selectedCity}, ${selectedDistrict}`,
-                  id: store.getState().region.length.toString(),
+                  id: `${selectedCity}, ${selectedDistrict}`,
                   latitude: "-1",
                   longitude: "-1",
                 });
@@ -144,9 +157,7 @@ export default function MenuScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Gradiant */}
-      {/* <Background weatherData={weatherData} /> */}
-
+      {/* Background */}
       <View
         style={{
           backgroundColor: "#191919",
@@ -183,14 +194,65 @@ export default function MenuScreen() {
         <ScrollView style={styles.bodySection}>
           <FlatList
             data={region ?? []}
-            renderItem={({ item }) =>
-              regionCard(
-                item.name,
-                weatherDataList[item.name]?.[0]?.[0] ?? null,
-                item.id === "0",
-                () => navigation.navigate("index" as never)
-              )
-            }
+            renderItem={({ item, index }) => {
+              const weatherData = weatherDataList[item.name]?.[0]?.[0] ?? null;
+
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    console.log("Selected region: ", index);
+
+                    navigation.navigate("index" as never);
+                    store.dispatch(setSelectedRegionIndex(index));
+                  }}
+                  onLongPress={() =>
+                    setSelectedMenu(item.id !== "0" ? item.id : "-1")
+                  }
+                >
+                  <View style={styles.regionCard}>
+                    <Background
+                      weatherData={weatherData}
+                      style={{ borderRadius: 12 }}
+                    />
+
+                    <View style={styles.regionCardDisplay}>
+                      <View style={{ flexDirection: "column" }}>
+                        <Text style={styles.regionCardTitleText}>
+                          {item.name}
+                        </Text>
+                        <Text style={styles.regionCardSubText}>
+                          {item.id === "0" ? "當前地區" : ""}
+                        </Text>
+                      </View>
+                      <Text style={styles.regionCardTemperatureText}>
+                        {(weatherData?.temp ?? "--") + "°C"}
+                      </Text>
+                    </View>
+
+                    <View style={styles.regionCardDisplay}>
+                      <Text style={styles.regionCardText}>
+                        {weatherData?.weatherText ?? "--"}
+                      </Text>
+                      <Text style={styles.regionCardText}>{`體感溫度: ${
+                        weatherData?.bodyTemp ?? "--"
+                      }`}</Text>
+                    </View>
+                  </View>
+
+                  <Menu
+                    opened={selectedMenu === item.id}
+                    onBackdropPress={() => setSelectedMenu("-1")}
+                  >
+                    <MenuTrigger />
+                    <MenuOptions>
+                      <MenuOption onSelect={() => userRemoveRegion(item)}>
+                        <Text style={{ fontSize: 16, color: "red" }}>刪除</Text>
+                      </MenuOption>
+                    </MenuOptions>
+                  </Menu>
+                </TouchableOpacity>
+              );
+            }}
             keyExtractor={(item) => item.name}
           />
         </ScrollView>
@@ -204,48 +266,6 @@ export default function MenuScreen() {
         footer={modalFooter}
       />
     </View>
-  );
-}
-
-function regionCard(
-  region: string,
-  weatherData: WeatherData,
-  isLocal = false,
-  onPress: () => void
-) {
-  return (
-    <TouchableOpacity
-      onPress={() => {
-        console.log("click");
-        store.dispatch(setSelectedRegion(region));
-        onPress();
-      }}
-    >
-      <View style={styles.regionCard}>
-        <Background weatherData={weatherData} style={{ borderRadius: 12 }} />
-
-        <View style={styles.regionCardDisplay}>
-          <View style={{ flexDirection: "column" }}>
-            <Text style={styles.regionCardTitleText}>{region}</Text>
-            <Text style={styles.regionCardSubText}>
-              {isLocal ? "當前地區" : ""}
-            </Text>
-          </View>
-          <Text style={styles.regionCardTemperatureText}>
-            {(weatherData?.temp ?? "--") + "°C"}
-          </Text>
-        </View>
-
-        <View style={styles.regionCardDisplay}>
-          <Text style={styles.regionCardText}>
-            {weatherData?.weatherText ?? "--"}
-          </Text>
-          <Text style={styles.regionCardText}>{`體感溫度: ${
-            weatherData?.bodyTemp ?? "--"
-          }`}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
   );
 }
 

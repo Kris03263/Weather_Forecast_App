@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 
-import { Selecter, DailySug, WeatherDataList } from "@/app/(tabs)/_layout";
+import { DailySug, WeatherDataList } from "@/app/(tabs)/_layout";
 
 interface SuggestionDisplayWidgetProps {
   type: string;
@@ -13,50 +13,11 @@ interface SuggestionDisplayWidgetProps {
 export function SuggestionDisplayWidget({
   type,
 }: SuggestionDisplayWidgetProps) {
-  // {
-  //   dressing: [
-  //     {
-  //       name: "衣著",
-  //       suggestion: "(根據當天天氣推薦適合的衣著)",
-  //     },
-  //   ],
-  //   health: [
-  //     {
-  //       name: "健康",
-  //       suggestion: "(根據當天天氣提出健康建議)",
-  //     },
-  //   ],
-  //   transportation: [
-  //     {
-  //       name: "出行",
-  //       suggestion: "(根據當天天氣推薦適合的交通方案)",
-  //     },
-  //   ],
-  //   sport: [
-  //     {
-  //       name: "籃球",
-  //       suggestion: "(根據當天天氣判定是否適合該運動)",
-  //     },
-  //     {
-  //       name: "羽球",
-  //       suggestion: "(根據當天天氣判定是否適合該運動)",
-  //     },
-  //   ],
-  //   activity: [
-  //     {
-  //       name: "出遊",
-  //       suggestion: "(根據當天天氣判定是否適合該活動)",
-  //     },
-  //   ],
-  // };
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
   const dailySuggestions = useSelector(
     (state: { dailySug: DailySug }) => state.dailySug
-  );
-  const selecter = useSelector(
-    (state: { selecter: Selecter }) => state.selecter
   );
 
   const suggestion = dailySuggestions[type as keyof typeof dailySuggestions];

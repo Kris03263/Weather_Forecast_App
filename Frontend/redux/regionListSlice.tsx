@@ -16,6 +16,9 @@ const regionListSlice = createSlice({
       return action.payload;
     },
     updateRegion: (state, action: { payload: Region }) => {
+      if (!state.find((region) => region.id === action.payload.id)) {
+        return [...state, action.payload];
+      }
       return state.map((region) =>
         region.id === action.payload.id ? action.payload : region
       );

@@ -15,18 +15,26 @@ import {
 } from "@/redux/weatherDataSlice";
 import { setRegion, updateRegion } from "@/redux/regionListSlice";
 import {
-  setSelectedRegion,
+  setSelectedRegionIndex,
   setSelectedTimeInterval,
 } from "@/redux/selecterSlice";
 import { removeUser, setUser } from "@/redux/userSlice";
 import { setUserSettings } from "@/redux/userSettingsSlice";
 import { updateDailySug } from "@/redux/dailySugSlice";
-import CustomModal from "@/components/CustomModal";
 import { MessageModal } from "@/components/MessageModal";
 import { setMessage, setVisible } from "@/redux/globalMessageSlice";
+import { MenuProvider } from "react-native-popup-menu";
 
-// todo list
-// 1. Change region-selector to number
+// TODO list:
+// - [V] Add weather data API
+// - [V] Add weather image
+// - [X] Fix muti-day weather forecast view (Cancel)
+// - [ ] Switch to use region name to fetch weather data
+// - [V] Switch to use Redux for global state management
+// - [V] Move weatherDataList, region, currentTime to index.tsx
+// - [V] Use a global variable to save wrong msg
+// - [X] Move background color control to _layout.tsx (Instead moving to Background.tsx)
+// - [ ] Change region-selector to number
 
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
@@ -88,7 +96,7 @@ export interface RegionList {
   };
 }
 export interface Selecter {
-  region: string;
+  regionIndex: number;
   timeInterval: number;
 }
 export interface User {
@@ -213,7 +221,7 @@ export const userSetSports = async (_sportIDs: number[]) => {
     })
   );
 
-  console.log("Set sports with response: " + response.status);
+  console.log("Set sports with response: " + response.Status);
 };
 export const userSetHabits = async (_habitIDs: number[]) => {
   // GET
@@ -240,7 +248,7 @@ export const userSetHabits = async (_habitIDs: number[]) => {
     })
   );
 
-  console.log("Set habits with response: " + response.status);
+  console.log("Set habits with response: " + response.Status);
 };
 export const userAddRegion = async (_region: Region) => {
   // GET
@@ -258,6 +266,35 @@ export const userAddRegion = async (_region: Region) => {
   // STORE
   store.dispatch(setRegion([...regions, _region]));
   AsyncStorage.setItem("regions", JSON.stringify([...regions, _region]));
+
+  // BEFORE UPDATE
+  await Promise.all([
+    updateWeatherData_3h(_region),
+    updateWeatherData_12h(_region),
+  ]);
+
+  console.log("Added region: " + _region.name);
+  console.log("Region list: " + JSON.stringify(store.getState().region));
+};
+export const userRemoveRegion = async (_region: Region) => {
+  // GET
+  let regions = store.getState().region ?? [];
+  if (regions.length === 0) {
+    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
+  }
+
+  // ERROR HANDLE
+  if (!regions.find((region) => region.id === _region.id)) {
+    setNotification(`${_region.name} 不存在`);
+    return;
+  }
+
+  // STORE
+  store.dispatch(setRegion(regions.filter((r) => r.id !== _region.id)));
+  AsyncStorage.setItem(
+    "regions",
+    JSON.stringify(regions.filter((r) => r.id !== _region.id))
+  );
 
   // BEFORE UPDATE
   await Promise.all([
@@ -327,12 +364,26 @@ export const updateRegion0 = async () => {
   );
 
   // BEFORE UPDATE
-  await Promise.all([
-    updateWeatherData_3h(region),
-    updateWeatherData_12h(region),
-  ]);
+  await Promise.all([updateRegionList()]);
 
   console.log("Updated region[0] to: " + region.name);
+  console.log("Region list: " + JSON.stringify(store.getState().region));
+};
+export const updateRegionList = async () => {
+  // GET
+  let regions = store.getState().region ?? [];
+  if (regions.length === 0) {
+    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
+  }
+
+  // STORE
+  store.dispatch(setRegion(regions));
+  AsyncStorage.setItem("regions", JSON.stringify(regions));
+
+  // AFTER UPDATE
+  await Promise.all([updateWeatherData_3h(), updateWeatherData_12h()]);
+
+  console.log("Updated regions");
   console.log("Region list: " + JSON.stringify(store.getState().region));
 };
 export const updateWeatherData_3h = async (_region?: Region) => {
@@ -391,17 +442,17 @@ export const updateUser = async () => {
     userID = (await AsyncStorage.getItem("userID")) || "-1";
   }
 
+  // CHECK
+  if (userID === "-1") return;
+
   // FETCH
   const user = await HandleGetUser(userID);
 
-  // ERROR HANDLING
-  if (!user) {
-    return;
-  }
-
   // STORE
-  store.dispatch(setUser(user));
-  AsyncStorage.setItem("userID", JSON.stringify(user.id));
+  store.dispatch(
+    setUser(user ?? { id: "-1", account: "", password: "", status: "" })
+  );
+  AsyncStorage.setItem("userID", user?.id ?? "-1");
 
   // AFTER
   await Promise.all([updateUserSettings(), updateDailySuggestions()]);
@@ -434,6 +485,9 @@ export const updateUserSettings = async () => {
     userID = (await AsyncStorage.getItem("userID")) || "-1";
   }
 
+  // CHECK
+  if (userID === "-1") return;
+
   // FETCH
   const userSettings = {
     sport: (await HandleGetUserSports(userID)) ?? [],
@@ -460,7 +514,7 @@ export const setNotification = async (message: string) => {
 // API fetching // (Return null & set global err msg if catch error)
 //////////////////
 
-const hostURL = "http://34.49.99.63/"; //`https://weather-2-10.onrender.com/` `http://34.49.99.63/`
+const hostURL = "https://420269.xyz/"; //`https://weather-2-10.onrender.com/` `http://34.49.99.63/` `http://34.110.138.136/`
 
 const HandleSetUser = async (
   _account: string,
@@ -586,7 +640,7 @@ const HandleSetUserSports = async (
         return data;
       });
 
-    if (response.status !== "Successful") {
+    if (response.Status !== "Update Successful !") {
       throw new Error(response.status);
     }
 
@@ -641,7 +695,7 @@ const HandleSetUserHabits = async (
         return data;
       });
 
-    if (response.status !== "Successful") {
+    if (response.Status !== "Update Successful !") {
       throw new Error(response.status);
     }
 
@@ -886,25 +940,18 @@ const HandleGetAllHabit = async (): Promise<Habit[] | null> => {
   }
 };
 
-///////////////
-// Socket.io //
-///////////////
-
 export default function TabLayout() {
-  const [socket, setSocket] = useState<any>(null);
+  const [serverMessages, setServerMessages] = useState([]);
   const [connectionStatus, setConnectionStatus] = useState("Disconnected");
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [serverMessage, setServerMessage] = useState("");
 
   useEffect(() => {
     // Update current location and current time every minute
     const Update = async () => {
       console.log("Updating data......");
 
-      await Promise.all([
-        updateRegion0(),
-        updateWeatherData_3h(),
-        updateWeatherData_12h(),
-        updateUser(),
-      ]);
+      await Promise.all([updateRegion0(), updateRegionList(), updateUser()]);
 
       console.log(
         "-----------------------------------------------------\n" +
@@ -918,64 +965,96 @@ export default function TabLayout() {
     };
 
     const init = async () => {
-      const socket = io(hostURL, {
-        transports: ["websocket", "polling"], // 首选 WebSocket
-        reconnectionAttempts: 5, // 设置最大重连次数
-        timeout: 10000, // 设置连接超时时间为10秒
-      });
+      // var ws = new WebSocket(hostURL);
+      // const testMsg = {
+      //   userID: 1,
+      //   longitude: "120.62343304881064",
+      //   latitude: "24.21694034808",
+      // };
 
-      // 連接成功事件
-      socket.on("connect", () => {
-        setNotification("Connected to server");
-        setConnectionStatus("Connected");
-        // 設置位置（選擇真實或假資料）
-        // socket.emit("set_location", {
-        //   userID: 1,
-        //   longitude: "120.62343304881064",
-        //   latitude: "24.21694034808",
-        // });
-        // 或者
-        // socket.emit("set_location_fake", {
-        //   userID: 1,
-        //   longitude: "120.62343304881064",
-        //   latitude: "24.21694034808",
-        // });
-      });
-      // 連接失敗事件
-      socket.on("connect_error", () => {
-        setNotification("連接WebSocket失敗");
-        setConnectionStatus("Disconnected");
-      });
-      // 註冊成功事件
-      socket.on("registration_success", (data) => {
-        setNotification(data.message);
-      });
-      // 地震更新事件（真實資料）
-      socket.on("earthquake_update", (data) => {
-        setNotification(`Received earthquake update: ${data}`); // 更新 UI 或顯示地震通知
-      });
-      // 地震更新事件（假資料）
-      socket.on("earthquake_update_fake", (data) => {
-        setNotification(`Received earthquake update: ${data}`);
-      });
-      // 錯誤事件
-      socket.on("error", (error) => {
-        setNotification(error.message);
-      });
-      // 斷開連接事件
-      socket.on("disconnect", () => {
-        setNotification("Disconnected from WebSocket");
-        setConnectionStatus("Disconnected");
-      });
-      setSocket(socket);
+      // ws.onopen = () => {
+      //   setNotification("連接 WebSocket 成功");
+      //   setConnectionStatus("Connected");
 
-      let regions: Region[] = JSON.parse(
-        (await AsyncStorage.getItem("regions")) || "[]"
-      );
-      store.dispatch(setRegion(regions));
+      //   if (ws.readyState === WebSocket.OPEN) {
+      //     ws.send(JSON.stringify(testMsg));
+      //     setNotification("訊息已發送");
+      //   } else {
+      //     setNotification("WebSocket 未連接，無法發送訊息");
+      //   }
+      // };
+      // ws.onerror = (error) => {
+      //   setNotification(`連接 WebSocket 失敗: ${error}`);
+      //   setConnectionStatus("Disconnected");
+      // };
+      // ws.onclose = (event) => {
+      //   setNotification(
+      //     `已斷開 WebSocket 連線: (${event.code}) ${event.reason}`
+      //   );
+      //   setConnectionStatus("Disconnected");
+      // };
+      // ws.onmessage = (e) => {
+      //   console.log("aaaa");
+      //   console.log(e.data);
+      // };
+
+      // const socket = io(hostURL, {
+      //   transports: ["websocket", "polling"],
+      //   reconnectionAttempts: 5,
+      //   timeout: 2000,
+      // });
+
+      // // 連接成功事件
+      // socket.on("connect", () => {
+      //   setNotification("Connected to server");
+      //   setConnectionStatus("Connected");
+      //   // 設置位置（選擇真實或假資料）
+      //   // socket.emit("set_location", {
+      //   //   userID: 1,
+      //   //   longitude: "120.62343304881064",
+      //   //   latitude: "24.21694034808",
+      //   // });
+      //   // 或者
+      //   socket.emit("set_location_fake", {
+      //     userID: 1,
+      //     longitude: "120.62343304881064",
+      //     latitude: "24.21694034808",
+      //   });
+      //   socket.send({
+      //     userID: 1,
+      //     longitude: "120.62343304881064",
+      //     latitude: "24.21694034808",
+      //   });
+      // });
+      // // // 連接失敗事件
+      // socket.on("connect_error", () => {
+      //   setNotification("連接WebSocket失敗");
+      //   setConnectionStatus("Disconnected");
+      // });
+      // // 註冊成功事件
+      // socket.on("registration_success", (data) => {
+      //   setNotification(data.message);
+      // });
+      // // 地震更新事件（真實資料）
+      // socket.on("earthquake_update", (data) => {
+      //   setNotification(`Received earthquake update: ${data}`); // 更新 UI 或顯示地震通知
+      // });
+      // // 地震更新事件（假資料）
+      // socket.on("earthquake_update_fake", (data) => {
+      //   setNotification(`Received earthquake update: ${data}`);
+      // });
+      // // 錯誤事件
+      // socket.on("error", (error) => {
+      //   setNotification(error.message);
+      // });
+      // // 斷開連接事件
+      // socket.on("disconnect", (event) => {
+      //   setNotification("Disconnected from WebSocket : ");
+      //   setConnectionStatus("Disconnected");
+      // });
 
       // Set default region and time interval
-      store.dispatch(setSelectedRegion(regions[0]?.name ?? "")); // Change to number
+      store.dispatch(setSelectedRegionIndex(0));
       store.dispatch(setSelectedTimeInterval(0));
     };
 
@@ -988,58 +1067,96 @@ export default function TabLayout() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const ws = new WebSocket(hostURL);
+    const testMsg = {
+      userID: 1,
+      longitude: "120.62343304881064",
+      latitude: "24.21694034808",
+    };
+
+    ws.onopen = () => {
+      setNotification("WebSocket connection opened");
+      ws.send(JSON.stringify(testMsg)); // Send a test message to the server
+      setIsConnected(true); // Update state to reflect successful connection
+    };
+
+    ws.onmessage = (e) => {
+      setNotification("Message from server:" + e.data);
+      setServerMessage(e?.data); // Store the server message
+    };
+
+    ws.onerror = (e) => {
+      setNotification("WebSocket error:" + e);
+      setIsConnected(false); // Update state if there is an error
+    };
+
+    ws.onclose = (e) => {
+      setNotification("WebSocket connection closed:" + e.code + e.reason);
+      setIsConnected(false); // Update state if the connection closes
+    };
+
+    // Clean up WebSocket connection when the component unmounts
+    return () => {
+      ws.close();
+    };
+  }, []);
+
   const colorScheme = useColorScheme();
 
   return (
     <Provider store={store}>
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: "white", // 設置圖標為白色
-          tabBarInactiveTintColor: "white", // 未選中的圖標顏色
-          headerShown: false,
-          tabBarStyle: styles.tabBar, // 應用自定義的樣式
-        }}
-      >
-        <Tabs.Screen
-          name="menu"
-          options={{
-            title: "",
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "menu" : "menu-outline"}
-                color={color}
-                size={20} // 縮小圖標
-              />
-            ),
+      <MenuProvider>
+        <Tabs
+          screenOptions={{
+            tabBarActiveTintColor: "white", // 設置圖標為白色
+            tabBarInactiveTintColor: "white", // 未選中的圖標顏色
+            headerShown: false,
+            tabBarStyle: styles.tabBar, // 應用自定義的樣式
           }}
-        />
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: "",
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "home" : "home-outline"}
-                color={color}
-                size={20} // 縮小圖標
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="setting"
-          options={{
-            title: "",
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "settings-sharp" : "settings-outline"}
-                color={color}
-                size={20} // 縮小圖標
-              />
-            ),
-          }}
-        />
-      </Tabs>
+        >
+          <Tabs.Screen
+            name="menu"
+            options={{
+              title: "",
+              tabBarIcon: ({ color, focused }) => (
+                <TabBarIcon
+                  name={focused ? "menu" : "menu-outline"}
+                  color={color}
+                  size={20} // 縮小圖標
+                />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: "",
+              tabBarIcon: ({ color, focused }) => (
+                <TabBarIcon
+                  name={focused ? "home" : "home-outline"}
+                  color={color}
+                  size={20} // 縮小圖標
+                />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="setting"
+            options={{
+              title: "",
+              tabBarIcon: ({ color, focused }) => (
+                <TabBarIcon
+                  name={focused ? "settings-sharp" : "settings-outline"}
+                  color={color}
+                  size={20} // 縮小圖標
+                />
+              ),
+            }}
+          />
+        </Tabs>
+      </MenuProvider>
+
       <MessageModal />
     </Provider>
   );

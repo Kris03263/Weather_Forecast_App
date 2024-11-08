@@ -6,38 +6,32 @@ import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 import { SlideModal } from "@/components/slideModal";
 
-import {
-  Selecter,
-  WeatherDataList,
-  indicatorsDictionary,
-} from "@/app/(tabs)/_layout";
+import { WeatherDataList, indicatorsDictionary } from "@/app/(tabs)/_layout";
 
 interface IndicatorsDisplayWidgetProps_double {
   type1: string;
   type2: string;
+  region: string;
 }
 
 export function IndicatorsDisplayWidget_double({
   type1,
   type2,
+  region,
 }: IndicatorsDisplayWidgetProps_double) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
-  const selecter = useSelector(
-    (state: { selecter: Selecter }) => state.selecter
-  );
+
   const indicator1 =
     indicatorsDictionary[type1 as keyof typeof indicatorsDictionary];
   const indicator2 =
     indicatorsDictionary[type2 as keyof typeof indicatorsDictionary];
 
-  indicator1.value =
-    weatherDataList?.[selecter.region]?.[0]?.[0]?.[type1] ?? ""; // region - timeInterval - index
-  indicator2.value =
-    weatherDataList?.[selecter.region]?.[0]?.[0]?.[type2] ?? "";
+  indicator1.value = weatherDataList?.[region]?.[0]?.[0]?.[type1] ?? "--"; // region - timeInterval - index
+  indicator2.value = weatherDataList?.[region]?.[0]?.[0]?.[type2] ?? "--";
 
   return (
     <TouchableOpacity

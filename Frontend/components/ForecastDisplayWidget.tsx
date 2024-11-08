@@ -11,37 +11,38 @@ import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 import { DynamicImage } from "@/components/DynamicImage";
 
-import { WeatherDataList, Selecter } from "@/app/(tabs)/_layout";
+import { WeatherDataList } from "@/app/(tabs)/_layout";
 import { SlideModal } from "@/components/slideModal";
 import { useState } from "react";
 
-export function ForecastDisplayWidget() {
+interface ForecastDisplayWidgetProps {
+  region: string;
+}
+
+export function ForecastDisplayWidget({ region }: ForecastDisplayWidgetProps) {
   const [ModalVisible, setModalVisible] = useState(false);
 
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
-  );
-  const selecter = useSelector(
-    (state: { selecter: Selecter }) => state.selecter
   );
 
   return (
     <>
       <TouchableOpacity onPress={() => setModalVisible(true)}>
         <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
-          <View style={styles.titleDisplay}>
+          <View style={styles.titleLayout}>
             <SvgImage style={{ width: 30, height: 30 }} name="weather" />
             <Text style={styles.title}>天氣預報</Text>
           </View>
 
-          <View style={styles.cityView}>
+          <View style={styles.contentLayout}>
             <FlatList
               horizontal
-              style={{ width: "100%" }}
-              data={weatherDataList?.[selecter.region]?.[0] ?? []}
+              style={styles.weatherCardGroundLayout}
+              data={weatherDataList?.[region]?.[0] ?? []}
               renderItem={({ item }) => (
-                <View style={styles.weatherCard}>
-                  <Text style={styles.weatherTime}>
+                <View style={styles.weatherCardLayout}>
+                  <Text style={styles.weatherTimeText}>
                     {item.time.split(" ")[1].split(":")[0] + "時"}
                   </Text>
                   <DynamicImage
@@ -53,7 +54,7 @@ export function ForecastDisplayWidget() {
                         : `night/${item.weatherCode}.png`
                     }
                   />
-                  <Text style={styles.weatherTemperature}>
+                  <Text style={styles.weatherTemperatureText}>
                     {item.temp + "°C"}
                   </Text>
                 </View>
@@ -84,14 +85,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  cityView: {
-    width: "100%",
-    overflow: "hidden",
-    alignItems: "center",
-    marginBottom: 10,
-    gap: 10,
-  },
-  titleDisplay: {
+  titleLayout: {
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
@@ -103,15 +97,21 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: "left",
   },
-  subTitle: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+  contentLayout: {
+    width: "100%",
+    overflow: "hidden",
+    alignItems: "center",
+    marginBottom: 10,
+    gap: 10,
   },
   weatherScroll: {
     flexDirection: "row",
   },
-  weatherCard: {
+  weatherCardGroundLayout: {
+    width: "100%",
+    height: 150,
+  },
+  weatherCardLayout: {
     width: 60,
     backgroundColor: "none",
     justifyContent: "space-between",
@@ -122,12 +122,12 @@ const styles = StyleSheet.create({
     width: "80%",
     marginBottom: 5,
   },
-  weatherTime: {
+  weatherTimeText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
   },
-  weatherTemperature: {
+  weatherTemperatureText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
