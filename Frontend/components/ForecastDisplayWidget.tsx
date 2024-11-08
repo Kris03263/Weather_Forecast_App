@@ -14,6 +14,7 @@ import { DynamicImage } from "@/components/DynamicImage";
 import { WeatherDataList, Selecter } from "@/app/(tabs)/_layout";
 import { SlideModal } from "@/components/slideModal";
 import { useState } from "react";
+import Chart from "@/components/Chart";
 
 export function ForecastDisplayWidget() {
   const [ModalVisible, setModalVisible] = useState(false);
@@ -72,7 +73,7 @@ export function ForecastDisplayWidget() {
             <Text style={styles.title}>天氣預報</Text>
           </View>
         }
-        content={<Text>天氣預報</Text>}
+        content={<Chart type="temp"></Chart>}
       />
     </>
   );
