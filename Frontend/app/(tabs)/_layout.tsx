@@ -1,29 +1,29 @@
 import React, { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import { StyleSheet } from "react-native";
-import { Provider, useSelector } from "react-redux";
+import { Provider } from "react-redux";
 import { Tabs } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MenuProvider } from "react-native-popup-menu";
 import io, { Socket } from "socket.io-client";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import { MessageModal } from "@/components/MessageModal";
 import store from "@/redux/store";
 import {
   updateWeatherData3h,
   updateWeatherData12h,
 } from "@/redux/weatherDataSlice";
-import { setRegion, updateRegion } from "@/redux/regionListSlice";
+import { setRegions } from "@/redux/regionsSlice";
 import {
   setSelectedRegionIndex,
   setSelectedTimeInterval,
 } from "@/redux/selecterSlice";
 import { removeUser, setUser } from "@/redux/userSlice";
-import { setUserSettings } from "@/redux/userSettingsSlice";
-import { updateDailySug } from "@/redux/dailySugSlice";
-import { MessageModal } from "@/components/MessageModal";
+import { setHabit, setSport, setUserSettings } from "@/redux/userSettingsSlice";
+import { setDailySug } from "@/redux/dailySugSlice";
 import { setMessage, setVisible } from "@/redux/globalMessageSlice";
-import { MenuProvider } from "react-native-popup-menu";
 
 // TODO list:
 // - [V] Add weather data API
@@ -98,6 +98,7 @@ export interface RegionList {
 export interface Selecter {
   regionIndex: number;
   timeInterval: number;
+  targetRegionIndex: number;
 }
 export interface User {
   account: string;
@@ -130,127 +131,67 @@ export interface GlobalMessage {
 //////////////////////
 
 export const userLogin = async (_account: string, _password: string) => {
-  // FETCH
   const user = await HandleUserLogin(_account, _password);
+  if (!user) return;
 
-  // ERROR HANDLE
-  if (!user) {
-    return;
-  }
-
-  // STORE
   store.dispatch(setUser(user));
   AsyncStorage.setItem("userID", user.id);
 
-  // UPDATE
   await Promise.all([updateUserSettings(), updateDailySuggestions()]);
 
   console.log("Login as " + user.account);
 };
 export const userLogout = async () => {
-  // STORE
-  AsyncStorage.setItem("userID", "-1");
   store.dispatch(removeUser());
+  AsyncStorage.setItem("userID", "-1");
 
   console.log("Logged out");
 };
 export const userDelete = async (_userID: string) => {
-  // FETCH
   const response = await HandleDeleteUser(_userID);
+  if (!response) return;
 
-  // ERROR HANDLE
-  if (!response) {
-    return;
-  }
-
-  // STORE
-  AsyncStorage.setItem("userID", "-1");
   store.dispatch(removeUser());
-
-  // AFTER
-  await Promise.all([userLogout()]);
+  AsyncStorage.setItem("userID", "-1");
 
   console.log("Delete with response: " + response.status);
 };
 export const userRegister = async (_account: string, _password: string) => {
-  // FETCH
   const user = await HandleSetUser(_account, _password);
+  if (!user) return;
 
-  // ERROR HANDLE
-  if (!user) {
-    return;
-  }
-
-  // STORE
   store.dispatch(setUser(user));
   AsyncStorage.setItem("userID", user.id);
 
-  // UPDATE
   await Promise.all([userLogin(_account, _password)]);
 
   console.log("Register as " + user.account);
 };
 export const userSetSports = async (_sportIDs: number[]) => {
-  // GET
-  const habit = store.getState().userSettings?.habit ?? [];
-  let userID = store.getState().user?.id ?? "";
-  if (!userID) {
-    userID = (await AsyncStorage.getItem("userID")) || "-1";
-  }
+  const userID = store.getState().user.id;
 
-  // FETCH
   const response = await HandleSetUserSports(userID, _sportIDs);
   const sports = await HandleGetUserSports(userID);
+  if (!sports || !response) return;
 
-  // ERROR HANDLE
-  if (!sports || !response) {
-    return;
-  }
-
-  // STORE
-  store.dispatch(
-    setUserSettings({
-      sport: sports,
-      habit: habit,
-    })
-  );
+  store.dispatch(setSport(sports));
 
   console.log("Set sports with response: " + response.Status);
 };
 export const userSetHabits = async (_habitIDs: number[]) => {
-  // GET
-  const sport = store.getState().userSettings?.sport ?? [];
-  let userID = store.getState().user?.id ?? "";
-  if (!userID) {
-    userID = (await AsyncStorage.getItem("userID")) || "-1";
-  }
+  const userID = store.getState().user.id;
 
-  // FETCH
   const response = await HandleSetUserHabits(userID, _habitIDs);
   const habits = await HandleGetUserHabits(userID);
 
-  // ERROR HANDLE
-  if (!habits || !response) {
-    return;
-  }
+  if (!habits || !response) return;
 
-  // STORE
-  store.dispatch(
-    setUserSettings({
-      sport: sport,
-      habit: habits,
-    })
-  );
+  store.dispatch(setHabit(habits));
 
   console.log("Set habits with response: " + response.Status);
 };
 export const userAddRegion = async (_city: string, _district: string) => {
-  // GET
-  let regions = store.getState().region ?? [];
-  if (regions.length === 0) {
-    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-  }
-
+  const regions = store.getState().regions;
   const _region: Region = {
     id: `${_city}${_district}`,
     name: `${_city}, ${_district}`,
@@ -258,155 +199,102 @@ export const userAddRegion = async (_city: string, _district: string) => {
     latitude: "-1",
   };
 
-  // ERROR HANDLE
   if (!_city || !_district) {
-    setNotification("地區資料不完整");
+    showNotification("地區資料不完整");
     return;
   }
   if (regions.find((region) => region.id === _region.id)) {
-    setNotification(`${_region.name} 已存在`);
+    showNotification(`${_region.name} 已存在`);
     return;
   }
 
-  // STORE
-  store.dispatch(setRegion([...regions, _region]));
+  store.dispatch(setRegions([...regions, _region]));
   AsyncStorage.setItem("regions", JSON.stringify([...regions, _region]));
 
-  // BEFORE UPDATE
   await Promise.all([
     updateWeatherData_3h(_region),
     updateWeatherData_12h(_region),
   ]);
 
   console.log("Added region: " + _region.name);
-  console.log("Region list: " + JSON.stringify(store.getState().region));
+  console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
 export const userRemoveRegion = async (_index: number) => {
-  // GET
-  let regions = store.getState().region ?? [];
-  if (regions.length === 0) {
-    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-  }
+  const regions = store.getState().regions;
 
-  // ERROR HANDLE
-  if (!regions.find((r, index) => index === _index)) {
-    setNotification(`${regions[_index]} 不存在`);
-    return;
-  }
+  // Consider to remove this
+  // if (!regions.find((r, index) => index === _index)) {
+  //   showNotification(`${regions[_index]} 不存在`);
+  //   return;
+  // }
 
-  // STORE
-  store.dispatch(setRegion(regions.filter((r, index) => index !== _index)));
+  store.dispatch(setRegions(regions.filter((r, index) => index !== _index)));
   AsyncStorage.setItem(
     "regions",
     JSON.stringify(regions.filter((r, index) => index !== _index))
   );
 
-  // BEFORE UPDATE
   await Promise.all([
     updateWeatherData_3h(regions[_index]),
     updateWeatherData_12h(regions[_index]),
   ]);
 
   console.log("Added region: " + regions[_index].name);
-  console.log("Region list: " + JSON.stringify(store.getState().region));
+  console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
 export const getAllRegionList = async (): Promise<RegionList> => {
-  // FETCH
   const regionList = await HandleGetAllRegion();
 
-  // ERROR HANDLE
-  if (!regionList) {
-    return { city: {} } as RegionList;
-  }
-
-  // RETURN
-  return regionList;
+  return regionList ?? ({} as RegionList);
 };
 export const getAllSportList = async (): Promise<Sport[]> => {
-  // FETCH
   const sportList = await HandleGetAllSport();
 
-  // ERROR HANDLE
-  if (!sportList) {
-    return [] as Sport[];
-  }
-
-  // RETURN
-  return sportList;
+  return sportList ?? [];
 };
 export const getAllHabitList = async (): Promise<Habit[]> => {
-  // FETCH
   const habitList = await HandleGetAllHabit();
 
-  // ERROR HANDLE
-  if (!habitList) {
-    return [] as Habit[];
-  }
-
-  // RETURN
-  return habitList;
+  return habitList ?? [];
 };
 export const updateRegion0 = async () => {
-  // GET
-  let regions = store.getState().region ?? [];
-  if (regions.length === 0) {
-    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-  }
+  const regions = store.getState().regions;
 
-  // FETCH
   const region = await HandleGetLocation();
+  if (!region) return;
 
-  // ERROR HANDLE
-  if (!region) {
-    return;
-  }
-
-  // STORE
-  store.dispatch(updateRegion(region));
+  store.dispatch(setRegions([region, ...regions.filter((_, i) => i !== 0)]));
   AsyncStorage.setItem(
     "regions",
     JSON.stringify([region, ...regions.filter((_, i) => i !== 0)])
   );
 
-  // BEFORE UPDATE
-  await Promise.all([updateRegionList()]);
+  await Promise.all([
+    updateWeatherData_3h(region),
+    updateWeatherData_12h(region),
+  ]);
 
   console.log("Updated region[0] to: " + region.name);
-  console.log("Region list: " + JSON.stringify(store.getState().region));
+  console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
-export const updateRegionList = async () => {
-  // GET
-  let regions = store.getState().region ?? [];
-  if (regions.length === 0) {
-    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-  }
+export const updateRegions = async () => {
+  const regions = store.getState().regions;
 
-  // STORE
-  store.dispatch(setRegion(regions));
+  store.dispatch(setRegions(regions));
   AsyncStorage.setItem("regions", JSON.stringify(regions));
 
-  // AFTER UPDATE
   await Promise.all([updateWeatherData_3h(), updateWeatherData_12h()]);
 
-  console.log("Updated regions");
-  console.log("Region list: " + JSON.stringify(store.getState().region));
+  console.log("Updated all regions");
+  console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
 export const updateWeatherData_3h = async (_region?: Region) => {
-  // GET
-  let regions = _region ? [_region] : store.getState().region ?? [];
-  if (regions.length === 0) {
-    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-  }
+  const regions = _region ? [_region] : store.getState().regions;
 
   await Promise.all(
     regions.map(async (region) => {
-      // FETCH
-      const weatherData3h = await HandleGetWeatherData3h(region);
+      const weatherData3h = (await HandleGetWeatherData3h(region)) ?? [];
 
-      // ERROR HANDLING
-      if (!weatherData3h) return null;
-
-      // STORE
       store.dispatch(updateWeatherData3h(weatherData3h));
     })
   );
@@ -416,21 +304,12 @@ export const updateWeatherData_3h = async (_region?: Region) => {
   );
 };
 export const updateWeatherData_12h = async (_region?: Region) => {
-  // GET
-  let regions = _region ? [_region] : store.getState().region ?? [];
-  if (regions.length === 0) {
-    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-  }
+  const regions = _region ? [_region] : store.getState().regions;
 
   await Promise.all(
     regions.map(async (region) => {
-      // FETCH
-      const weatherData12h = await HandleGetWeatherData12h(region);
+      const weatherData12h = (await HandleGetWeatherData12h(region)) ?? [];
 
-      // ERROR HANDLING
-      if (!weatherData12h) return null;
-
-      // STORE
       store.dispatch(updateWeatherData12h(weatherData12h));
     })
   );
@@ -441,78 +320,70 @@ export const updateWeatherData_12h = async (_region?: Region) => {
   );
 };
 export const updateUser = async () => {
-  // GET
-  let userID = store.getState().user?.id ?? "";
-  if (!userID) {
-    userID = (await AsyncStorage.getItem("userID")) || "-1";
-  }
+  const userID = store.getState().user.id;
 
-  // CHECK
   if (userID === "-1") return;
 
-  // FETCH
   const user = await HandleGetUser(userID);
+  if (!user) return;
 
-  // STORE
-  store.dispatch(
-    setUser(user ?? { id: "-1", account: "", password: "", status: "" })
-  );
+  store.dispatch(setUser(user));
   AsyncStorage.setItem("userID", user?.id ?? "-1");
 
-  // AFTER
   await Promise.all([updateUserSettings(), updateDailySuggestions()]);
 
   console.log("Updated user");
 };
 export const updateDailySuggestions = async () => {
-  // GET
-  let userID = store.getState().user?.id ?? "";
-  let regions = store.getState().region ?? [];
-  if (!userID) {
-    userID = (await AsyncStorage.getItem("userID")) || "-1";
-  }
-  if (regions.length === 0) {
-    regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
-  }
+  let userID = store.getState().user.id;
+  let regions = store.getState().regions;
 
-  // FETCH
   const dailySuggestions = (await HandleGetDailySug(userID, regions[0])) ?? {};
 
-  // STORE
-  store.dispatch(updateDailySug(dailySuggestions));
+  store.dispatch(setDailySug(dailySuggestions));
 
   console.log("Updated daily suggestions");
 };
 export const updateUserSettings = async () => {
-  // GET
-  let userID = store.getState().user?.id ?? "";
-  if (!userID) {
-    userID = (await AsyncStorage.getItem("userID")) || "-1";
-  }
+  let userID = store.getState().user.id;
 
-  // CHECK
   if (userID === "-1") return;
 
-  // FETCH
   const userSettings = {
     sport: (await HandleGetUserSports(userID)) ?? [],
     habit: (await HandleGetUserHabits(userID)) ?? [],
   };
 
-  // STORE
   store.dispatch(setUserSettings(userSettings));
   AsyncStorage.setItem("userSettings", JSON.stringify(userSettings));
 
   console.log("Updated user settings");
 };
 export const requestLocationPermission = async () => {
-  let { status } = await Location.requestForegroundPermissionsAsync();
+  const { status } = await Location.requestForegroundPermissionsAsync();
 
   return status == "granted";
 };
-export const setNotification = async (message: string) => {
+export const showNotification = async (message: string) => {
   store.dispatch(setMessage(message));
   store.dispatch(setVisible(true));
+};
+export const syncLocalDataToGlobal = async () => {
+  const userID = (await AsyncStorage.getItem("userID")) ?? "-1";
+  const regions = JSON.parse((await AsyncStorage.getItem("regions")) ?? "[]");
+  const userSettings = JSON.parse(
+    (await AsyncStorage.getItem("userSettings")) ?? "{}"
+  );
+
+  console.log("local data: ", userID, regions, userSettings);
+
+  store.dispatch(
+    setUser({ id: userID, account: "", password: "", status: "" })
+  );
+  store.dispatch(setRegions(regions));
+  store.dispatch(setUserSettings(userSettings));
+
+  console.log("Synced local data to global");
 };
 
 //////////////////
@@ -545,7 +416,7 @@ const HandleSetUser = async (
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -565,7 +436,7 @@ const HandleGetUser = async (_userID: string): Promise<User | null> => {
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -591,7 +462,7 @@ const HandleDeleteUser = async (_userID: string): Promise<any> => {
 
     return response;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -621,7 +492,7 @@ const HandleUserLogin = async (
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -651,7 +522,7 @@ const HandleSetUserSports = async (
 
     return response;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -676,7 +547,7 @@ const HandleGetUserSports = async (
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -706,7 +577,7 @@ const HandleSetUserHabits = async (
 
     return response;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -733,7 +604,7 @@ const HandleGetUserHabits = async (
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -769,7 +640,7 @@ const HandleGetLocation = async (): Promise<Region | null> => {
 
     return region;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -796,7 +667,7 @@ const HandleGetWeatherDataCoords = async (
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -828,7 +699,7 @@ const HandleGetWeatherData3h = async (
 
     return data;
   } catch (e) {
-    setNotification(`獲取 ${_region} 3h 資料失敗 \n錯誤訊息: ` + String(e));
+    showNotification(`獲取 ${_region} 3h 資料失敗 \n錯誤訊息: ` + String(e));
     return null;
   }
 };
@@ -860,7 +731,7 @@ const HandleGetWeatherData12h = async (
 
     return data;
   } catch (e) {
-    setNotification(`獲取 ${_region} 12h 資料失敗 \n錯誤訊息: ` + String(e));
+    showNotification(`獲取 ${_region} 12h 資料失敗 \n錯誤訊息: ` + String(e));
     return null;
   }
 };
@@ -892,7 +763,7 @@ const HandleGetDailySug = async (
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -908,7 +779,7 @@ const HandleGetAllRegion = async (): Promise<RegionList | null> => {
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -924,7 +795,7 @@ const HandleGetAllSport = async (): Promise<Sport[] | null> => {
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -940,7 +811,7 @@ const HandleGetAllHabit = async (): Promise<Habit[] | null> => {
 
     return data;
   } catch (e) {
-    setNotification(String(e));
+    showNotification(String(e));
     return null;
   }
 };
@@ -954,7 +825,8 @@ export default function TabLayout() {
     const Update = async () => {
       console.log("Updating data......");
 
-      await Promise.all([updateRegion0(), updateRegionList(), updateUser()]);
+      await syncLocalDataToGlobal();
+      await Promise.all([updateRegion0(), updateRegions(), updateUser()]);
 
       console.log(
         "-----------------------------------------------------\n" +
@@ -963,8 +835,8 @@ export default function TabLayout() {
           "-----------------------------------------------------\n" +
           "| Data update success! \t\t\t\t\t\t\t\t|" +
           "\n" +
-          JSON.stringify(store.getState().weatherData) +
-          "-----------------------------------------------------\n"
+          "-----------------------------------------------------\n" +
+          JSON.stringify(store.getState().regions)
       );
     };
 
@@ -991,9 +863,8 @@ export default function TabLayout() {
 
     setSocketInstance(socket);
 
-    // 連接成功事件
     socket.on("connect", () => {
-      setNotification(`連接 WebSocket (id: ${socket.id}) 成功`);
+      showNotification(`連接 WebSocket (id: ${socket.id}) 成功`);
       setIsConnected(true);
       // 設置位置（選擇真實或假資料）
       socket.emit("set_location", {
@@ -1001,39 +872,32 @@ export default function TabLayout() {
         longitude: "120.62343304881064",
         latitude: "24.21694034808",
       });
-      // 或者
       socket.emit("set_location_fake", {
         userID: 1,
         longitude: "120.62343304881064",
         latitude: "24.21694034808",
       });
     });
-    //連接失敗事件
     socket.on("connect_error", () => {
-      setNotification(`連接 WebSocket (id: ${socket.id}) 失敗`);
+      showNotification(`連接 WebSocket (id: ${socket.id}) 失敗`);
       setIsConnected(false);
     });
-    // 錯誤事件
     socket.on("error", (error) => {
-      setNotification(`連接 WebSocket 錯誤: ${error.message}`);
+      showNotification(`連接 WebSocket 錯誤: ${error.message}`);
       setIsConnected(false);
     });
-    // 斷開連接事件
     socket.on("disconnect", () => {
-      setNotification("已斷開 WebSocket 連線");
+      showNotification("已斷開 WebSocket 連線");
       setIsConnected(false);
     });
-    // 註冊成功事件
     socket.on("registration_success", (data) => {
       console.log(data.message);
     });
-    // 地震更新事件（真實資料）
     socket.on("earthquake_update", (data) => {
-      setNotification(`收到地震資料: ${JSON.stringify(data)}`); // 更新 UI 或顯示地震通知
+      showNotification(`收到地震資料: ${JSON.stringify(data)}`); // 更新 UI 或顯示地震通知
     });
-    // 地震更新事件（假資料）
     socket.on("earthquake_update_fake", (data) => {
-      setNotification(`收到地震資料(測試用): ${JSON.stringify(data)}`);
+      showNotification(`收到地震資料(測試用): ${JSON.stringify(data)}`);
     });
   }, []);
 

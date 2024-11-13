@@ -14,26 +14,22 @@ import {
   MenuOptions,
   MenuOption,
   MenuTrigger,
-  MenuProvider,
 } from "react-native-popup-menu";
 
 import {
   WeatherDataList,
-  WeatherData,
+  RegionList,
   Region,
   userAddRegion,
   getAllRegionList,
-  RegionList,
   userRemoveRegion,
-  setNotification,
 } from "./_layout";
 
 import { Background } from "@/components/Background";
 import { SvgImage } from "@/components/Svg";
 import CustomModal from "@/components/CustomModal";
 import store from "@/redux/store";
-import { setSelectedRegionIndex } from "@/redux/selecterSlice";
-import { removeRegion } from "@/redux/regionListSlice";
+import { setSelectedTargetRegionIndex } from "@/redux/selecterSlice";
 
 export default function MenuScreen() {
   const navigation = useNavigation();
@@ -58,7 +54,7 @@ export default function MenuScreen() {
     });
   }, []);
 
-  const region = useSelector((state: { region: Region[] }) => state.region);
+  const regions = useSelector((state: { regions: Region[] }) => state.regions);
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
@@ -190,17 +186,22 @@ export default function MenuScreen() {
       {weatherDataList && (
         <ScrollView style={styles.bodySection}>
           <FlatList
-            data={region ?? []}
+            data={regions}
             renderItem={({ item, index }) => {
               const weatherData = weatherDataList[item.name]?.[0]?.[0] ?? null;
 
               return (
                 <TouchableOpacity
                   onPress={() => {
-                    console.log("Selected region: ", index);
+                    console.log(
+                      "Selected region: ",
+                      index,
+                      "Target region: ",
+                      store.getState().selecter.targetRegionIndex
+                    );
 
                     navigation.navigate("index" as never);
-                    store.dispatch(setSelectedRegionIndex(index));
+                    store.dispatch(setSelectedTargetRegionIndex(index));
                   }}
                   onLongPress={() =>
                     setSelectedMenu(item.id !== "0" ? item.id : "-1")

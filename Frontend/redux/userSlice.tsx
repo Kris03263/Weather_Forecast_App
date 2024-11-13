@@ -4,23 +4,23 @@ import { User } from "@/app/(tabs)/_layout";
 
 const userSlice = createSlice({
   name: "userSlice",
-  initialState: {} as User,
+  initialState: { id: "-1", account: "", password: "", status: "" } as User,
   reducers: {
-    updateUserAccount: (state, action: { payload: string }) => {
+    setUserAccount: (state, action: { payload: string }) => {
       state.account = action.payload;
     },
-    updateUserPassword: (state, action: { payload: string }) => {
+    setUserPassword: (state, action: { payload: string }) => {
       state.password = action.payload;
     },
     setUser: (state, action: { payload: User }) => {
       return action.payload;
     },
     removeUser: (state) => {
-      return { id: "-1", account: "", password: "", status: "" };
+      return { id: "-1", account: "", password: "", status: "" } as User;
     },
   },
 });
 
-export const { updateUserAccount, updateUserPassword, setUser, removeUser } =
+export const { setUserAccount, setUserPassword, setUser, removeUser } =
   userSlice.actions;
 export default userSlice.reducer;
