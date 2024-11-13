@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 
-import { Selecter, WeatherDataList } from "./_layout";
+import { Region, Selecter, WeatherDataList } from "./_layout";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
@@ -18,27 +18,22 @@ import { IndicatorsDisplayWidget_double } from "@/components/IndicatorsDisplayWi
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
 import { EarthQuakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
+import store from "@/redux/store";
+import { setSelectedRegionIndex } from "@/redux/selecterSlice";
+import { FlatList } from "react-native-gesture-handler";
 
-const { height: screenHeight } = Dimensions.get("window");
-
-// TODO list:
-// - [V] Add weather data API
-// - [V] Add weather image
-// - [X] Fix muti-day weather forecast view (Cancel)
-// - [ ] Switch to use region name to fetch weather data
-// - [V] Switch to use Redux for global state management
-// - [V] Move weatherDataList, region, currentTime to index.tsx
-// - [ ] Use a global variable to save wrong msg
-// - [X] Move background color control to _layout.tsx (Instead moving to Background.tsx)
+const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const selecter = useSelector(
     (state: { selecter: Selecter }) => state.selecter
   );
+  const regions = useSelector((state: { region: Region[] }) => state.region);
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
-  const weatherData = weatherDataList?.[selecter.region]?.[0]?.[0] ?? null;
+  const weatherData =
+    weatherDataList?.[regions[selecter.regionIndex]?.name]?.[0]?.[0] ?? null;
 
   // Header Control
   const [isSecendLayout, setIsSecendLayout] = useState(false);
@@ -64,29 +59,8 @@ export default function HomeScreen() {
       {/* Gradiant */}
       <Background weatherData={weatherData} />
 
-      {/* Top Section */}
-      <View style={[styles.topSection]}>
-        {weatherData && (
-          <>
-            <View style={styles.regionNameDisplay}>
-              <Text style={styles.regionName}>{selecter.region} </Text>
-            </View>
-            <Animated.View
-              style={[
-                styles.temperatureDisplay,
-                {
-                  opacity: opacity,
-                  height: headerHeight,
-                },
-              ]}
-            >
-              <WeatherDisplay isSecendLayout={isSecendLayout} />
-            </Animated.View>
-          </>
-        )}
-      </View>
-
-      {!weatherData && (
+      {/* Loading */}
+      {!weatherDataList && (
         <View style={styles.topSection}>
           <Text style={styles.loadingText}>{"載入資料中..."}</Text>
           <Text style={styles.hintText}>
@@ -95,48 +69,93 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {/* Body Section */}
-      {weatherData && (
-        <ScrollView
-          style={styles.bodySection}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: false }
-          )}
-          scrollEventThrottle={16}
+      {/* Top Section */}
+      <View style={[styles.topSection]}>
+        <View style={styles.regionNameDisplay}>
+          <Text style={styles.regionName}>
+            {regions[selecter.regionIndex]?.name ?? null}
+          </Text>
+        </View>
+
+        <Animated.View
+          style={[
+            styles.temperatureDisplay,
+            {
+              opacity: opacity,
+              height: headerHeight,
+            },
+          ]}
         >
-          <ForecastDisplayWidget />
+          <WeatherDisplay
+            region={regions[selecter.regionIndex]?.name ?? null}
+            isSecendLayout={isSecendLayout}
+          />
+        </Animated.View>
+      </View>
 
-          <View style={styles.row}>
-            <IndicatorsDisplayWidget_single type="wet" />
-            <IndicatorsDisplayWidget_single type="rainRate" />
-          </View>
-
-          <View style={styles.row}>
-            <IndicatorsDisplayWidget_single type="windSpeed" />
-            <IndicatorsDisplayWidget_single type="windDirection" />
-          </View>
-
-          <View style={styles.row}>
-            <SuggestionDisplayWidget type="dressing" />
-            <SuggestionDisplayWidget type="health" />
-          </View>
-
-          <View style={styles.row}>
-            <SuggestionDisplayWidget type="sport" />
-            <SuggestionDisplayWidget type="transportation" />
-          </View>
-
-          <View style={styles.row}>
-            <SuggestionDisplayWidget type="activity" />
-          </View>
-
-          <View style={styles.row}>
-            <EarthQuakeDisplayWidget />
-          </View>
-        </ScrollView>
-      )}
+      <ScrollView
+        nestedScrollEnabled={true}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
+        <FlatList
+          initialScrollIndex={selecter.regionIndex}
+          horizontal
+          data={regions}
+          onScroll={async (event) => {
+            const offsetX = event.nativeEvent.contentOffset.x;
+            const currentIndex = Math.round(offsetX / screenWidth);
+            store.dispatch(setSelectedRegionIndex(currentIndex));
+          }}
+          pagingEnabled={true}
+          nestedScrollEnabled={true}
+          renderItem={({ item, index }) => (
+            <View style={{ width: screenWidth }}>
+              {/* Body Section */}
+              <View style={styles.bodySection}>
+                <ForecastDisplayWidget region={item.name} />
+                <View style={styles.row}>
+                  <IndicatorsDisplayWidget_single
+                    type="wet"
+                    region={item.name}
+                  />
+                  <IndicatorsDisplayWidget_single
+                    type="rainRate"
+                    region={item.name}
+                  />
+                </View>
+                <View style={styles.row}>
+                  <IndicatorsDisplayWidget_single
+                    type="windSpeed"
+                    region={item.name}
+                  />
+                  <IndicatorsDisplayWidget_single
+                    type="windDirection"
+                    region={item.name}
+                  />
+                </View>
+                <View style={styles.row}>
+                  <SuggestionDisplayWidget type="dressing" />
+                  <SuggestionDisplayWidget type="health" />
+                </View>
+                <View style={styles.row}>
+                  <SuggestionDisplayWidget type="sport" />
+                  <SuggestionDisplayWidget type="transportation" />
+                </View>
+                <View style={styles.row}>
+                  <SuggestionDisplayWidget type="activity" />
+                </View>
+                <View style={styles.row}>
+                  <EarthQuakeDisplayWidget />
+                </View>
+              </View>
+            </View>
+          )}
+        />
+      </ScrollView>
     </View>
   );
 }
@@ -144,6 +163,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: screenWidth,
   },
   loadingText: {
     color: "white",
@@ -223,5 +243,44 @@ const styles = StyleSheet.create({
   dropdownHightlight: {
     backgroundColor: "pink",
     fontWeight: "bold",
+  },
+
+  buttonWrapper: {
+    position: "absolute", // 讓按鈕固定在畫面上
+    height: "100%", // 確保按鈕高度適配
+    flexDirection: "row",
+    justifyContent: "space-between", // 讓按鈕分佈在左右兩邊
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 50,
+    fontWeight: "bold",
+  },
+  pagination: {
+    position: "absolute",
+    bottom: 65, // 調整此處可設置距離底部的距離
+    left: 0,
+    right: 0,
+    justifyContent: "center", // 將圓點居中
+  },
+  dot: {
+    backgroundColor: "rgba(255,255,255,0.3)",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 3,
+    marginRight: 3,
+    marginTop: 3,
+    marginBottom: 3,
+  },
+  activeDot: {
+    backgroundColor: "#fff",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 3,
+    marginRight: 3,
+    marginTop: 3,
+    marginBottom: 3,
   },
 });

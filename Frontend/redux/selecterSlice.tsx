@@ -6,8 +6,8 @@ const selecterSlice = createSlice({
   name: "selecter",
   initialState: {} as Selecter,
   reducers: {
-    setSelectedRegion: (state, action: { payload: string }) => {
-      state.region = action.payload;
+    setSelectedRegionIndex: (state, action: { payload: number }) => {
+      state.regionIndex = action.payload;
     },
     setSelectedTimeInterval: (state, action: { payload: number }) => {
       state.timeInterval = action.payload;
@@ -15,6 +15,6 @@ const selecterSlice = createSlice({
   },
 });
 
-export const { setSelectedRegion, setSelectedTimeInterval } =
+export const { setSelectedRegionIndex, setSelectedTimeInterval } =
   selecterSlice.actions;
 export default selecterSlice.reducer;
