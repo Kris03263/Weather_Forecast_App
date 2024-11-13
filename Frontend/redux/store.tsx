@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 
-import regionSlice from "./regionListSlice";
+import regionsSlice from "./regionsSlice";
 import weatherDataSlice from "./weatherDataSlice";
 import selecterSlice from "./selecterSlice";
 import userSlice from "./userSlice";
@@ -10,7 +10,7 @@ import globalMessageSlice from "./globalMessageSlice";
 
 const store = configureStore({
   reducer: {
-    region: regionSlice,
+    regions: regionsSlice,
     weatherData: weatherDataSlice,
     selecter: selecterSlice,
     user: userSlice,

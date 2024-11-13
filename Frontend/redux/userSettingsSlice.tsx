@@ -6,10 +6,10 @@ const userSettingsSlice = createSlice({
   name: "userSettingsSlice",
   initialState: { sport: [], habit: [] } as UserSettings,
   reducers: {
-    updateSport: (state, action: { payload: Sport[] }) => {
+    setSport: (state, action: { payload: Sport[] }) => {
       state.sport = action.payload;
     },
-    updateHabit: (state, action: { payload: Habit[] }) => {
+    setHabit: (state, action: { payload: Habit[] }) => {
       state.habit = action.payload;
     },
     setUserSettings: (state, action: { payload: UserSettings }) => {
@@ -18,6 +18,6 @@ const userSettingsSlice = createSlice({
   },
 });
 
-export const { updateSport, updateHabit, setUserSettings } =
+export const { setSport, setHabit, setUserSettings } =
   userSettingsSlice.actions;
 export default userSettingsSlice.reducer;

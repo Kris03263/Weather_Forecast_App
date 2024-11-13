@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,6 +8,7 @@ import {
   Text,
 } from "react-native";
 import { useSelector } from "react-redux";
+import { FlatList } from "react-native-gesture-handler";
 
 import { Region, Selecter, WeatherDataList } from "./_layout";
 
@@ -19,8 +20,10 @@ import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
 import { EarthQuakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
 import store from "@/redux/store";
-import { setSelectedRegionIndex } from "@/redux/selecterSlice";
-import { FlatList } from "react-native-gesture-handler";
+import {
+  setSelectedRegionIndex,
+  setSelectedTargetRegionIndex,
+} from "@/redux/selecterSlice";
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
@@ -28,7 +31,7 @@ export default function HomeScreen() {
   const selecter = useSelector(
     (state: { selecter: Selecter }) => state.selecter
   );
-  const regions = useSelector((state: { region: Region[] }) => state.region);
+  const regions = useSelector((state: { regions: Region[] }) => state.regions);
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
@@ -53,6 +56,18 @@ export default function HomeScreen() {
     outputRange: [1, 0, 1],
     extrapolate: "clamp",
   });
+
+  // FlatList Control
+  const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    if (selecter.targetRegionIndex === -1) return;
+    flatListRef.current?.scrollToOffset({
+      animated: true,
+      offset: selecter.targetRegionIndex * screenWidth,
+    });
+    store.dispatch(setSelectedTargetRegionIndex(-1));
+  }, [selecter.targetRegionIndex]);
 
   return (
     <View style={styles.container}>
@@ -102,6 +117,7 @@ export default function HomeScreen() {
         scrollEventThrottle={16}
       >
         <FlatList
+          ref={flatListRef}
           initialScrollIndex={selecter.regionIndex}
           horizontal
           data={regions}

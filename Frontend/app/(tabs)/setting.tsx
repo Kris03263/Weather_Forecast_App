@@ -22,6 +22,7 @@ import {
   userRegister,
   getAllHabitList,
   getAllSportList,
+  Region,
 } from "./_layout";
 
 import store from "@/redux/store";
@@ -66,10 +67,12 @@ export default function SettingsScreen() {
   const selecter = useSelector(
     (state: { selecter: Selecter }) => state.selecter
   );
+  const regions = useSelector((state: { regions: Region[] }) => state.regions);
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
-  const weatherData = weatherDataList?.[selecter.region]?.[0]?.[0] ?? null;
+  const weatherData =
+    weatherDataList?.[regions[selecter.regionIndex]?.name]?.[0]?.[0] ?? null;
 
   useEffect(() => {
     getAllHabitList().then((data) => {
@@ -294,7 +297,7 @@ export default function SettingsScreen() {
           <>
             <TouchableOpacity
               onPress={() => {
-                userDelete();
+                userDelete(store.getState().user.id);
                 setModalVisible(false);
               }}
               style={styles.modalButton}

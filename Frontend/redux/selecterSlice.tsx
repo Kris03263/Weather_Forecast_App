@@ -4,7 +4,11 @@ import { Region, Selecter } from "@/app/(tabs)/_layout";
 
 const selecterSlice = createSlice({
   name: "selecter",
-  initialState: {} as Selecter,
+  initialState: {
+    regionIndex: 0,
+    timeInterval: 0,
+    targetRegionIndex: 0,
+  } as Selecter,
   reducers: {
     setSelectedRegionIndex: (state, action: { payload: number }) => {
       state.regionIndex = action.payload;
@@ -12,9 +16,15 @@ const selecterSlice = createSlice({
     setSelectedTimeInterval: (state, action: { payload: number }) => {
       state.timeInterval = action.payload;
     },
+    setSelectedTargetRegionIndex: (state, action: { payload: number }) => {
+      state.targetRegionIndex = action.payload;
+    },
   },
 });
 
-export const { setSelectedRegionIndex, setSelectedTimeInterval } =
-  selecterSlice.actions;
+export const {
+  setSelectedRegionIndex,
+  setSelectedTimeInterval,
+  setSelectedTargetRegionIndex,
+} = selecterSlice.actions;
 export default selecterSlice.reducer;
