@@ -37,7 +37,8 @@ export function ForecastDisplayWidget({ region }: ForecastDisplayWidgetProps) {
 
           <View style={styles.contentLayout}>
             <FlatList
-              horizontal
+              nestedScrollEnabled={true}
+              horizontal={true}
               style={styles.weatherCardGroundLayout}
               data={weatherDataList?.[region]?.[0] ?? []}
               renderItem={({ item }) => (
@@ -108,6 +109,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   weatherCardGroundLayout: {
+    flexDirection: "row",
     width: "100%",
     height: 150,
   },

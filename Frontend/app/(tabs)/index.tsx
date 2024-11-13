@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,7 +8,6 @@ import {
   Text,
 } from "react-native";
 import { useSelector } from "react-redux";
-import Swiper from "react-native-swiper";
 
 import { Region, Selecter, WeatherDataList } from "./_layout";
 
@@ -21,8 +20,9 @@ import { Background } from "@/components/Background";
 import { EarthQuakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
 import store from "@/redux/store";
 import { setSelectedRegionIndex } from "@/redux/selecterSlice";
+import { FlatList } from "react-native-gesture-handler";
 
-const { height: screenHeight } = Dimensions.get("window");
+const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const selecter = useSelector(
@@ -38,7 +38,6 @@ export default function HomeScreen() {
   // Header Control
   const [isSecendLayout, setIsSecendLayout] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
-  const swiperRef = useRef<Swiper>(null);
 
   scrollY.addListener(({ value }) => {
     setIsSecendLayout(value > screenHeight / 5);
@@ -55,12 +54,20 @@ export default function HomeScreen() {
     extrapolate: "clamp",
   });
 
-  // useEffect(() => {}, [selecter.regionIndex]);
-
   return (
     <View style={styles.container}>
       {/* Gradiant */}
       <Background weatherData={weatherData} />
+
+      {/* Loading */}
+      {!weatherDataList && (
+        <View style={styles.topSection}>
+          <Text style={styles.loadingText}>{"載入資料中..."}</Text>
+          <Text style={styles.hintText}>
+            {"(若長時間無法載入，請檢查網路連線或聯絡開發者)"}
+          </Text>
+        </View>
+      )}
 
       {/* Top Section */}
       <View style={[styles.topSection]}>
@@ -69,6 +76,7 @@ export default function HomeScreen() {
             {regions[selecter.regionIndex]?.name ?? null}
           </Text>
         </View>
+
         <Animated.View
           style={[
             styles.temperatureDisplay,
@@ -85,97 +93,77 @@ export default function HomeScreen() {
         </Animated.View>
       </View>
 
-      {!weatherDataList && (
-        <View style={styles.topSection}>
-          <Text style={styles.loadingText}>{"載入資料中..."}</Text>
-          <Text style={styles.hintText}>
-            {"(若長時間無法載入，請檢查網路連線或聯絡開發者)"}
-          </Text>
-        </View>
-      )}
-
-      {/* Body Section */}
-      <Swiper
-        ref={swiperRef}
-        style={styles.wrapper}
-        showsButtons
-        loop={false}
+      <ScrollView
         nestedScrollEnabled={true}
-        index={selecter.regionIndex}
-        onIndexChanged={(index) => {
-          console.log("當前頁面索引:", index);
-          store.dispatch(setSelectedRegionIndex(index));
-          console.log("當前頁面索引:", index);
-          swiperRef.current?.scrollTo(index, true);
-          console.log("當前頁面索引:", index);
-        }}
-        buttonWrapperStyle={styles.buttonWrapper}
-        nextButton={<Text style={styles.buttonText}>›</Text>}
-        prevButton={<Text style={styles.buttonText}>‹</Text>}
-        paginationStyle={styles.pagination}
-        dot={<View style={styles.dot} />}
-        activeDot={<View style={styles.activeDot} />}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
       >
-        {regions.map((region) => {
-          return (
-            <ScrollView
-              nestedScrollEnabled={true}
-              key={region.id}
-              style={styles.bodySection}
-              contentContainerStyle={{ paddingBottom: 20 }}
-              onScroll={Animated.event(
-                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                { useNativeDriver: false }
-              )}
-              scrollEventThrottle={16}
-            >
-              <ForecastDisplayWidget region={region.name} />
-              <View style={styles.row}>
-                <IndicatorsDisplayWidget_single
-                  type="wet"
-                  region={region.name}
-                />
-                <IndicatorsDisplayWidget_single
-                  type="rainRate"
-                  region={region.name}
-                />
+        <FlatList
+          initialScrollIndex={selecter.regionIndex}
+          horizontal
+          data={regions}
+          onScroll={async (event) => {
+            const offsetX = event.nativeEvent.contentOffset.x;
+            const currentIndex = Math.round(offsetX / screenWidth);
+            store.dispatch(setSelectedRegionIndex(currentIndex));
+          }}
+          pagingEnabled={true}
+          nestedScrollEnabled={true}
+          renderItem={({ item, index }) => (
+            <View style={{ width: screenWidth }}>
+              {/* Body Section */}
+              <View style={styles.bodySection}>
+                <ForecastDisplayWidget region={item.name} />
+                <View style={styles.row}>
+                  <IndicatorsDisplayWidget_single
+                    type="wet"
+                    region={item.name}
+                  />
+                  <IndicatorsDisplayWidget_single
+                    type="rainRate"
+                    region={item.name}
+                  />
+                </View>
+                <View style={styles.row}>
+                  <IndicatorsDisplayWidget_single
+                    type="windSpeed"
+                    region={item.name}
+                  />
+                  <IndicatorsDisplayWidget_single
+                    type="windDirection"
+                    region={item.name}
+                  />
+                </View>
+                <View style={styles.row}>
+                  <SuggestionDisplayWidget type="dressing" />
+                  <SuggestionDisplayWidget type="health" />
+                </View>
+                <View style={styles.row}>
+                  <SuggestionDisplayWidget type="sport" />
+                  <SuggestionDisplayWidget type="transportation" />
+                </View>
+                <View style={styles.row}>
+                  <SuggestionDisplayWidget type="activity" />
+                </View>
+                <View style={styles.row}>
+                  <EarthQuakeDisplayWidget />
+                </View>
               </View>
-              <View style={styles.row}>
-                <IndicatorsDisplayWidget_single
-                  type="windSpeed"
-                  region={region.name}
-                />
-                <IndicatorsDisplayWidget_single
-                  type="windDirection"
-                  region={region.name}
-                />
-              </View>
-              <View style={styles.row}>
-                <SuggestionDisplayWidget type="dressing" />
-                <SuggestionDisplayWidget type="health" />
-              </View>
-              <View style={styles.row}>
-                <SuggestionDisplayWidget type="sport" />
-                <SuggestionDisplayWidget type="transportation" />
-              </View>
-              <View style={styles.row}>
-                <SuggestionDisplayWidget type="activity" />
-              </View>
-              <View style={styles.row}>
-                <EarthQuakeDisplayWidget />
-              </View>
-            </ScrollView>
-          );
-        })}
-      </Swiper>
+            </View>
+          )}
+        />
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {},
   container: {
     flex: 1,
+    width: screenWidth,
   },
   loadingText: {
     color: "white",

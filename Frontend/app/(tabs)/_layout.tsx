@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 import { Provider, useSelector } from "react-redux";
 import { Tabs } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import io from "socket.io-client";
+import io, { Socket } from "socket.io-client";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
@@ -154,15 +154,9 @@ export const userLogout = async () => {
 
   console.log("Logged out");
 };
-export const userDelete = async () => {
-  // GET
-  let userID = store.getState().user?.id ?? "";
-  if (!userID) {
-    userID = (await AsyncStorage.getItem("userID")) || "-1";
-  }
-
+export const userDelete = async (_userID: string) => {
   // FETCH
-  const response = await HandleDeleteUser(userID);
+  const response = await HandleDeleteUser(_userID);
 
   // ERROR HANDLE
   if (!response) {
@@ -250,16 +244,27 @@ export const userSetHabits = async (_habitIDs: number[]) => {
 
   console.log("Set habits with response: " + response.Status);
 };
-export const userAddRegion = async (_region: Region) => {
+export const userAddRegion = async (_city: string, _district: string) => {
   // GET
   let regions = store.getState().region ?? [];
   if (regions.length === 0) {
     regions = JSON.parse((await AsyncStorage.getItem("regions")) || "[]");
   }
 
+  const _region: Region = {
+    id: `${_city}${_district}`,
+    name: `${_city}, ${_district}`,
+    longitude: "-1",
+    latitude: "-1",
+  };
+
   // ERROR HANDLE
+  if (!_city || !_district) {
+    setNotification("地區資料不完整");
+    return;
+  }
   if (regions.find((region) => region.id === _region.id)) {
-    console.error("Region already exists");
+    setNotification(`${_region.name} 已存在`);
     return;
   }
 
@@ -276,7 +281,7 @@ export const userAddRegion = async (_region: Region) => {
   console.log("Added region: " + _region.name);
   console.log("Region list: " + JSON.stringify(store.getState().region));
 };
-export const userRemoveRegion = async (_region: Region) => {
+export const userRemoveRegion = async (_index: number) => {
   // GET
   let regions = store.getState().region ?? [];
   if (regions.length === 0) {
@@ -284,25 +289,25 @@ export const userRemoveRegion = async (_region: Region) => {
   }
 
   // ERROR HANDLE
-  if (!regions.find((region) => region.id === _region.id)) {
-    setNotification(`${_region.name} 不存在`);
+  if (!regions.find((r, index) => index === _index)) {
+    setNotification(`${regions[_index]} 不存在`);
     return;
   }
 
   // STORE
-  store.dispatch(setRegion(regions.filter((r) => r.id !== _region.id)));
+  store.dispatch(setRegion(regions.filter((r, index) => index !== _index)));
   AsyncStorage.setItem(
     "regions",
-    JSON.stringify(regions.filter((r) => r.id !== _region.id))
+    JSON.stringify(regions.filter((r, index) => index !== _index))
   );
 
   // BEFORE UPDATE
   await Promise.all([
-    updateWeatherData_3h(_region),
-    updateWeatherData_12h(_region),
+    updateWeatherData_3h(regions[_index]),
+    updateWeatherData_12h(regions[_index]),
   ]);
 
-  console.log("Added region: " + _region.name);
+  console.log("Added region: " + regions[_index].name);
   console.log("Region list: " + JSON.stringify(store.getState().region));
 };
 export const getAllRegionList = async (): Promise<RegionList> => {
@@ -941,10 +946,8 @@ const HandleGetAllHabit = async (): Promise<Habit[] | null> => {
 };
 
 export default function TabLayout() {
-  const [serverMessages, setServerMessages] = useState([]);
-  const [connectionStatus, setConnectionStatus] = useState("Disconnected");
+  const [socketInstance, setSocketInstance] = useState<Socket>();
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [serverMessage, setServerMessage] = useState("");
 
   useEffect(() => {
     // Update current location and current time every minute
@@ -960,99 +963,12 @@ export default function TabLayout() {
           "-----------------------------------------------------\n" +
           "| Data update success! \t\t\t\t\t\t\t\t|" +
           "\n" +
+          JSON.stringify(store.getState().weatherData) +
           "-----------------------------------------------------\n"
       );
     };
 
     const init = async () => {
-      // var ws = new WebSocket(hostURL);
-      // const testMsg = {
-      //   userID: 1,
-      //   longitude: "120.62343304881064",
-      //   latitude: "24.21694034808",
-      // };
-
-      // ws.onopen = () => {
-      //   setNotification("連接 WebSocket 成功");
-      //   setConnectionStatus("Connected");
-
-      //   if (ws.readyState === WebSocket.OPEN) {
-      //     ws.send(JSON.stringify(testMsg));
-      //     setNotification("訊息已發送");
-      //   } else {
-      //     setNotification("WebSocket 未連接，無法發送訊息");
-      //   }
-      // };
-      // ws.onerror = (error) => {
-      //   setNotification(`連接 WebSocket 失敗: ${error}`);
-      //   setConnectionStatus("Disconnected");
-      // };
-      // ws.onclose = (event) => {
-      //   setNotification(
-      //     `已斷開 WebSocket 連線: (${event.code}) ${event.reason}`
-      //   );
-      //   setConnectionStatus("Disconnected");
-      // };
-      // ws.onmessage = (e) => {
-      //   console.log("aaaa");
-      //   console.log(e.data);
-      // };
-
-      // const socket = io(hostURL, {
-      //   transports: ["websocket", "polling"],
-      //   reconnectionAttempts: 5,
-      //   timeout: 2000,
-      // });
-
-      // // 連接成功事件
-      // socket.on("connect", () => {
-      //   setNotification("Connected to server");
-      //   setConnectionStatus("Connected");
-      //   // 設置位置（選擇真實或假資料）
-      //   // socket.emit("set_location", {
-      //   //   userID: 1,
-      //   //   longitude: "120.62343304881064",
-      //   //   latitude: "24.21694034808",
-      //   // });
-      //   // 或者
-      //   socket.emit("set_location_fake", {
-      //     userID: 1,
-      //     longitude: "120.62343304881064",
-      //     latitude: "24.21694034808",
-      //   });
-      //   socket.send({
-      //     userID: 1,
-      //     longitude: "120.62343304881064",
-      //     latitude: "24.21694034808",
-      //   });
-      // });
-      // // // 連接失敗事件
-      // socket.on("connect_error", () => {
-      //   setNotification("連接WebSocket失敗");
-      //   setConnectionStatus("Disconnected");
-      // });
-      // // 註冊成功事件
-      // socket.on("registration_success", (data) => {
-      //   setNotification(data.message);
-      // });
-      // // 地震更新事件（真實資料）
-      // socket.on("earthquake_update", (data) => {
-      //   setNotification(`Received earthquake update: ${data}`); // 更新 UI 或顯示地震通知
-      // });
-      // // 地震更新事件（假資料）
-      // socket.on("earthquake_update_fake", (data) => {
-      //   setNotification(`Received earthquake update: ${data}`);
-      // });
-      // // 錯誤事件
-      // socket.on("error", (error) => {
-      //   setNotification(error.message);
-      // });
-      // // 斷開連接事件
-      // socket.on("disconnect", (event) => {
-      //   setNotification("Disconnected from WebSocket : ");
-      //   setConnectionStatus("Disconnected");
-      // });
-
       // Set default region and time interval
       store.dispatch(setSelectedRegionIndex(0));
       store.dispatch(setSelectedTimeInterval(0));
@@ -1068,38 +984,57 @@ export default function TabLayout() {
   }, []);
 
   useEffect(() => {
-    const ws = new WebSocket(hostURL);
-    const testMsg = {
-      userID: 1,
-      longitude: "120.62343304881064",
-      latitude: "24.21694034808",
-    };
+    const socket = io("https://420269.xyz/", {
+      transports: ["websocket", "polling"],
+      reconnectionAttempts: 5,
+    });
 
-    ws.onopen = () => {
-      setNotification("WebSocket connection opened");
-      ws.send(JSON.stringify(testMsg)); // Send a test message to the server
-      setIsConnected(true); // Update state to reflect successful connection
-    };
+    setSocketInstance(socket);
 
-    ws.onmessage = (e) => {
-      setNotification("Message from server:" + e.data);
-      setServerMessage(e?.data); // Store the server message
-    };
-
-    ws.onerror = (e) => {
-      setNotification("WebSocket error:" + e);
-      setIsConnected(false); // Update state if there is an error
-    };
-
-    ws.onclose = (e) => {
-      setNotification("WebSocket connection closed:" + e.code + e.reason);
-      setIsConnected(false); // Update state if the connection closes
-    };
-
-    // Clean up WebSocket connection when the component unmounts
-    return () => {
-      ws.close();
-    };
+    // 連接成功事件
+    socket.on("connect", () => {
+      setNotification(`連接 WebSocket (id: ${socket.id}) 成功`);
+      setIsConnected(true);
+      // 設置位置（選擇真實或假資料）
+      socket.emit("set_location", {
+        userID: 1,
+        longitude: "120.62343304881064",
+        latitude: "24.21694034808",
+      });
+      // 或者
+      socket.emit("set_location_fake", {
+        userID: 1,
+        longitude: "120.62343304881064",
+        latitude: "24.21694034808",
+      });
+    });
+    //連接失敗事件
+    socket.on("connect_error", () => {
+      setNotification(`連接 WebSocket (id: ${socket.id}) 失敗`);
+      setIsConnected(false);
+    });
+    // 錯誤事件
+    socket.on("error", (error) => {
+      setNotification(`連接 WebSocket 錯誤: ${error.message}`);
+      setIsConnected(false);
+    });
+    // 斷開連接事件
+    socket.on("disconnect", () => {
+      setNotification("已斷開 WebSocket 連線");
+      setIsConnected(false);
+    });
+    // 註冊成功事件
+    socket.on("registration_success", (data) => {
+      console.log(data.message);
+    });
+    // 地震更新事件（真實資料）
+    socket.on("earthquake_update", (data) => {
+      setNotification(`收到地震資料: ${JSON.stringify(data)}`); // 更新 UI 或顯示地震通知
+    });
+    // 地震更新事件（假資料）
+    socket.on("earthquake_update_fake", (data) => {
+      setNotification(`收到地震資料(測試用): ${JSON.stringify(data)}`);
+    });
   }, []);
 
   const colorScheme = useColorScheme();
@@ -1109,10 +1044,10 @@ export default function TabLayout() {
       <MenuProvider>
         <Tabs
           screenOptions={{
-            tabBarActiveTintColor: "white", // 設置圖標為白色
-            tabBarInactiveTintColor: "white", // 未選中的圖標顏色
+            tabBarActiveTintColor: "white",
+            tabBarInactiveTintColor: "white",
             headerShown: false,
-            tabBarStyle: styles.tabBar, // 應用自定義的樣式
+            tabBarStyle: styles.tabBar,
           }}
         >
           <Tabs.Screen
@@ -1123,7 +1058,7 @@ export default function TabLayout() {
                 <TabBarIcon
                   name={focused ? "menu" : "menu-outline"}
                   color={color}
-                  size={20} // 縮小圖標
+                  size={20}
                 />
               ),
             }}
@@ -1136,7 +1071,7 @@ export default function TabLayout() {
                 <TabBarIcon
                   name={focused ? "home" : "home-outline"}
                   color={color}
-                  size={20} // 縮小圖標
+                  size={20}
                 />
               ),
             }}
@@ -1149,7 +1084,7 @@ export default function TabLayout() {
                 <TabBarIcon
                   name={focused ? "settings-sharp" : "settings-outline"}
                   color={color}
-                  size={20} // 縮小圖標
+                  size={20}
                 />
               ),
             }}

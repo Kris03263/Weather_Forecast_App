@@ -101,6 +101,7 @@ export default function MenuScreen() {
               onChange={handleCitySelect}
               style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
             >
+              <option key={null} value={""} />
               {Object.keys(allRegionList.city).map((city) => (
                 <option key={city} value={city}>
                   {city}
@@ -114,6 +115,7 @@ export default function MenuScreen() {
               onChange={handleDistrictSelect}
               style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
             >
+              <option key={null} value={""} />
               {selectedCity &&
                 allRegionList.city[selectedCity].map((district) => (
                   <option key={district} value={district}>
@@ -133,12 +135,7 @@ export default function MenuScreen() {
             <TouchableOpacity
               style={styles.modalButton}
               onPress={() => {
-                userAddRegion({
-                  name: `${selectedCity}, ${selectedDistrict}`,
-                  id: `${selectedCity}, ${selectedDistrict}`,
-                  latitude: "-1",
-                  longitude: "-1",
-                });
+                userAddRegion(selectedCity, selectedDistrict);
                 setModalVisible(false);
               }}
             >
@@ -245,7 +242,7 @@ export default function MenuScreen() {
                   >
                     <MenuTrigger />
                     <MenuOptions>
-                      <MenuOption onSelect={() => userRemoveRegion(item)}>
+                      <MenuOption onSelect={() => userRemoveRegion(index)}>
                         <Text style={{ fontSize: 16, color: "red" }}>刪除</Text>
                       </MenuOption>
                     </MenuOptions>
