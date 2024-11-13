@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { View, StyleSheet, Dimensions, Text } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { useSelector } from "react-redux";
+
 import {
   WeatherDataList,
   Selecter,
   indicatorsDictionary,
   Region,
 } from "@/app/(tabs)/_layout";
+
 interface ChartProps {
   type: string;
 }
@@ -24,13 +26,13 @@ export function Chart({ type }: ChartProps) {
   const selecter = useSelector(
     (state: { selecter: Selecter }) => state.selecter
   );
-  const regions = useSelector((state: { region: Region[] }) => state.region);
-
-  const data = weatherDataList?.[regions[selecter.regionIndex].name]?.[0] ?? [];
+  const regions = useSelector((state: { regions: Region[] }) => state.regions);
+  const weatherDatas =
+  weatherDataList?.[regions[selecter.regionIndex]?.name]?.[0] ?? [];
 
   const segments = [];
-  for (let i = 0; i < data.length; i += 9) {
-    segments.push(data.slice(i, i + 9));
+  for (let i = 0; i < weatherDatas.length; i += 9) {
+    segments.push(weatherDatas.slice(i, i + 9));
   }
 
   const segment = segments[0] || [];

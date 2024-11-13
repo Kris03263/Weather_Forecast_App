@@ -6,36 +6,31 @@ import { useSelector } from "react-redux";
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 import { SlideModal } from "@/components/SlideModal";
-import { Chart } from "@/components/Chart";
 
-import { WeatherDataList, indicatorsDictionary } from "@/app/(tabs)/_layout";
+import { WeatherData, indicatorsDictionary } from "@/app/(tabs)/_layout";
 
 interface IndicatorsDisplayWidgetProps_single {
   type: string;
-  region: string;
+  weatherData: WeatherData;
 }
 
 export function IndicatorsDisplayWidget_single({
   type,
-  region,
+  weatherData
 }: IndicatorsDisplayWidgetProps_single) {
   const [modalVisible, setModalVisible] = useState(false);
-
-  const weatherDataList = useSelector(
-    (state: { weatherData: WeatherDataList }) => state.weatherData
-  );
 
   const indicator =
     indicatorsDictionary[type as keyof typeof indicatorsDictionary];
 
-  indicator.value = weatherDataList?.[region]?.[0]?.[0]?.[type] ?? "--"; // region - timeInterval - index
+  indicator.value = weatherData?.[type] ?? "--"; 
   return (
     <>
       <TouchableOpacity
         style={{ flex: 1, width: "100%" }}
         onPress={() => setModalVisible(true)}
       >
-        <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
+        <Widget style={styles.customWidgetStyle} isShow={true}>
           <View style={styles.layout}>
             <View style={styles.titleDisplay}>
               <SvgImage style={styles.svgImage} name={type} />

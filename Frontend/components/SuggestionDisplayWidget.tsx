@@ -1,29 +1,24 @@
 import { StyleSheet, View, Text } from "react-native";
-import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 
-import { DailySug, WeatherDataList } from "@/app/(tabs)/_layout";
+import { DailySug } from "@/app/(tabs)/_layout";
 
 interface SuggestionDisplayWidgetProps {
   type: string;
+  dailySug: DailySug;
 }
 
 export function SuggestionDisplayWidget({
   type,
+  dailySug
 }: SuggestionDisplayWidgetProps) {
-  const weatherDataList = useSelector(
-    (state: { weatherData: WeatherDataList }) => state.weatherData
-  );
-  const dailySuggestions = useSelector(
-    (state: { dailySug: DailySug }) => state.dailySug
-  );
 
-  const suggestion = dailySuggestions[type as keyof typeof dailySuggestions];
+  const suggestion = dailySug?.[type as keyof typeof dailySug] ?? null;
 
   return (
-    <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
+    <Widget style={styles.customWidgetStyle} isShow={true}>
       <View style={styles.layout}>
         <SvgImage style={styles.svgImage} name={type} />
         <Text style={styles.text}>

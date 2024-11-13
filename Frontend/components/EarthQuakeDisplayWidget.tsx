@@ -9,17 +9,13 @@ import { SvgImage } from "@/components/Svg";
 export function EarthQuakeDisplayWidget() {
   const [modalVisible, setModalVisible] = useState(false);
 
-  const weatherDataList = useSelector(
-    (state: { weatherData: WeatherDataList }) => state.weatherData
-  );
-
   return (
     <>
       <TouchableOpacity
         style={{ flex: 1, width: "100%" }}
         onPress={() => setModalVisible(true)}
       >
-        <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
+        <Widget style={styles.customWidgetStyle} isShow={true}>
           <View style={styles.layout}>
             <View style={styles.titleDisplay}>
               <SvgImage style={{ width: 30, height: 30 }} name="weather" />
@@ -29,6 +25,7 @@ export function EarthQuakeDisplayWidget() {
           </View>
         </Widget>
       </TouchableOpacity>
+      
       <SlideModal
         type="earthQuake"
         isModalShow={modalVisible}
@@ -41,51 +38,6 @@ export function EarthQuakeDisplayWidget() {
 }
 
 const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  modalView: {
-    width: "100%",
-    height: "90%", // 占满屏幕的 90%
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalHandle: {
-    width: 40,
-    height: 5,
-    backgroundColor: "#ccc",
-    borderRadius: 2.5,
-    alignSelf: "center",
-    marginVertical: 10,
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  modalButton: {
-    backgroundColor: "#2196F3",
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
   customWidgetStyle: {
     alignItems: "center",
     justifyContent: "center",

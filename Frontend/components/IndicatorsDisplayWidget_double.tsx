@@ -6,32 +6,28 @@ import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 import { SlideModal } from "@/components/SlideModal";
 
-import { WeatherDataList, indicatorsDictionary } from "@/app/(tabs)/_layout";
+import { WeatherData, indicatorsDictionary } from "@/app/(tabs)/_layout";
 
 interface IndicatorsDisplayWidgetProps_double {
   type1: string;
   type2: string;
-  region: string;
+  weatherData: WeatherData;
 }
 
 export function IndicatorsDisplayWidget_double({
   type1,
   type2,
-  region,
+  weatherData
 }: IndicatorsDisplayWidgetProps_double) {
   const [modalVisible, setModalVisible] = useState(false);
-
-  const weatherDataList = useSelector(
-    (state: { weatherData: WeatherDataList }) => state.weatherData
-  );
 
   const indicator1 =
     indicatorsDictionary[type1 as keyof typeof indicatorsDictionary];
   const indicator2 =
     indicatorsDictionary[type2 as keyof typeof indicatorsDictionary];
 
-  indicator1.value = weatherDataList?.[region]?.[0]?.[0]?.[type1] ?? "--"; // region - timeInterval - index
-  indicator2.value = weatherDataList?.[region]?.[0]?.[0]?.[type2] ?? "--";
+  indicator1.value = weatherData?.[type1] ?? "--";
+  indicator2.value = weatherData?.[type2] ?? "--";
 
   return (
     <TouchableOpacity
@@ -40,7 +36,7 @@ export function IndicatorsDisplayWidget_double({
         setModalVisible(!modalVisible);
       }}
     >
-      <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
+      <Widget style={styles.customWidgetStyle} isShow={true}>
         <View style={styles.layout}>
           <View style={styles.titleDisplay}>
             <SvgImage style={styles.svgImage} name={type1} />
@@ -59,11 +55,10 @@ export function IndicatorsDisplayWidget_double({
       </Widget>
       <SlideModal
         isModalShow={modalVisible}
-        title={<Text>title</Text>}
         onClose={() => {
           setModalVisible(false);
         }}
-        content={<Text>here put content</Text>}
+        type={type1}
       />
     </TouchableOpacity>
   );
