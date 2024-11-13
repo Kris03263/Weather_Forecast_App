@@ -1,7 +1,7 @@
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { Widget } from "@/components/Widget";
 import { useState } from "react";
-import { SlideModal } from "@/components/slideModal";
+import { SlideModal } from "@/components/SlideModal";
 import { WeatherDataList } from "@/app/(tabs)/_layout";
 import { useSelector } from "react-redux";
 import { SvgImage } from "./Svg";

@@ -460,7 +460,7 @@ export const setNotification = async (message: string) => {
 // API fetching // (Return null & set global err msg if catch error)
 //////////////////
 
-const hostURL = "http://34.49.99.63/"; //`https://weather-2-10.onrender.com/` `http://34.49.99.63/`
+const hostURL = "https://420269.xyz/"; //`https://weather-2-10.onrender.com/` `https://420269.xyz/`
 
 const HandleSetUser = async (
   _account: string,

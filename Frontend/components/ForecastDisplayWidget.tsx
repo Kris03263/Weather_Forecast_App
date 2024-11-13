@@ -12,7 +12,7 @@ import { SvgImage } from "@/components/Svg";
 import { DynamicImage } from "@/components/DynamicImage";
 
 import { WeatherDataList, Selecter } from "@/app/(tabs)/_layout";
-import { SlideModal } from "@/components/slideModal";
+import { SlideModal } from "@/components/SlideModal";
 import { useState } from "react";
 import Chart from "@/components/Chart";
 
