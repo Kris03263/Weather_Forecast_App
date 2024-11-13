@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { SvgImage } from "@/components/Svg";
+import ModalDropdown from "react-native-modal-dropdown";
 
 interface modalVisibleCrontrollProps {
   isModalShow: boolean;
@@ -37,11 +38,18 @@ export function SlideModal({
     }
   }, [isModalShow]);
 
+  const options = [
+    "天氣狀況",
+    "紫外線指數",
+    "風",
+    "降水",
+    "體感溫度",
+    "濕度",
+    "能見度",
+    "氣壓",
+  ];
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        return gestureState.dy > 10;
-      },
       onPanResponderMove: (evt, gestureState) => {
         if (gestureState.dy > 10) {
           Animated.event([null, { dy: pan.y }], { useNativeDriver: false })(
@@ -89,6 +97,13 @@ export function SlideModal({
               {title}
             </View>
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
+              <View style={styles.container}>
+                <ModalDropdown
+                  options={options}
+                  style={{ justifyContent: "flex-end" }}
+                  dropdownStyle={styles.dropdownStyle}
+                ></ModalDropdown>
+              </View>
               {content}
             </ScrollView>
           </Animated.View>
@@ -182,5 +197,26 @@ const styles = StyleSheet.create({
   svgImage: {
     width: 20,
     height: 20,
+  },
+  container: {
+    paddingTop: 50,
+  },
+  dropdownText: {
+    fontSize: 16,
+    padding: 10,
+    color: "#fff",
+  },
+  dropdownStyle: {
+    width: 150,
+    backgroundColor: "#333", // Set background color
+  },
+  dropdownRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+  },
+  label: {
+    fontSize: 16,
+    color: "#fff",
   },
 });

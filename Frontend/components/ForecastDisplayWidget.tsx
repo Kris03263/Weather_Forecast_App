@@ -14,6 +14,7 @@ import { DynamicImage } from "@/components/DynamicImage";
 import { WeatherDataList } from "@/app/(tabs)/_layout";
 import { SlideModal } from "@/components/slideModal";
 import { useState } from "react";
+import Chart from "@/components/Chart";
 
 interface ForecastDisplayWidgetProps {
   region: string;
@@ -74,7 +75,7 @@ export function ForecastDisplayWidget({ region }: ForecastDisplayWidgetProps) {
             <Text style={styles.title}>天氣預報</Text>
           </View>
         }
-        content={<Text>天氣預報</Text>}
+        content={<Chart type="temp"></Chart>}
       />
     </>
   );

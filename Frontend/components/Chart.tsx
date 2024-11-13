@@ -1,30 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Dimensions, Text } from "react-native";
-import Svg, {
-  Path,
-  Circle,
-  Text as SvgText,
-  Defs,
-  LinearGradient,
-  Stop,
-  Rect,
-} from "react-native-svg";
+import { LineChart } from "react-native-chart-kit";
 import { useSelector } from "react-redux";
 import {
   WeatherDataList,
   Selecter,
   indicatorsDictionary,
 } from "@/app/(tabs)/_layout";
-
 interface ChartProps {
   type: string;
 }
 
 export function Chart({ type }: ChartProps) {
-  const width = Dimensions.get("window").width - 40; // 圖表寬度
-  const height = 200; // 圖表高度
-  const maxHumidity = 100; // 濕度最大值
-  const minHumidity = 0; // 濕度最小值
+  const screenWidth = Dimensions.get("window").width - 40;
+
+  const [selectedValue, setselectedValue] = useState<number>(0);
+  const [selectedTime, setselectedTime] = useState<string>("");
 
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
@@ -33,147 +24,110 @@ export function Chart({ type }: ChartProps) {
     (state: { selecter: Selecter }) => state.selecter
   );
 
+  const data = weatherDataList?.[selecter.region]?.[0] ?? [];
+  console.log(data);
+
+  const segments = [];
+  for (let i = 0; i < data.length; i += 9) {
+    segments.push(data.slice(i, i + 9));
+  }
+
+  const segment = segments[0] || [];
+
   const indicator =
     indicatorsDictionary[type as keyof typeof indicatorsDictionary];
 
+  let valueData: number[] = [];
+  let labels: string[] = [];
+
   switch (type) {
     case "wet":
-      const data = weatherDataList?.[selecter.region]?.[0] ?? [];
-
-      // 將data用00:00~00:00分割
-      const segments = [];
-      for (let i = 0; i < data.length; i += 9) {
-        segments.push(data.slice(i, i + 9));
-      }
-
-      // 目前只取第一段數據
-      const segment = segments[0] || [];
-
-      const wetData = segment.map((item) => parseInt(item.wet));
-      const timeData = segment.map((item) => {
-        const hour = item.time.split(" ")[1].split(":")[0];
-        return hour + "時";
-      });
-
-      // 計算每個點的坐標
-      const coordinates = wetData.map((wet, index) => {
-        const x = (index / (wetData.length - 1)) * width;
-        const y =
-          height - ((wet - minHumidity) / (maxHumidity - minHumidity)) * height;
-        return { x, y };
-      });
-
-      // 生成 Path Data
-      let pathData = `M ${coordinates[0].x} ${coordinates[0].y}`;
-      coordinates.slice(1).forEach((point) => {
-        pathData += ` L ${point.x} ${point.y}`;
-      });
-
-      return (
-        <View style={styles.container}>
-          <Svg
-            height={height + 40}
-            width={width + 60}
-            viewBox={`-10 0 ${width + 40} ${height + 40}`}
-          >
-            {/* 背景漸變 */}
-            <Defs>
-              <LinearGradient
-                id="gradientBackground"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <Stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.9" />
-                <Stop offset="100%" stopColor="#1e40af" stopOpacity="0.5" />
-              </LinearGradient>
-            </Defs>
-
-            {/* 繪製矩形背景 */}
-            <Rect
-              x="0"
-              y="0"
-              width={width}
-              height={height}
-              fill="url(#gradientBackground)"
-              rx="8"
-              ry="8"
-            />
-
-            {/* 濕度折線 */}
-            <Path d={pathData} stroke="#8b5cf6" strokeWidth="2" fill="none" />
-
-            {/* 每個點上的標記 */}
-            {coordinates.map((point, index) => (
-              <Circle
-                key={index}
-                cx={point.x}
-                cy={point.y}
-                r="3"
-                fill="#8b5cf6"
-              />
-            ))}
-
-            {/* Y 軸單位 */}
-            {[0, 20, 40, 60, 80, 100].map((value, index) => (
-              <SvgText
-                key={index}
-                x={width + 10}
-                y={(height - (value / maxHumidity) * height).toString()}
-                fontSize="10"
-                fill="gray"
-              >
-                {value}%
-              </SvgText>
-            ))}
-
-            {/* X 軸單位 */}
-            {coordinates.map((point, index) => (
-              <SvgText
-                key={index}
-                x={point.x}
-                y={height + 15}
-                fontSize="10"
-                fill="gray"
-                textAnchor="middle"
-              >
-                {timeData[index]}
-              </SvgText>
-            ))}
-          </Svg>
-        </View>
-      );
+      valueData = segment.map((item) => parseInt(item.wet));
+      break;
+    case "rainRate":
+      valueData = segment.map((item) => parseInt(item.rainRate));
+      break;
+    case "windSpeed":
+      valueData = segment.map((item) => parseInt(item.windSpeed));
+      break;
+    case "temp":
+      valueData = segment.map((item) => parseInt(item.temp));
     default:
-      return (
-        <View style={styles.container}>
-          <Text style={styles.title}>{indicator.title}</Text>
-          <Text style={styles.value}>
-            {indicator.value}
-            {indicator.unit}
-          </Text>
-        </View>
-      );
+      break;
   }
+  labels = segment.map((item) => {
+    const hour = item.time.split(" ")[1].split(":")[0];
+    return hour + "時";
+  });
+
+  const chartData = {
+    labels: labels,
+    datasets: [
+      {
+        data: valueData,
+        color: (opacity = 1) => `rgba(139, 92, 246, ${opacity})`,
+        strokeWidth: 2,
+      },
+    ],
+  };
+
+  const chartConfig = {
+    backgroundGradientFrom: "#1e3a8a",
+    backgroundGradientTo: "#1e40af",
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    style: {
+      borderRadius: 16,
+    },
+    propsForDots: {
+      r: "3",
+      strokeWidth: "1",
+      stroke: "#8b5cf6",
+    },
+    yAxisSuffix: indicator.unit,
+    yAxisInterval: 1,
+  };
+
+  return (
+    <>
+      <View>
+        <Text style={styles.modalText}>
+          {selectedTime} - {selectedValue}
+          {indicator.unit}
+        </Text>
+      </View>
+      <LineChart
+        data={chartData}
+        width={screenWidth}
+        height={220}
+        chartConfig={chartConfig}
+        style={styles.chart}
+        fromZero={true}
+        onDataPointClick={({ value, index }) => {
+          setselectedTime(labels[index]);
+          setselectedValue(value);
+        }}
+        bezier
+      />
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
-    padding: 16,
     backgroundColor: "#1a1a1a",
-    borderRadius: 12,
+    borderRadius: 16,
+    paddingVertical: 8,
   },
-  noDataText: {
-    color: "#fff",
-    fontSize: 16,
+  chart: {
+    borderRadius: 16,
   },
-  title: {
-    color: "#fff",
-    fontSize: 18,
-  },
-  value: {
-    color: "#fff",
-    fontSize: 16,
+  modalText: {
+    marginBottom: 15,
+    color: "white",
+    textAlign: "center",
   },
 });
+
+export default Chart;

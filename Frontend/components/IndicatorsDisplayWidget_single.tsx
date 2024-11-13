@@ -27,6 +27,7 @@ export function IndicatorsDisplayWidget_single({
 
   const indicator =
     indicatorsDictionary[type as keyof typeof indicatorsDictionary];
+  console.log(indicator);
 
   indicator.value = weatherDataList?.[region]?.[0]?.[0]?.[type] ?? "--"; // region - timeInterval - index
   return (
@@ -56,7 +57,7 @@ export function IndicatorsDisplayWidget_single({
         onClose={() => {
           setModalVisible(false);
         }}
-        content={<Chart type="wet"></Chart>}
+        content={<Chart type={type}></Chart>}
       />
     </>
   );
