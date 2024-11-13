@@ -6,6 +6,7 @@ import {
   WeatherDataList,
   Selecter,
   indicatorsDictionary,
+  Region,
 } from "@/app/(tabs)/_layout";
 interface ChartProps {
   type: string;
@@ -23,9 +24,9 @@ export function Chart({ type }: ChartProps) {
   const selecter = useSelector(
     (state: { selecter: Selecter }) => state.selecter
   );
+  const regions = useSelector((state: { region: Region[] }) => state.region);
 
-  const data = weatherDataList?.[selecter.region]?.[0] ?? [];
-  console.log(data);
+  const data = weatherDataList?.[regions[selecter.regionIndex].name]?.[0] ?? [];
 
   const segments = [];
   for (let i = 0; i < data.length; i += 9) {
@@ -65,15 +66,15 @@ export function Chart({ type }: ChartProps) {
     datasets: [
       {
         data: valueData,
-        color: (opacity = 1) => `rgba(139, 92, 246, ${opacity})`,
+        color: (opacity = 1) => `rgba(255, 200, 0, ${opacity})`,
         strokeWidth: 2,
       },
     ],
   };
 
   const chartConfig = {
-    backgroundGradientFrom: "#1e3a8a",
-    backgroundGradientTo: "#1e40af",
+    backgroundGradientFrom: "#0f172a",
+    backgroundGradientTo: "#1f2937",
     decimalPlaces: 0,
     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -83,7 +84,7 @@ export function Chart({ type }: ChartProps) {
     propsForDots: {
       r: "3",
       strokeWidth: "1",
-      stroke: "#8b5cf6",
+      stroke: "#ffcc00",
     },
     yAxisSuffix: indicator.unit,
     yAxisInterval: 1,
@@ -116,7 +117,7 @@ export function Chart({ type }: ChartProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#0f172a",
     borderRadius: 16,
     paddingVertical: 8,
   },

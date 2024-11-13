@@ -69,13 +69,7 @@ export function ForecastDisplayWidget({ region }: ForecastDisplayWidgetProps) {
       <SlideModal
         isModalShow={ModalVisible}
         onClose={() => setModalVisible(false)}
-        title={
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <SvgImage style={{ width: 30, height: 30 }} name="weather" />
-            <Text style={styles.title}>天氣預報</Text>
-          </View>
-        }
-        content={<Chart type="temp"></Chart>}
+        type="temp"
       />
     </>
   );

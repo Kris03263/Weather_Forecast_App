@@ -4,7 +4,7 @@ import { useState } from "react";
 import { SlideModal } from "@/components/SlideModal";
 import { WeatherDataList } from "@/app/(tabs)/_layout";
 import { useSelector } from "react-redux";
-import { SvgImage } from "./Svg";
+import { SvgImage } from "@/components/Svg";
 
 export function EarthQuakeDisplayWidget() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -30,12 +30,11 @@ export function EarthQuakeDisplayWidget() {
         </Widget>
       </TouchableOpacity>
       <SlideModal
+        type="earthQuake"
         isModalShow={modalVisible}
-        title={<Text>title</Text>}
         onClose={() => {
           setModalVisible(false);
         }}
-        content={<Text style={styles.modalText}>地震資訊</Text>}
       />
     </>
   );

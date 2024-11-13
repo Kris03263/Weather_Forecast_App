@@ -10,23 +10,69 @@ import {
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { SvgImage } from "@/components/Svg";
-import ModalDropdown from "react-native-modal-dropdown";
+import { Dropdown } from "@/components/DropDown";
+import { Chart } from "@/components/Chart";
 
 interface modalVisibleCrontrollProps {
+  type: string;
   isModalShow: boolean;
-  title: React.ReactNode;
-  content: React.ReactNode;
   onClose: () => void;
 }
 
 export function SlideModal({
+  type,
   isModalShow,
-  content,
-  title,
   onClose,
 }: modalVisibleCrontrollProps) {
   const [ModalVisible, setModalVisible] = useState(isModalShow);
+  const [indicator, setIndicator] = useState<string>(type);
+  const [title, setTitle] = useState<React.ReactNode>();
+  const [content, setContent] = useState<React.ReactNode>();
   const pan = useRef(new Animated.ValueXY()).current;
+
+  const renderPage = () => {
+    switch (indicator) {
+      case "temp":
+        setTitle(
+          <View style={styles.titleDisplay}>
+            <SvgImage style={styles.svgImage} name="weather" />
+            <Text style={styles.title}>天氣預報</Text>
+          </View>
+        );
+        setContent(<Chart type="temp" />);
+        break;
+      case "rainRate":
+        setTitle(
+          <View style={styles.titleDisplay}>
+            <SvgImage style={styles.svgImage} name="rainRate" />
+            <Text style={styles.title}>降雨機率</Text>
+          </View>
+        );
+        setContent(<Chart type="rainRate" />);
+        break;
+      case "windSpeed":
+        setTitle(
+          <View style={styles.titleDisplay}>
+            <SvgImage style={styles.svgImage} name="windSpeed" />
+            <Text style={styles.title}>風速</Text>
+          </View>
+        );
+        setContent(<Chart type="windSpeed" />);
+        break;
+      case "wet":
+        setTitle(
+          <View style={styles.titleDisplay}>
+            <SvgImage style={styles.svgImage} name="wet" />
+            <Text style={styles.title}>濕度</Text>
+          </View>
+        );
+        setContent(<Chart type="wet" />);
+        break;
+      default:
+        return null;
+    }
+  };
+
   useEffect(() => {
     setModalVisible(isModalShow);
     if (isModalShow) {
@@ -36,18 +82,13 @@ export function SlideModal({
         useNativeDriver: false,
       }).start();
     }
+    renderPage();
   }, [isModalShow]);
 
-  const options = [
-    "天氣狀況",
-    "紫外線指數",
-    "風",
-    "降水",
-    "體感溫度",
-    "濕度",
-    "能見度",
-    "氣壓",
-  ];
+  useEffect(() => {
+    renderPage();
+  }, [indicator]);
+
   const panResponder = useRef(
     PanResponder.create({
       onPanResponderMove: (evt, gestureState) => {
@@ -78,7 +119,10 @@ export function SlideModal({
         animationType="slide"
         transparent={true}
         visible={ModalVisible}
-        onRequestClose={() => {}}
+        onRequestClose={() => {
+          setModalVisible(!ModalVisible);
+          onClose();
+        }}
       >
         <View style={styles.centeredView}>
           <Animated.View
@@ -98,11 +142,11 @@ export function SlideModal({
             </View>
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
               <View style={styles.container}>
-                <ModalDropdown
-                  options={options}
-                  style={{ justifyContent: "flex-end" }}
-                  dropdownStyle={styles.dropdownStyle}
-                ></ModalDropdown>
+                <Dropdown
+                  onIndicatorChange={(newIndicator: string) => {
+                    setIndicator(newIndicator);
+                  }}
+                />
               </View>
               {content}
             </ScrollView>
@@ -118,6 +162,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
+  },
+  titleDisplay: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 10,
+  },
+  title: {
+    color: "white",
+    fontSize: 20,
+    textAlign: "left",
   },
   header: {
     width: "100%",

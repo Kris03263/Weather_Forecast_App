@@ -27,7 +27,6 @@ export function IndicatorsDisplayWidget_single({
 
   const indicator =
     indicatorsDictionary[type as keyof typeof indicatorsDictionary];
-  console.log(indicator);
 
   indicator.value = weatherDataList?.[region]?.[0]?.[0]?.[type] ?? "--"; // region - timeInterval - index
   return (
@@ -48,16 +47,10 @@ export function IndicatorsDisplayWidget_single({
       </TouchableOpacity>
       <SlideModal
         isModalShow={modalVisible}
-        title={
-          <View style={styles.titleDisplay}>
-            <SvgImage style={styles.svgImage} name={type} />
-            <Text style={styles.title}>{indicator.title}</Text>
-          </View>
-        }
         onClose={() => {
           setModalVisible(false);
         }}
-        content={<Chart type={type}></Chart>}
+        type={type}
       />
     </>
   );
