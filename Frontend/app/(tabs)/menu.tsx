@@ -27,7 +27,7 @@ import {
 
 import { Background } from "@/components/Background";
 import { SvgImage } from "@/components/Svg";
-import CustomModal from "@/components/CustomModal";
+import CustomModal from "@/components/PopupModal";
 import store from "@/redux/store";
 import { setSelectedTargetRegionIndex } from "@/redux/selecterSlice";
 

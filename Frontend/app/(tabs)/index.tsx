@@ -14,8 +14,7 @@ import { Region, Selecter, WeatherDataList, DailySug } from "./_layout";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
-import { IndicatorsDisplayWidget_single } from "@/components/IndicatorsDisplayWidget_single";
-import { IndicatorsDisplayWidget_double } from "@/components/IndicatorsDisplayWidget_double";
+import { IndicatorsDisplayWidget } from "@/components/IndicatorsDisplayWidget";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
 import { EarthQuakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
@@ -135,21 +134,21 @@ export default function HomeScreen() {
               <View style={styles.bodySection}>
                 <ForecastDisplayWidget weatherDatas={weatherDataList?.[item.name]?.[0] ?? null} />
                 <View style={styles.row}>
-                  <IndicatorsDisplayWidget_single
+                  <IndicatorsDisplayWidget
                     type="wet"
                     weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
                   />
-                  <IndicatorsDisplayWidget_single
+                  <IndicatorsDisplayWidget
                     type="rainRate"
                     weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
                   />
                 </View>
                 <View style={styles.row}>
-                  <IndicatorsDisplayWidget_single
+                  <IndicatorsDisplayWidget
                     type="windSpeed"
                     weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
                   />
-                  <IndicatorsDisplayWidget_single
+                  <IndicatorsDisplayWidget
                     type="windDirection"
                     weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
                   />

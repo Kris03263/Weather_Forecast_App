@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity, Text } from "react-native";
 import { useSelector } from "react-redux";
 
-import CustomModal from "@/components/CustomModal";
+import CustomModal from "@/components/PopupModal";
 import store from "@/redux/store";
 import { setVisible } from "@/redux/globalMessageSlice";
 

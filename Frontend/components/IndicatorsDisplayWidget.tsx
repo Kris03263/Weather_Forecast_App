@@ -1,7 +1,6 @@
 import React from "react";
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { useState } from "react";
-import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
@@ -9,15 +8,15 @@ import { SlideModal } from "@/components/SlideModal";
 
 import { WeatherData, indicatorsDictionary } from "@/app/(tabs)/_layout";
 
-interface IndicatorsDisplayWidgetProps_single {
+interface IndicatorsDisplayWidgetProps {
   type: string;
   weatherData: WeatherData;
 }
 
-export function IndicatorsDisplayWidget_single({
+export function IndicatorsDisplayWidget({
   type,
   weatherData
-}: IndicatorsDisplayWidgetProps_single) {
+}: IndicatorsDisplayWidgetProps) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const indicator =

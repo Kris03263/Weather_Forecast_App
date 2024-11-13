@@ -18,7 +18,6 @@ export const RadioButton = ({ label, selected, onPress }: RadioButtonProps) => {
 };
 
 const styles = StyleSheet.create({
-  // Radio button
   radioButtonLayout: {
     flexDirection: "row",
     alignItems: "center",
