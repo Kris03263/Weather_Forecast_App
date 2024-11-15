@@ -1,8 +1,8 @@
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { Widget } from "@/components/Widget";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SlideModal } from "@/components/SlideModal";
-import { WeatherDataList } from "@/app/(tabs)/_layout";
+import { getEarthquake, WeatherDataList } from "@/app/(tabs)/_layout";
 import { useSelector } from "react-redux";
 import { SvgImage } from "./Svg";
 
@@ -13,6 +13,10 @@ export function EarthQuakeDisplayWidget() {
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
 
+  useEffect(() => {
+    getEarthquake();
+  }, []);
+
   return (
     <>
       <TouchableOpacity
@@ -22,7 +26,7 @@ export function EarthQuakeDisplayWidget() {
         <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
           <View style={styles.layout}>
             <View style={styles.titleDisplay}>
-              <SvgImage style={{ width: 30, height: 30 }} name="weather" />
+              <SvgImage style={{ width: 30, height: 30 }} name="earthquake" />
               <Text style={styles.title}>地震資訊</Text>
             </View>
             <Text style={styles.value}>--</Text>

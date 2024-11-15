@@ -34,7 +34,7 @@ import { setMessage, setVisible } from "@/redux/globalMessageSlice";
 // - [V] Move weatherDataList, region, currentTime to index.tsx
 // - [V] Use a global variable to save wrong msg
 // - [X] Move background color control to _layout.tsx (Instead moving to Background.tsx)
-// - [ ] Change region-selector to number
+// - [V] Change region-selector to number
 
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
@@ -257,6 +257,18 @@ export const getAllHabitList = async (): Promise<Habit[]> => {
 
   return habitList ?? [];
 };
+export const getEarthquake = async () => {
+  const userID = store.getState().user.id;
+  const regions = store.getState().regions;
+
+  const data = await HandleGetEarthquakeData(
+    userID,
+    regions[0].latitude,
+    regions[0].longitude
+  );
+
+  return data ?? {};
+};
 export const updateRegion0 = async () => {
   const regions = store.getState().regions;
 
@@ -289,11 +301,13 @@ export const updateRegions = async () => {
   console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
 export const updateWeatherData_3h = async (_region?: Region) => {
+  const userID = store.getState().user.id;
   const regions = _region ? [_region] : store.getState().regions;
 
   await Promise.all(
     regions.map(async (region) => {
-      const weatherData3h = (await HandleGetWeatherData3h(region)) ?? [];
+      const weatherData3h =
+        (await HandleGetWeatherData3h(userID, region)) ?? [];
 
       store.dispatch(updateWeatherData3h(weatherData3h));
     })
@@ -304,11 +318,13 @@ export const updateWeatherData_3h = async (_region?: Region) => {
   );
 };
 export const updateWeatherData_12h = async (_region?: Region) => {
+  const userID = store.getState().user.id;
   const regions = _region ? [_region] : store.getState().regions;
 
   await Promise.all(
     regions.map(async (region) => {
-      const weatherData12h = (await HandleGetWeatherData12h(region)) ?? [];
+      const weatherData12h =
+        (await HandleGetWeatherData12h(userID, region)) ?? [];
 
       store.dispatch(updateWeatherData12h(weatherData12h));
     })
@@ -672,8 +688,8 @@ const HandleGetWeatherDataCoords = async (
   }
 };
 const HandleGetWeatherData3h = async (
-  _region: Region,
-  _userID?: string
+  _userID: string,
+  _region: Region
 ): Promise<WeatherData[] | null> => {
   try {
     const [city, district] = _region.name.split(", ");
@@ -683,9 +699,9 @@ const HandleGetWeatherData3h = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userID: _userID ?? "-1",
-        longitude: "0",
-        latitude: "0",
+        userID: _userID,
+        longitude: "-1",
+        latitude: "-1",
         cusloc: {
           city: city,
           district: district,
@@ -704,8 +720,8 @@ const HandleGetWeatherData3h = async (
   }
 };
 const HandleGetWeatherData12h = async (
-  _region: Region,
-  _userID?: string
+  _userID: string,
+  _region: Region
 ): Promise<WeatherData[] | null> => {
   try {
     const [city, district] = _region.name.split(", ");
@@ -715,9 +731,9 @@ const HandleGetWeatherData12h = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userID: _userID ?? "-1",
-        longitude: "0",
-        latitude: "0",
+        userID: _userID,
+        longitude: "-1",
+        latitude: "-1",
         cusloc: {
           city: city,
           district: district,
@@ -815,6 +831,40 @@ const HandleGetAllHabit = async (): Promise<Habit[] | null> => {
     return null;
   }
 };
+const HandleGetEarthquakeData = async (
+  _userID: string,
+  _latitude: string,
+  _longitude: string
+): Promise<any | null> => {
+  try {
+    const data = await fetch(`${hostURL}/Disaster/GetEarthQuakeData`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userID: _userID,
+        longitude: _longitude,
+        latitude: _latitude,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data;
+      });
+
+    console.log("Earthquke data: ", JSON.stringify(data));
+
+    if (!data) {
+      throw new Error(data.status);
+    }
+
+    return data;
+  } catch (e) {
+    showNotification(String(e));
+    return null;
+  }
+};
 
 export default function TabLayout() {
   const [socketInstance, setSocketInstance] = useState<Socket>();
@@ -856,9 +906,9 @@ export default function TabLayout() {
   }, []);
 
   useEffect(() => {
-    const socket = io("https://420269.xyz/", {
+    const socket = io(hostURL, {
       transports: ["websocket", "polling"],
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 1,
     });
 
     setSocketInstance(socket);
@@ -867,11 +917,11 @@ export default function TabLayout() {
       showNotification(`連接 WebSocket (id: ${socket.id}) 成功`);
       setIsConnected(true);
       // 設置位置（選擇真實或假資料）
-      socket.emit("set_location", {
-        userID: 1,
-        longitude: "120.62343304881064",
-        latitude: "24.21694034808",
-      });
+      // socket.emit("set_location", {
+      //   userID: 1,
+      //   longitude: "120.62343304881064",
+      //   latitude: "24.21694034808",
+      // });
       socket.emit("set_location_fake", {
         userID: 1,
         longitude: "120.62343304881064",
