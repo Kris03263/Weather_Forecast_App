@@ -23,7 +23,7 @@ import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
 import { IndicatorsDisplayWidget } from "@/components/IndicatorsDisplayWidget";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
-import { EarthQuakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
+import { EarthquakeDisplayWidget } from "@/components/EarthquakeDisplayWidget";
 import { SlideModal } from "@/components/SlideModal";
 import store from "@/redux/store";
 import {
@@ -81,14 +81,14 @@ export default function HomeScreen() {
   }, [selecter.targetRegionIndex]);
 
   // SlideModal Control
-  const [modalVisible, setModalVisible] = useState(false);
+  const [activeModalId, setActiveModalId] = useState<string>("-1");
   const [modalIndicatorType, setModalIndicatorType] = useState<indicators>(
     indicators.temp
   );
 
-  const openSlideModal = (indicatorType: indicators) => {
+  const openSlideModal = (id: string, indicatorType: indicators) => {
     setModalIndicatorType(indicatorType);
-    setModalVisible(true);
+    setActiveModalId(id);
   };
 
   return (
@@ -155,30 +155,32 @@ export default function HomeScreen() {
               {/* Body Section */}
               <View style={styles.bodySection}>
                 <ForecastDisplayWidget
-                  onPress={() => openSlideModal(indicators.temp)}
+                  onPress={() => openSlideModal(item.id, indicators.temp)}
                   weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
                 />
                 <View style={styles.row}>
                   <IndicatorsDisplayWidget
                     indicatorType={indicators.wet}
-                    onPress={() => openSlideModal(indicators.wet)}
+                    onPress={() => openSlideModal(item.id, indicators.wet)}
                     weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                   <IndicatorsDisplayWidget
                     indicatorType={indicators.rainRate}
-                    onPress={() => openSlideModal(indicators.rainRate)}
+                    onPress={() => openSlideModal(item.id, indicators.rainRate)}
                     weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                 </View>
                 <View style={styles.row}>
                   <IndicatorsDisplayWidget
                     indicatorType={indicators.windSpeed}
-                    onPress={() => openSlideModal(indicators.windSpeed)}
+                    onPress={() =>
+                      openSlideModal(item.id, indicators.windSpeed)
+                    }
                     weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                   <IndicatorsDisplayWidget
                     indicatorType={indicators.windDirection}
-                    onPress={() => openSlideModal(indicators.windDirection)}
+                    onPress={() => {}}
                     weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                 </View>
@@ -203,16 +205,16 @@ export default function HomeScreen() {
                   />
                 </View>
                 <View style={styles.row}>
-                  <EarthQuakeDisplayWidget
-                    onPress={() => openSlideModal(indicators.aqi)}
+                  <EarthquakeDisplayWidget
+                    onPress={() => openSlideModal(item.id, indicators.aqi)}
                   />
                 </View>
               </View>
               <SlideModal
                 indicatorType={modalIndicatorType}
                 weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
-                isModalShow={modalVisible}
-                onClose={() => setModalVisible(false)}
+                isModalShow={activeModalId === item.id}
+                onClose={() => setActiveModalId("-1")}
               />
             </View>
           )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { View, Text, StyleSheet, Pressable, Modal } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 
@@ -7,18 +7,15 @@ import { indicators, indicatorsDictionary } from "@/app/(tabs)/_layout";
 import { SvgImage } from "@/components/Svg";
 
 interface DropdownProps {
+  indicatorType: indicators;
   onIndicatorChange: (indicator: indicators) => void;
 }
 
-export function Dropdown({ onIndicatorChange }: DropdownProps) {
+export function Dropdown({ indicatorType, onIndicatorChange }: DropdownProps) {
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
-  const [indicator, setIndicator] = useState<indicators>(indicators.temp);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<View>(null);
-
-  useEffect(() => {
-    indicator ? onIndicatorChange(indicator) : null;
-  }, [indicator]);
+  const ignoreList = [indicators.windDirection];
 
   return (
     <>
@@ -39,7 +36,7 @@ export function Dropdown({ onIndicatorChange }: DropdownProps) {
         >
           <SvgImage
             style={styles.svgImage}
-            name={indicatorsDictionary[indicator].svgName}
+            name={indicatorsDictionary[indicatorType].svgName}
           />
           <SvgImage style={styles.svgImage} name="down" />
         </Pressable>
@@ -58,22 +55,26 @@ export function Dropdown({ onIndicatorChange }: DropdownProps) {
             data={Object.values(indicators)}
             renderItem={({ item, index }) => (
               <>
-                {index !== 0 && <View style={styles.separator} />}
-                <Pressable
-                  style={styles.dropdownItem}
-                  onPress={() => {
-                    setIndicator(item);
-                    setIsDropdownVisible(false);
-                  }}
-                >
-                  <SvgImage
-                    style={styles.svgImage}
-                    name={indicatorsDictionary[item].svgName}
-                  ></SvgImage>
-                  <Text style={styles.dropdownText}>
-                    {indicatorsDictionary[item].title}
-                  </Text>
-                </Pressable>
+                {!ignoreList.includes(item) && index !== 0 && (
+                  <View style={styles.separator} />
+                )}
+                {!ignoreList.includes(item) && (
+                  <Pressable
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      onIndicatorChange(item);
+                      setIsDropdownVisible(false);
+                    }}
+                  >
+                    <SvgImage
+                      style={styles.svgImage}
+                      name={indicatorsDictionary[item].svgName}
+                    ></SvgImage>
+                    <Text style={styles.dropdownText}>
+                      {indicatorsDictionary[item].title}
+                    </Text>
+                  </Pressable>
+                )}
               </>
             )}
           />

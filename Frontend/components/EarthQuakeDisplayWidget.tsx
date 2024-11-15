@@ -1,20 +1,25 @@
-import { useEffect } from "react";
-import { StyleSheet, View, Pressable, Text } from "react-native";
+import { useEffect, useState } from "react";
+import { StyleSheet, View, Pressable, Text, Image } from "react-native";
 
-import { getEarthquake } from "@/app/(tabs)/_layout";
+import { EarthquakeData, getEarthquakeData } from "@/app/(tabs)/_layout";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 
-interface EarthQuakeDisplayWidgetProps {
+interface EarthquakeDisplayWidgetProps {
   onPress: () => void;
 }
 
-export function EarthQuakeDisplayWidget({
+export const EarthquakeDisplayWidget = ({
   onPress,
-}: EarthQuakeDisplayWidgetProps) {
+}: EarthquakeDisplayWidgetProps) => {
+  const [earthquakeData, setEarthquakeData] = useState<EarthquakeData[]>();
+
   useEffect(() => {
-    getEarthquake();
+    getEarthquakeData().then((data) => {
+      setEarthquakeData(data);
+      console.log(data[0].reportImg);
+    });
   }, []);
 
   return (
@@ -22,15 +27,14 @@ export function EarthQuakeDisplayWidget({
       <Widget style={styles.customWidgetStyle} isShow={true}>
         <View style={styles.layout}>
           <View style={styles.titleDisplay}>
-            <SvgImage style={{ width: 30, height: 30 }} name="earthquake" />
+            <SvgImage style={styles.svgImage} name="earthquake" />
             <Text style={styles.title}>地震資訊</Text>
           </View>
-          <Text style={styles.value}>--</Text>
         </View>
       </Widget>
     </Pressable>
   );
-}
+};
 
 const styles = StyleSheet.create({
   customWidgetStyle: {
@@ -38,6 +42,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   layout: {
+    width: "100%",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "space-between",

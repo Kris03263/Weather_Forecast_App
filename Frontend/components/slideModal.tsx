@@ -19,6 +19,14 @@ import {
   WeatherData,
 } from "@/app/(tabs)/_layout";
 
+interface selectedData {
+  time: string;
+  value: number;
+  maxValue: number;
+  minValue: number;
+  unit: string;
+}
+
 interface modalVisibleCrontrollProps {
   indicatorType: indicators;
   weatherDatas: WeatherData[];
@@ -32,13 +40,15 @@ export function SlideModal({
   isModalShow,
   onClose,
 }: modalVisibleCrontrollProps) {
-  const [selectData, setSelectData] = useState<{
-    time: string;
-    value: number;
-    maxValue: number;
-    minValue: number;
-    unit: string;
-  }>({ time: "", value: 0, maxValue: 0, minValue: 0, unit: "" });
+  const [selectedIndicator, setSelectedIndicator] =
+    useState<indicators>(indicatorType);
+  const [selectedData, setSelectedData] = useState<selectedData>({
+    time: "",
+    value: 0,
+    maxValue: 0,
+    minValue: 0,
+    unit: "",
+  });
   const [selectedDateIndex, setSelectedDateIndex] = useState(3);
   const pan = useRef(new Animated.ValueXY()).current;
 
@@ -51,6 +61,10 @@ export function SlideModal({
       }).start();
     }
   }, [isModalShow]);
+
+  useEffect(() => {
+    setSelectedIndicator(indicatorType);
+  }, [indicatorType]);
 
   return (
     <View style={styles.modalBackground}>
@@ -71,10 +85,10 @@ export function SlideModal({
               <View style={styles.titleLayout}>
                 <SvgImage
                   style={styles.svgImage}
-                  name={indicatorsDictionary[indicatorType].svgName}
+                  name={indicatorsDictionary[selectedIndicator].svgName}
                 />
                 <Text style={styles.titleText}>
-                  {indicatorsDictionary[indicatorType].title}
+                  {indicatorsDictionary[selectedIndicator].title}
                 </Text>
               </View>
 
@@ -115,33 +129,34 @@ export function SlideModal({
                 {/* Weather Info Section */}
                 <View style={styles.weatherInfoLayout}>
                   <Text style={styles.weatherInfoMainText}>
-                    {selectData.value}
-                    {selectData.unit}
+                    {selectedData.value}
+                    {selectedData.unit}
                   </Text>
 
                   <Text style={styles.weatherInfoSubText}>
-                    最高 {selectData.maxValue}
-                    {selectData.unit} 最低 {selectData.minValue}
-                    {selectData.unit}
+                    最高 {selectedData.maxValue}
+                    {selectedData.unit} 最低 {selectedData.minValue}
+                    {selectedData.unit}
                   </Text>
                 </View>
 
                 {/* Dropdown */}
-                <Dropdown onIndicatorChange={() => {}} />
+                <Dropdown
+                  indicatorType={selectedIndicator}
+                  onIndicatorChange={(indicator: indicators) =>
+                    setSelectedIndicator(indicator)
+                  }
+                />
               </View>
 
               <View style={styles.contentLayout}>
                 {/* Chart */}
                 <Chart
-                  indicatorType={indicatorType}
+                  indicatorType={selectedIndicator}
                   weatherDatas={weatherDatas}
-                  onSelectDataChange={(newSelectData: {
-                    time: string;
-                    value: number;
-                    maxValue: number;
-                    minValue: number;
-                    unit: string;
-                  }) => setSelectData(newSelectData)}
+                  onSelectDataChange={(newSelectData: selectedData) =>
+                    setSelectedData(newSelectData)
+                  }
                 />
               </View>
             </ScrollView>

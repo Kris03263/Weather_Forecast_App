@@ -103,6 +103,23 @@ export interface WeatherDataList {
 export interface WeatherData {
   [key: string]: string;
 }
+export interface EarthquakeData {
+  color: string;
+  content: string;
+  depth: string;
+  distance: string;
+  intensity: {
+    AreaDesc: string;
+    AreaIntensity: string;
+    CountyName: string;
+  }[];
+  location: string;
+  magnitude: string;
+  nowLocationIntensity: string;
+  reportImg: string;
+  shakeImg: string;
+  time: string;
+}
 export interface Region {
   id: string; // md5
   city: string;
@@ -272,7 +289,7 @@ export const getAllHabitList = async (): Promise<Habit[]> => {
 
   return habitList ?? [];
 };
-export const getEarthquake = async () => {
+export const getEarthquakeData = async (): Promise<EarthquakeData[]> => {
   const userID = store.getState().user.id;
   const regions = store.getState().regions;
 
@@ -282,7 +299,7 @@ export const getEarthquake = async () => {
     regions[0].longitude
   );
 
-  return data ?? {};
+  return data ?? [];
 };
 export const updateRegion0 = async () => {
   const regions = store.getState().regions;
@@ -856,7 +873,7 @@ const HandleGetEarthquakeData = async (
   _userID: string,
   _latitude: string,
   _longitude: string
-): Promise<any | null> => {
+): Promise<EarthquakeData[] | null> => {
   try {
     const data = await fetch(`${hostURL}/Disaster/GetEarthQuakeData`, {
       method: "POST",
@@ -871,13 +888,11 @@ const HandleGetEarthquakeData = async (
     })
       .then((response) => response.json())
       .then((data) => {
-        return data;
+        return data as EarthquakeData[];
       });
 
-    console.log("Earthquke data: ", JSON.stringify(data));
-
     if (!data) {
-      throw new Error(data.status);
+      throw new Error("無地震資料");
     }
 
     return data;
