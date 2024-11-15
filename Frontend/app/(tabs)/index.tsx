@@ -10,7 +10,13 @@ import {
 import { useSelector } from "react-redux";
 import { FlatList } from "react-native-gesture-handler";
 
-import { Region, Selecter, WeatherDataList, DailySug } from "./_layout";
+import {
+  Region,
+  Selecter,
+  WeatherDataList,
+  DailySug,
+  indicators,
+} from "./_layout";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
@@ -18,6 +24,7 @@ import { IndicatorsDisplayWidget } from "@/components/IndicatorsDisplayWidget";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
 import { EarthQuakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
+import { SlideModal } from "@/components/SlideModal";
 import store from "@/redux/store";
 import {
   setSelectedRegionIndex,
@@ -34,9 +41,13 @@ export default function HomeScreen() {
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
-  const dailySug = useSelector((state: { dailySug: DailySug }) => state.dailySug);
-  const weatherDatas = weatherDataList?.[regions[selecter.regionIndex]?.name]?.[0] ?? null;
+  const dailySug = useSelector(
+    (state: { dailySug: DailySug }) => state.dailySug
+  );
+  const weatherDatas =
+    weatherDataList?.[regions[selecter.regionIndex]?.id]?.[0] ?? null;
   const weatherData = weatherDatas?.[0] ?? null;
+  const region = regions[selecter.regionIndex];
 
   // Header Control
   const [isSecendLayout, setIsSecendLayout] = useState(false);
@@ -69,6 +80,17 @@ export default function HomeScreen() {
     store.dispatch(setSelectedTargetRegionIndex(-1));
   }, [selecter.targetRegionIndex]);
 
+  // SlideModal Control
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalIndicatorType, setModalIndicatorType] = useState<indicators>(
+    indicators.temp
+  );
+
+  const openSlideModal = (indicatorType: indicators) => {
+    setModalIndicatorType(indicatorType);
+    setModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
       {/* Gradiant */}
@@ -88,7 +110,7 @@ export default function HomeScreen() {
       <View style={[styles.topSection]}>
         <View style={styles.regionNameDisplay}>
           <Text style={styles.regionName}>
-            {regions[selecter.regionIndex]?.name ?? null}
+            {`${region?.city}, ${region?.district}` ?? null}
           </Text>
         </View>
 
@@ -132,42 +154,66 @@ export default function HomeScreen() {
             <View style={{ width: screenWidth }}>
               {/* Body Section */}
               <View style={styles.bodySection}>
-                <ForecastDisplayWidget weatherDatas={weatherDataList?.[item.name]?.[0] ?? null} />
+                <ForecastDisplayWidget
+                  onPress={() => openSlideModal(indicators.temp)}
+                  weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
+                />
                 <View style={styles.row}>
                   <IndicatorsDisplayWidget
-                    type="wet"
-                    weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.wet}
+                    onPress={() => openSlideModal(indicators.wet)}
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                   <IndicatorsDisplayWidget
-                    type="rainRate"
-                    weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.rainRate}
+                    onPress={() => openSlideModal(indicators.rainRate)}
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                 </View>
                 <View style={styles.row}>
                   <IndicatorsDisplayWidget
-                    type="windSpeed"
-                    weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.windSpeed}
+                    onPress={() => openSlideModal(indicators.windSpeed)}
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                   <IndicatorsDisplayWidget
-                    type="windDirection"
-                    weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.windDirection}
+                    onPress={() => openSlideModal(indicators.windDirection)}
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                 </View>
                 <View style={styles.row}>
-                  <SuggestionDisplayWidget type="dressing" dailySug={dailySug}/>
+                  <SuggestionDisplayWidget
+                    type="dressing"
+                    dailySug={dailySug}
+                  />
                   <SuggestionDisplayWidget type="health" dailySug={dailySug} />
                 </View>
                 <View style={styles.row}>
-                  <SuggestionDisplayWidget type="sport" dailySug={dailySug}/>
-                  <SuggestionDisplayWidget type="transportation"dailySug={dailySug} />
+                  <SuggestionDisplayWidget type="sport" dailySug={dailySug} />
+                  <SuggestionDisplayWidget
+                    type="transportation"
+                    dailySug={dailySug}
+                  />
                 </View>
                 <View style={styles.row}>
-                  <SuggestionDisplayWidget type="activity"dailySug={dailySug} />
+                  <SuggestionDisplayWidget
+                    type="activity"
+                    dailySug={dailySug}
+                  />
                 </View>
                 <View style={styles.row}>
-                  <EarthQuakeDisplayWidget />
+                  <EarthQuakeDisplayWidget
+                    onPress={() => openSlideModal(indicators.aqi)}
+                  />
                 </View>
               </View>
+              <SlideModal
+                indicatorType={modalIndicatorType}
+                weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
+                isModalShow={modalVisible}
+                onClose={() => setModalVisible(false)}
+              />
             </View>
           )}
         />
@@ -258,18 +304,6 @@ const styles = StyleSheet.create({
   },
   dropdownHightlight: {
     backgroundColor: "pink",
-    fontWeight: "bold",
-  },
-
-  buttonWrapper: {
-    position: "absolute", // 讓按鈕固定在畫面上
-    height: "100%", // 確保按鈕高度適配
-    flexDirection: "row",
-    justifyContent: "space-between", // 讓按鈕分佈在左右兩邊
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 50,
     fontWeight: "bold",
   },
   pagination: {

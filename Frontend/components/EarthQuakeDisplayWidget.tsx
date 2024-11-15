@@ -1,46 +1,34 @@
-import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, View, Pressable, Text } from "react-native";
+
+import { getEarthquake } from "@/app/(tabs)/_layout";
+
 import { Widget } from "@/components/Widget";
-import { useEffect, useState } from "react";
-import { SlideModal } from "@/components/SlideModal";
-import { getEarthquake, WeatherDataList } from "@/app/(tabs)/_layout";
-import { useSelector } from "react-redux";
 import { SvgImage } from "@/components/Svg";
 
-export function EarthQuakeDisplayWidget() {
-  const [modalVisible, setModalVisible] = useState(false);
+interface EarthQuakeDisplayWidgetProps {
+  onPress: () => void;
+}
 
-  const weatherDataList = useSelector(
-    (state: { weatherData: WeatherDataList }) => state.weatherData
-  );
-
+export function EarthQuakeDisplayWidget({
+  onPress,
+}: EarthQuakeDisplayWidgetProps) {
   useEffect(() => {
     getEarthquake();
   }, []);
 
   return (
-    <>
-      <TouchableOpacity
-        style={{ flex: 1, width: "100%" }}
-        onPress={() => setModalVisible(true)}
-      >
-        <Widget style={styles.customWidgetStyle} isShow={true}>
-          <View style={styles.layout}>
-            <View style={styles.titleDisplay}>
-              <SvgImage style={{ width: 30, height: 30 }} name="earthquake" />
-              <Text style={styles.title}>地震資訊</Text>
-            </View>
-            <Text style={styles.value}>--</Text>
+    <Pressable style={{ flex: 1, width: "100%" }} onPress={() => onPress()}>
+      <Widget style={styles.customWidgetStyle} isShow={true}>
+        <View style={styles.layout}>
+          <View style={styles.titleDisplay}>
+            <SvgImage style={{ width: 30, height: 30 }} name="earthquake" />
+            <Text style={styles.title}>地震資訊</Text>
           </View>
-        </Widget>
-      </TouchableOpacity>
-      <SlideModal
-        type="earthQuake"
-        isModalShow={modalVisible}
-        onClose={() => {
-          setModalVisible(false);
-        }}
-      />
-    </>
+          <Text style={styles.value}>--</Text>
+        </View>
+      </Widget>
+    </Pressable>
   );
 }
 

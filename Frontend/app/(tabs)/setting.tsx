@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef, ReactNode } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
 
 import {
@@ -28,7 +22,7 @@ import {
 import store from "@/redux/store";
 import { Widget } from "@/components/Widget";
 import { Background } from "@/components/Background";
-import CustomModal from "@/components/PopupModal";
+import PopupModal from "@/components/PopupModal";
 import { SvgImage } from "@/components/Svg";
 import { RadioButton } from "@/components/RadioButton";
 
@@ -72,7 +66,7 @@ export default function SettingsScreen() {
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
   const weatherData =
-    weatherDataList?.[regions[selecter.regionIndex]?.name]?.[0]?.[0] ?? null;
+    weatherDataList?.[regions[selecter.regionIndex]?.id]?.[0]?.[0] ?? null;
 
   useEffect(() => {
     getAllHabitList().then((data) => {
@@ -158,13 +152,13 @@ export default function SettingsScreen() {
               secureTextEntry={true}
               onChangeText={setPassword}
             />
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 openModal(ModalType.REGISTER);
               }}
             >
               <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         );
       case ModalType.REGISTER:
@@ -251,7 +245,7 @@ export default function SettingsScreen() {
       case ModalType.LOGIN:
         return (
           <>
-            <TouchableOpacity
+            <Pressable
               style={styles.modalButton}
               onPress={() => {
                 usernameInput?.clear();
@@ -261,19 +255,19 @@ export default function SettingsScreen() {
               }}
             >
               <Text style={styles.buttonText}>登入</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               style={styles.modalButton}
               onPress={() => setModalVisible(false)}
             >
               <Text style={styles.buttonText}>關閉</Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         );
       case ModalType.REGISTER:
         return (
           <>
-            <TouchableOpacity
+            <Pressable
               style={styles.modalButton}
               onPress={() => {
                 usernameRegisterInput?.clear();
@@ -283,19 +277,19 @@ export default function SettingsScreen() {
               }}
             >
               <Text style={styles.buttonText}>提交</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               style={styles.modalButton}
               onPress={() => setModalVisible(false)}
             >
               <Text style={styles.buttonText}>關閉</Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         );
       case ModalType.USER:
         return (
           <>
-            <TouchableOpacity
+            <Pressable
               onPress={() => {
                 userDelete(store.getState().user.id);
                 setModalVisible(false);
@@ -303,8 +297,8 @@ export default function SettingsScreen() {
               style={styles.modalButton}
             >
               <Text style={styles.buttonText}>刪除使用者</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               onPress={() => {
                 userLogout();
                 setModalVisible(false);
@@ -312,19 +306,19 @@ export default function SettingsScreen() {
               style={styles.modalButton}
             >
               <Text style={styles.buttonText}>登出</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               style={styles.modalButton}
               onPress={() => setModalVisible(false)}
             >
               <Text style={styles.buttonText}>關閉</Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         );
       case ModalType.SPORT:
         return (
           <>
-            <TouchableOpacity
+            <Pressable
               style={styles.modalButton}
               onPress={() => {
                 userSetSports(sport);
@@ -332,13 +326,13 @@ export default function SettingsScreen() {
               }}
             >
               <Text style={styles.buttonText}>儲存&關閉</Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         );
       case ModalType.HABIT:
         return (
           <>
-            <TouchableOpacity
+            <Pressable
               style={styles.modalButton}
               onPress={() => {
                 userSetHabits(habit);
@@ -346,7 +340,7 @@ export default function SettingsScreen() {
               }}
             >
               <Text style={styles.buttonText}>儲存&關閉</Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         );
     }
@@ -362,14 +356,14 @@ export default function SettingsScreen() {
         <View style={styles.headerLayout}>
           <Text style={styles.headerText}>設定</Text>
           <View>
-            <TouchableOpacity
+            <Pressable
               style={styles.avatar}
               onPress={() => {
                 user.id && user.id !== "-1"
                   ? openModal(ModalType.USER)
                   : openModal(ModalType.LOGIN);
               }}
-            ></TouchableOpacity>
+            ></Pressable>
           </View>
         </View>
       </View>
@@ -393,21 +387,21 @@ export default function SettingsScreen() {
             <Text style={styles.boxTitle}>活動偏好</Text>
             <View style={styles.boxInputLayout}>
               <Text style={styles.boxInputLabel}>運動偏好:</Text>
-              <TouchableOpacity
+              <Pressable
                 style={styles.boxButton}
                 onPress={() => openModal(ModalType.SPORT)}
               >
                 <Text style={styles.buttonText}>選擇運動</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
             <View style={styles.boxInputLayout}>
               <Text style={styles.boxInputLabel}>興趣偏好:</Text>
-              <TouchableOpacity
+              <Pressable
                 style={styles.boxButton}
                 onPress={() => openModal(ModalType.HABIT)}
               >
                 <Text style={styles.buttonText}>選擇嗜好</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </Widget>
         </View>
@@ -417,17 +411,17 @@ export default function SettingsScreen() {
         <View style={styles.bodySection}>
           <Widget isShow={true}>
             <Text style={styles.boxTitle}>登入以使用設定</Text>
-            <TouchableOpacity
+            <Pressable
               style={styles.modalButton}
               onPress={() => openModal(ModalType.LOGIN)}
             >
               <Text style={styles.buttonText}>登入</Text>
-            </TouchableOpacity>
+            </Pressable>
           </Widget>
         </View>
       )}
 
-      <CustomModal
+      <PopupModal
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
         header={modalHeader}

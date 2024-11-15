@@ -1,7 +1,7 @@
-import { StyleSheet, TouchableOpacity, Text } from "react-native";
+import { StyleSheet, Pressable, Text } from "react-native";
 import { useSelector } from "react-redux";
 
-import CustomModal from "@/components/PopupModal";
+import PopupModal from "@/components/PopupModal";
 import store from "@/redux/store";
 import { setVisible } from "@/redux/globalMessageSlice";
 
@@ -19,15 +19,15 @@ export function MessageModal({}: MessageModalProps) {
   const onClose = () => store.dispatch(setVisible(false));
 
   return (
-    <CustomModal
+    <PopupModal
       isVisible={isVisible}
       onClose={onClose}
       header="通知"
       content={<Text>{message}</Text>}
       footer={
-        <TouchableOpacity style={styles.modalButton} onPress={onClose}>
+        <Pressable style={styles.modalButton} onPress={onClose}>
           <Text style={styles.modalButtonText}>確認</Text>
-        </TouchableOpacity>
+        </Pressable>
       }
     />
   );

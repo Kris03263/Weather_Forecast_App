@@ -1,52 +1,45 @@
 import React from "react";
-import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
-import { useState } from "react";
+import { StyleSheet, View, Text, Pressable } from "react-native";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
-import { SlideModal } from "@/components/SlideModal";
 
-import { WeatherData, indicatorsDictionary } from "@/app/(tabs)/_layout";
+import {
+  WeatherData,
+  indicators,
+  indicatorsDictionary,
+} from "@/app/(tabs)/_layout";
 
 interface IndicatorsDisplayWidgetProps {
-  type: string;
+  indicatorType: indicators;
+  onPress: () => void;
   weatherData: WeatherData;
 }
 
 export function IndicatorsDisplayWidget({
-  type,
-  weatherData
+  indicatorType,
+  onPress,
+  weatherData,
 }: IndicatorsDisplayWidgetProps) {
-  const [modalVisible, setModalVisible] = useState(false);
+  const indicator = indicatorsDictionary[indicatorType];
 
-  const indicator =
-    indicatorsDictionary[type as keyof typeof indicatorsDictionary];
+  indicator.value = weatherData?.[indicatorType] ?? "--";
 
-  indicator.value = weatherData?.[type] ?? "--"; 
   return (
-    <>
-      <TouchableOpacity
-        style={{ flex: 1, width: "100%" }}
-        onPress={() => setModalVisible(true)}
-      >
-        <Widget style={styles.customWidgetStyle} isShow={true}>
-          <View style={styles.layout}>
-            <View style={styles.titleDisplay}>
-              <SvgImage style={styles.svgImage} name={type} />
-              <Text style={styles.title}>{indicator.title}</Text>
-            </View>
-            <Text style={styles.value}>{indicator.value + indicator.unit}</Text>
+    <Pressable style={{ flex: 1, width: "100%" }} onPress={() => onPress()}>
+      <Widget style={styles.customWidgetStyle} isShow={true}>
+        <View style={styles.layout}>
+          <View style={styles.titleDisplay}>
+            <SvgImage
+              style={styles.svgImage}
+              name={indicatorsDictionary[indicatorType].svgName}
+            />
+            <Text style={styles.title}>{indicator.title}</Text>
           </View>
-        </Widget>
-      </TouchableOpacity>
-      <SlideModal
-        isModalShow={modalVisible}
-        onClose={() => {
-          setModalVisible(false);
-        }}
-        type={type}
-      />
-    </>
+          <Text style={styles.value}>{indicator.value + indicator.unit}</Text>
+        </View>
+      </Widget>
+    </Pressable>
   );
 }
 

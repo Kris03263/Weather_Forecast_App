@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, Pressable, View } from "react-native";
 
 interface RadioButtonProps {
   label: string;
@@ -8,12 +8,12 @@ interface RadioButtonProps {
 
 export const RadioButton = ({ label, selected, onPress }: RadioButtonProps) => {
   return (
-    <TouchableOpacity style={styles.radioButtonLayout} onPress={onPress}>
+    <Pressable style={styles.radioButtonLayout} onPress={onPress}>
       <View
         style={[styles.radioButton, selected && styles.radioButtonSelected]}
       />
       <Text style={styles.radioLabel}>{label}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

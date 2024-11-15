@@ -1,7 +1,7 @@
 import { Modal, StyleSheet, Text, View } from "react-native";
 import { ReactNode } from "react";
 
-export interface CustomModalProps {
+export interface PopupModalProps {
   isVisible: boolean;
   onClose: () => void;
   header: string;
@@ -9,13 +9,13 @@ export interface CustomModalProps {
   footer: ReactNode;
 }
 
-export default function CustomModal({
+export default function PopupModal({
   isVisible,
   onClose,
   header,
   content,
   footer,
-}: CustomModalProps) {
+}: PopupModalProps) {
   return (
     <Modal
       animationType="fade"
@@ -23,7 +23,7 @@ export default function CustomModal({
       visible={isVisible}
       onRequestClose={onClose}
     >
-      <View style={styles.centeredView}>
+      <View style={styles.modalBackground}>
         <View style={styles.modalView}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalHeaderText}>{header}</Text>
@@ -37,7 +37,7 @@ export default function CustomModal({
 }
 
 const styles = StyleSheet.create({
-  centeredView: {
+  modalBackground: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",

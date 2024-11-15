@@ -1,6 +1,6 @@
 import { View } from "react-native";
 
-import wetIcon from "@/assets/svgs/wet-icon.svg";
+import WetIcon from "@/assets/svgs/wet-icon.svg";
 import RainRateIcon from "@/assets/svgs/rainRate-icon.svg";
 import WindSpeedIcon from "@/assets/svgs/windSpeed-icon.svg";
 import WindDirectionIcon from "@/assets/svgs/windDirection-icon.svg";
@@ -16,6 +16,10 @@ import UserPasswordIcon from "@/assets/svgs/userPassword-icon.svg";
 import ListIcon from "@/assets/svgs/list-icon.svg";
 import CloseIcon from "@/assets/svgs/close-icon.svg";
 import EarthQuakeIcon from "@/assets/svgs/earthquake-icon.svg";
+import DownIcon from "@/assets/svgs/down-icon.svg";
+import AqiIcon from "@/assets/svgs/aqi-icon.svg";
+import TempIcon from "@/assets/svgs/temp-icon.svg";
+import Pm2_5Icon from "@/assets/svgs/pm2_5-icon.svg";
 
 interface SvgProps {
   style?: object;
@@ -24,7 +28,7 @@ interface SvgProps {
 
 export function SvgImage({ style = {}, name = "" }: SvgProps) {
   const Icon = {
-    wet: wetIcon,
+    wet: WetIcon,
     rainRate: RainRateIcon,
     windSpeed: WindSpeedIcon,
     windDirection: WindDirectionIcon,
@@ -40,6 +44,10 @@ export function SvgImage({ style = {}, name = "" }: SvgProps) {
     list: ListIcon,
     close: CloseIcon,
     earthquake: EarthQuakeIcon,
+    down: DownIcon,
+    aqi: AqiIcon,
+    temp: TempIcon,
+    pm2_5: Pm2_5Icon,
   }[name];
 
   return (

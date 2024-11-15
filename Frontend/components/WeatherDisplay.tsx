@@ -1,5 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
-import { useSelector } from "react-redux";
+import { StyleSheet, View, Text } from "react-native";
 
 import { WeatherData, indicatorsDictionary } from "@/app/(tabs)/_layout";
 
@@ -12,7 +11,7 @@ interface WeatherDisplayProps {
 
 export function WeatherDisplay({
   isSecendLayout,
-  weatherData
+  weatherData,
 }: WeatherDisplayProps) {
   const temp =
     indicatorsDictionary["temp" as keyof typeof indicatorsDictionary];
@@ -25,9 +24,9 @@ export function WeatherDisplay({
     return (
       <View style={styles2.layout}>
         <View style={styles2.temperatureDisplay}>
-          <Text style={styles2.temperature}>{temp.value + temp.unit}</Text>
+          <Text style={styles2.temperature}>{`${temp.value}${temp.unit}`}</Text>
           <Text style={styles2.body_temperature}>
-            {"| " + bodyTemp.value + bodyTemp.unit}
+            {`| ${bodyTemp.value}${bodyTemp.unit}`}
           </Text>
         </View>
       </View>
@@ -37,7 +36,7 @@ export function WeatherDisplay({
   return (
     <View style={styles.layout}>
       <View style={styles.temperatureDisplay}>
-        <Text style={styles.temperature}>{temp.value + temp.unit}</Text>
+        <Text style={styles.temperature}>{`${temp.value}${temp.unit}`}</Text>
         <DynamicImage
           style={styles.weatherIcon}
           path={
@@ -51,7 +50,7 @@ export function WeatherDisplay({
         />
       </View>
       <Text style={styles.body_temperature}>
-        {"| " + bodyTemp.value + bodyTemp.unit}
+        {`| ${bodyTemp.value}${bodyTemp.unit}`}
       </Text>
     </View>
   );

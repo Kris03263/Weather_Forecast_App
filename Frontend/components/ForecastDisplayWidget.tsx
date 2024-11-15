@@ -1,71 +1,58 @@
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Text,
-  FlatList,
-} from "react-native";
+import { StyleSheet, View, Pressable, Text, FlatList } from "react-native";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 import { DynamicImage } from "@/components/DynamicImage";
 
 import { WeatherData } from "@/app/(tabs)/_layout";
-import { SlideModal } from "@/components/SlideModal";
-import { useState } from "react";
 
 interface ForecastDisplayWidgetProps {
+  onPress: () => void;
   weatherDatas: WeatherData[];
 }
 
-export function ForecastDisplayWidget({ weatherDatas }: ForecastDisplayWidgetProps) {
-  const [ModalVisible, setModalVisible] = useState(false);
-
+export function ForecastDisplayWidget({
+  onPress,
+  weatherDatas,
+}: ForecastDisplayWidgetProps) {
   return (
-    <>
-      <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Widget style={styles.customWidgetStyle} isShow={true}>
-          <View style={styles.titleLayout}>
-            <SvgImage style={{ width: 30, height: 30 }} name="weather" />
-            <Text style={styles.title}>天氣預報</Text>
-          </View>
+    <Pressable onPress={() => onPress()}>
+      <Widget style={styles.customWidgetStyle} isShow={true}>
+        <View style={styles.titleLayout}>
+          <SvgImage style={{ width: 30, height: 30 }} name="weather" />
+          <Text style={styles.title}>天氣預報</Text>
+        </View>
 
-          <View style={styles.contentLayout}>
-            <FlatList
-              nestedScrollEnabled
-              horizontal
-              style={styles.weatherCardGroundLayout}
-              data={weatherDatas ?? []}
-              renderItem={({ item }) => (
-                <View style={styles.weatherCardLayout}>
-                  <Text style={styles.weatherTimeText}>
-                    {item.time.split(" ")[1].split(":")[0] + "時"}
-                  </Text>
-                  <DynamicImage
-                    style={styles.weatherIcon}
-                    path={
-                      item.time.split(" ")[1] < "18:00:00" &&
-                      item.time.split(" ")[1] >= "06:00:00"
-                        ? `day/${item.weatherCode}.png`
-                        : `night/${item.weatherCode}.png`
-                    }
-                  />
-                  <Text style={styles.weatherTemperatureText}>
-                    {item.temp + "°C"}
-                  </Text>
-                </View>
-              )}
-              keyExtractor={(item) => item.time}
-            />
-          </View>
-        </Widget>
-      </TouchableOpacity>
-      <SlideModal
-        isModalShow={ModalVisible}
-        onClose={() => setModalVisible(false)}
-        type="temp"
-      />
-    </>
+        <View style={styles.contentLayout}>
+          <FlatList
+            nestedScrollEnabled
+            horizontal
+            style={styles.weatherCardGroundLayout}
+            data={weatherDatas ?? []}
+            renderItem={({ item }) => (
+              <View style={styles.weatherCardLayout}>
+                <Text style={styles.weatherTimeText}>
+                  {item.time.split(" ")[1].split(":")[0] + "時"}
+                </Text>
+                <DynamicImage
+                  style={styles.weatherIcon}
+                  path={
+                    item.time.split(" ")[1] < "18:00:00" &&
+                    item.time.split(" ")[1] >= "06:00:00"
+                      ? `day/${item.weatherCode}.png`
+                      : `night/${item.weatherCode}.png`
+                  }
+                />
+                <Text style={styles.weatherTemperatureText}>
+                  {item.temp + "°C"}
+                </Text>
+              </View>
+            )}
+            keyExtractor={(item) => item.time}
+          />
+        </View>
+      </Widget>
+    </Pressable>
   );
 }
 

@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect, useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   ScrollView,
   FlatList,
@@ -27,7 +27,7 @@ import {
 
 import { Background } from "@/components/Background";
 import { SvgImage } from "@/components/Svg";
-import CustomModal from "@/components/PopupModal";
+import PopupModal from "@/components/PopupModal";
 import store from "@/redux/store";
 import { setSelectedTargetRegionIndex } from "@/redux/selecterSlice";
 
@@ -128,7 +128,7 @@ export default function MenuScreen() {
       case ModalType.SELECT:
         return (
           <>
-            <TouchableOpacity
+            <Pressable
               style={styles.modalButton}
               onPress={() => {
                 userAddRegion(selectedCity, selectedDistrict);
@@ -136,13 +136,13 @@ export default function MenuScreen() {
               }}
             >
               <Text style={styles.modalButtonText}>確認</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Pressable>
+            <Pressable
               style={styles.modalButton}
               onPress={() => setModalVisible(false)}
             >
               <Text style={styles.modalButtonText}>關閉</Text>
-            </TouchableOpacity>
+            </Pressable>
           </>
         );
     }
@@ -166,7 +166,7 @@ export default function MenuScreen() {
         <View style={styles.headerLayout}>
           <Text style={styles.headerText}>地區</Text>
 
-          <TouchableOpacity
+          <Pressable
             onPress={async () => {
               openModal(ModalType.SELECT);
             }}
@@ -178,7 +178,7 @@ export default function MenuScreen() {
               }}
               name="plus"
             ></SvgImage>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -188,10 +188,10 @@ export default function MenuScreen() {
           <FlatList
             data={regions}
             renderItem={({ item, index }) => {
-              const weatherData = weatherDataList[item.name]?.[0]?.[0] ?? null;
+              const weatherData = weatherDataList[item.id]?.[0]?.[0] ?? null;
 
               return (
-                <TouchableOpacity
+                <Pressable
                   onPress={() => {
                     console.log(
                       "Selected region: ",
@@ -216,10 +216,10 @@ export default function MenuScreen() {
                     <View style={styles.regionCardDisplay}>
                       <View style={{ flexDirection: "column" }}>
                         <Text style={styles.regionCardTitleText}>
-                          {item.name}
+                          {`${item.city}, ${item.district}`}
                         </Text>
                         <Text style={styles.regionCardSubText}>
-                          {item.id === "0" ? "當前地區" : ""}
+                          {index === 0 ? "當前地區" : ""}
                         </Text>
                       </View>
                       <Text style={styles.regionCardTemperatureText}>
@@ -248,15 +248,15 @@ export default function MenuScreen() {
                       </MenuOption>
                     </MenuOptions>
                   </Menu>
-                </TouchableOpacity>
+                </Pressable>
               );
             }}
-            keyExtractor={(item) => item.name}
+            keyExtractor={(item) => item.id}
           />
         </ScrollView>
       )}
 
-      <CustomModal
+      <PopupModal
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
         header={modalHeader}

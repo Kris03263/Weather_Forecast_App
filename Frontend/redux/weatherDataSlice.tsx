@@ -1,3 +1,4 @@
+import md5 from "md5";
 import { createSlice } from "@reduxjs/toolkit";
 
 import { WeatherDataList, WeatherData } from "@/app/(tabs)/_layout";
@@ -7,12 +8,12 @@ const weatherDataSlice = createSlice({
   initialState: {} as WeatherDataList,
   reducers: {
     updateWeatherData3h: (state, action: { payload: WeatherData[] }) => {
-      const key = `${action.payload[0].city}, ${action.payload[0].district}`;
+      const key = md5(`${action.payload[0].city}${action.payload[0].district}`);
       if (!state[key]) state[key] = [];
       state[key][0] = action.payload;
     },
     updateWeatherData12h: (state, action: { payload: WeatherData[] }) => {
-      const key = `${action.payload[0].city}, ${action.payload[0].district}`;
+      const key = md5(`${action.payload[0].city}${action.payload[0].district}`);
       if (!state[key]) state[key] = [];
       state[key][1] = action.payload;
     },

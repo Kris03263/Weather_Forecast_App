@@ -8,10 +8,13 @@ import {
   Selecter,
   indicatorsDictionary,
   Region,
+  indicators,
+  WeatherData,
 } from "@/app/(tabs)/_layout";
 
 interface ChartProps {
-  type: string;
+  indicatorType: indicators;
+  weatherDatas: WeatherData[];
   onSelectDataChange: (selectData: {
     time: string;
     value: number;
@@ -21,51 +24,26 @@ interface ChartProps {
   }) => void;
 }
 
-export function Chart({ type, onSelectDataChange }: ChartProps) {
-  const screenWidth = Dimensions.get("window").width - 40;
-
+export default function Chart({
+  indicatorType,
+  weatherDatas,
+  onSelectDataChange,
+}: ChartProps) {
   const [selectedValue, setselectedValue] = useState<number>(0);
   const [selectedTime, setselectedTime] = useState<string>("");
 
-  const weatherDataList = useSelector(
-    (state: { weatherData: WeatherDataList }) => state.weatherData
+  const segmentSize = 9;
+  const segments = Array.from(
+    { length: Math.ceil(weatherDatas.length / segmentSize) },
+    (_, index) =>
+      weatherDatas.slice(index * segmentSize, (index + 1) * segmentSize)
   );
-  const selecter = useSelector(
-    (state: { selecter: Selecter }) => state.selecter
-  );
-  const regions = useSelector((state: { regions: Region[] }) => state.regions);
-  const weatherDatas =
-    weatherDataList?.[regions[selecter.regionIndex]?.name]?.[0] ?? [];
-
-  const segments = [];
-  for (let i = 0; i < weatherDatas.length; i += 9) {
-    segments.push(weatherDatas.slice(i, i + 9));
-  }
-
   const segment = segments[0] || [];
 
-  const indicator =
-    indicatorsDictionary[type as keyof typeof indicatorsDictionary];
-
-  let valueData: number[] = [];
-  let labels: string[] = [];
-
-  switch (type) {
-    case "wet":
-      valueData = segment.map((item) => parseInt(item.wet));
-      break;
-    case "rainRate":
-      valueData = segment.map((item) => parseInt(item.rainRate));
-      break;
-    case "windSpeed":
-      valueData = segment.map((item) => parseInt(item.windSpeed));
-      break;
-    case "temp":
-      valueData = segment.map((item) => parseInt(item.temp));
-    default:
-      break;
-  }
-  labels = segment.map((item) => {
+  const valueData: number[] = segment.map((item) =>
+    parseInt(item[indicatorType])
+  );
+  const labels: string[] = segment.map((item) => {
     const hour = item.time.split(" ")[1].split(":")[0];
     return hour + "時";
   });
@@ -80,7 +58,6 @@ export function Chart({ type, onSelectDataChange }: ChartProps) {
       },
     ],
   };
-
   const chartConfig = {
     backgroundGradientFrom: "#0f172a",
     backgroundGradientTo: "#1f2937",
@@ -95,58 +72,45 @@ export function Chart({ type, onSelectDataChange }: ChartProps) {
       strokeWidth: "1",
       stroke: "#ffcc00",
     },
-    yAxisSuffix: indicator.unit,
+    yAxisSuffix: indicatorsDictionary[indicatorType].unit,
     yAxisInterval: 1,
   };
 
-  const selectData = {
-    time: selectedTime,
-    value: selectedValue,
-    maxValue: Math.max(...valueData),
-    minValue: Math.min(...valueData),
-    unit: indicator.unit,
-  };
+  useEffect(() => {
+    onSelectDataChange({
+      time: selectedTime,
+      value: selectedValue,
+      maxValue: Math.max(...valueData),
+      minValue: Math.min(...valueData),
+      unit: indicatorsDictionary[indicatorType].unit,
+    });
+  }, [selectedTime, selectedValue, indicatorType]);
 
   useEffect(() => {
-    onSelectDataChange(selectData);
-  }, [selectedTime, selectedValue, type]);
-  useEffect(() => {
-    selectData.value = parseInt(indicator.value);
-  }, [type]);
+    setselectedValue(parseInt(indicatorsDictionary[indicatorType].value));
+  }, [indicatorType]);
 
   return (
-    <>
-      <LineChart
-        data={chartData}
-        width={screenWidth}
-        height={220}
-        chartConfig={chartConfig}
-        style={styles.chart}
-        fromZero={true}
-        onDataPointClick={({ value, index }) => {
-          setselectedTime(labels[index]);
-          setselectedValue(value);
-        }}
-        bezier
-      />
-    </>
+    <LineChart
+      data={chartData}
+      width={Dimensions.get("window").width - 40}
+      height={220}
+      chartConfig={chartConfig}
+      style={styles.chart}
+      fromZero={true}
+      onDataPointClick={({ value, index }) => {
+        setselectedTime(labels[index]);
+        setselectedValue(value);
+      }}
+      bezier
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#0f172a",
-    borderRadius: 16,
-    paddingVertical: 8,
-  },
   chart: {
     borderRadius: 16,
-  },
-  modalText: {
-    marginBottom: 15,
-    color: "white",
-    textAlign: "center",
+    borderWidth: 1,
+    borderColor: "#9ca8b7",
   },
 });
-
-export default Chart;

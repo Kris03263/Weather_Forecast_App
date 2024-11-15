@@ -6,6 +6,7 @@ import { Tabs } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuProvider } from "react-native-popup-menu";
 import io, { Socket } from "socket.io-client";
+import md5 from "md5";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
@@ -36,57 +37,76 @@ import { setMessage, setVisible } from "@/redux/globalMessageSlice";
 // - [X] Move background color control to _layout.tsx (Instead moving to Background.tsx)
 // - [V] Change region-selector to number
 
+export enum indicators {
+  aqi = "aqi",
+  bodyTemp = "bodyTemp",
+  pm2_5 = "pm2.5",
+  rainRate = "rainRate",
+  temp = "temp",
+  wet = "wet",
+  windDirection = "windDirection",
+  windSpeed = "windSpeed",
+}
+export const indicatorsDictionary = {
+  [indicators.aqi]: {
+    title: "空氣品質",
+    unit: "",
+    value: "",
+    svgName: "aqi",
+  },
+  [indicators.bodyTemp]: {
+    title: "體感溫度",
+    unit: "°C",
+    value: "",
+    svgName: "temp",
+  },
+  [indicators.pm2_5]: {
+    title: "PM2.5指標",
+    unit: "μg/m³",
+    value: "",
+    svgName: "pm2_5",
+  },
+  [indicators.rainRate]: {
+    title: "降雨機率",
+    unit: "%",
+    value: "",
+    svgName: "rainRate",
+  },
+  [indicators.temp]: {
+    title: "溫度",
+    unit: "°C",
+    value: "",
+    svgName: "temp",
+  },
+  [indicators.wet]: {
+    title: "濕度",
+    unit: "%",
+    value: "",
+    svgName: "wet",
+  },
+  [indicators.windDirection]: {
+    title: "風向",
+    unit: "",
+    value: "",
+    svgName: "windDirection",
+  },
+  [indicators.windSpeed]: {
+    title: "風速",
+    unit: "m/s",
+    value: "",
+    svgName: "windSpeed",
+  },
+};
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
 }
 export interface WeatherData {
   [key: string]: string;
 }
-export const indicatorsDictionary = {
-  aqi: {
-    title: "空氣品質",
-    unit: "",
-    value: "",
-  },
-  bodyTemp: {
-    title: "體感溫度",
-    unit: "°C",
-    value: "",
-  },
-  "pm2.5": {
-    title: "PM2.5指標",
-    unit: "μg/m³",
-    value: "",
-  },
-  rainRate: {
-    title: "降雨機率",
-    unit: "%",
-    value: "",
-  },
-  temp: {
-    title: "溫度",
-    unit: "°C",
-    value: "",
-  },
-  wet: {
-    title: "濕度",
-    unit: "%",
-    value: "",
-  },
-  windDirection: {
-    title: "風向",
-    unit: "",
-    value: "",
-  },
-  windSpeed: {
-    title: "風速",
-    unit: "m/s",
-    value: "",
-  },
-};
 export interface Region {
-  id: string;
-  name: string;
+  id: string; // md5
+  city: string;
+  district: string;
   longitude: string;
   latitude: string;
 }
@@ -194,8 +214,9 @@ export const userSetHabits = async (_habitIDs: number[]) => {
 export const userAddRegion = async (_city: string, _district: string) => {
   const regions = store.getState().regions;
   const _region: Region = {
-    id: `${_city}${_district}`,
-    name: `${_city}, ${_district}`,
+    id: md5(`${_city}${_district}`),
+    city: _city,
+    district: _district,
     longitude: "-1",
     latitude: "-1",
   };
@@ -205,7 +226,7 @@ export const userAddRegion = async (_city: string, _district: string) => {
     return;
   }
   if (regions.find((region) => region.id === _region.id)) {
-    showNotification(`${_region.name} 已存在`);
+    showNotification(`${_region.city}, ${_region.district} 已存在`);
     return;
   }
 
@@ -217,7 +238,7 @@ export const userAddRegion = async (_city: string, _district: string) => {
     updateWeatherData_12h(_region),
   ]);
 
-  console.log("Added region: " + _region.name);
+  console.log(`Added region: ${_region.city}, ${_region.city}`);
   console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
 export const userRemoveRegion = async (_index: number) => {
@@ -229,12 +250,11 @@ export const userRemoveRegion = async (_index: number) => {
     JSON.stringify(regions.filter((r, index) => index !== _index))
   );
 
-  await Promise.all([
-    updateWeatherData_3h(regions[_index]),
-    updateWeatherData_12h(regions[_index]),
-  ]);
+  await Promise.all([updateRegions()]);
 
-  console.log("Added region: " + regions[_index].name);
+  console.log(
+    `Added region: ${regions[_index].city}, ${regions[_index].district}`
+  );
   console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
 export const getAllRegionList = async (): Promise<RegionList> => {
@@ -281,7 +301,7 @@ export const updateRegion0 = async () => {
     updateWeatherData_12h(region),
   ]);
 
-  console.log("Updated region[0] to: " + region.name);
+  console.log(`Updated region[0] to: ${region.city}, ${region.district}`);
   console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
 export const updateRegions = async () => {
@@ -310,7 +330,9 @@ export const updateWeatherData_3h = async (_region?: Region) => {
   );
 
   console.log(
-    "Updated weather data (3h) for: " + (_region ? _region.name : "all regions")
+    _region
+      ? `Updated weather data (3h) for: ${_region.city}, ${_region.district}`
+      : "Updated weather data (3h) for: all regions"
   );
 };
 export const updateWeatherData_12h = async (_region?: Region) => {
@@ -328,8 +350,9 @@ export const updateWeatherData_12h = async (_region?: Region) => {
   );
 
   console.log(
-    "Updated weather data (12h) for: " +
-      (_region ? _region.name : "all regions")
+    _region
+      ? `Updated weather data (12h) for: ${_region.city}, ${_region.district}`
+      : "Updated weather data (12h) for: all regions"
   );
 };
 export const updateUser = async () => {
@@ -621,7 +644,6 @@ const HandleGetUserHabits = async (
     return null;
   }
 };
-// Need fix
 const HandleGetLocation = async (): Promise<Region | null> => {
   try {
     if (!(await requestLocationPermission())) {
@@ -634,22 +656,10 @@ const HandleGetLocation = async (): Promise<Region | null> => {
       throw new Error("Location not found");
     }
 
-    // Make HandleGetRegionCoords() instead of this
-    const weatherData = await HandleGetWeatherDataCoords(
+    const region = await HandleGetRegionCoords(
       position.coords.latitude.toString(),
       position.coords.longitude.toString()
     );
-
-    if (!weatherData) {
-      throw new Error("Weather data is empty");
-    }
-
-    const region: Region = {
-      id: "0",
-      name: `${weatherData[0].city}, ${weatherData[0].district}`,
-      longitude: position.coords.longitude.toString(),
-      latitude: position.coords.latitude.toString(),
-    };
 
     return region;
   } catch (e) {
@@ -657,13 +667,12 @@ const HandleGetLocation = async (): Promise<Region | null> => {
     return null;
   }
 };
-// Change to HandleGetRegionCoords()
-const HandleGetWeatherDataCoords = async (
+const HandleGetRegionCoords = async (
   _latitude: string,
   _longitude: string
-): Promise<WeatherData[] | null> => {
+): Promise<Region | null> => {
   try {
-    const data = await fetch(`${hostURL}/Weather/Get3hData`, {
+    const data = await fetch(`${hostURL}/Users/locationData`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -675,7 +684,15 @@ const HandleGetWeatherDataCoords = async (
     })
       .then((response) => response.json())
       .then((data) => {
-        return data as WeatherData[];
+        console.log("HandleGetRegionCoords: " + JSON.stringify(data));
+
+        return {
+          id: md5(`${data.city}${data.district}`),
+          city: data.city,
+          district: data.district,
+          longitude: _longitude,
+          latitude: _latitude,
+        } as Region;
       });
 
     return data;
@@ -689,7 +706,6 @@ const HandleGetWeatherData3h = async (
   _region: Region
 ): Promise<WeatherData[] | null> => {
   try {
-    const [city, district] = _region.name.split(", ");
     const data = await fetch(`${hostURL}/Weather/Get3hData`, {
       method: "POST",
       headers: {
@@ -698,8 +714,8 @@ const HandleGetWeatherData3h = async (
       body: JSON.stringify({
         userID: _userID,
         cusloc: {
-          city: city,
-          district: district,
+          city: _region.city,
+          district: _region.district,
         },
       }),
     })
@@ -711,7 +727,8 @@ const HandleGetWeatherData3h = async (
     return data;
   } catch (e) {
     showNotification(
-      `獲取 ${_region.name} 3h 資料失敗 \n錯誤訊息: ` + String(e)
+      `獲取 ${_region.city}, ${_region.district} 3h 資料失敗 \n錯誤訊息: ` +
+        String(e)
     );
     return null;
   }
@@ -721,7 +738,6 @@ const HandleGetWeatherData12h = async (
   _region: Region
 ): Promise<WeatherData[] | null> => {
   try {
-    const [city, district] = _region.name.split(", ");
     const data = await fetch(`${hostURL}/Weather/Get12hData`, {
       method: "POST",
       headers: {
@@ -730,8 +746,8 @@ const HandleGetWeatherData12h = async (
       body: JSON.stringify({
         userID: _userID,
         cusloc: {
-          city: city,
-          district: district,
+          city: _region.city,
+          district: _region.district,
         },
       }),
     })
@@ -743,16 +759,16 @@ const HandleGetWeatherData12h = async (
     return data;
   } catch (e) {
     showNotification(
-      `獲取 ${_region.name} 12h 資料失敗 \n錯誤訊息: ` + String(e)
+      `獲取 ${_region.city}, ${_region.district} 12h 資料失敗 \n錯誤訊息: ` +
+        String(e)
     );
-    const [city, district] = _region.name.split(", ");
     console.log(
-      `獲取 ${_region.name} 12h 資料失敗 \n測資: ` +
+      `獲取 ${_region.city}, ${_region.district} 12h 資料失敗 \n測資: ` +
         JSON.stringify({
           userID: _userID,
           cusloc: {
-            city: city,
-            district: district,
+            city: _region.city,
+            district: _region.district,
           },
         })
     );
@@ -764,7 +780,6 @@ const HandleGetDailySug = async (
   _region: Region
 ): Promise<DailySug | null> => {
   try {
-    const [city, district] = _region.name.split(", ");
     const data = await fetch(`${hostURL}/Users/GetDailySuggestion`, {
       method: "POST",
       headers: {
@@ -773,8 +788,8 @@ const HandleGetDailySug = async (
       body: JSON.stringify({
         userID: _userID,
         cusloc: {
-          city: city,
-          district: district,
+          city: _region.city,
+          district: _region.district,
         },
       }),
     })
@@ -920,7 +935,7 @@ export default function TabLayout() {
     setSocketInstance(socket);
 
     socket.on("connect", () => {
-      showNotification(`連接 WebSocket (id: ${socket.id}) 成功`);
+      console.log(`連接 WebSocket (id: ${socket.id}) 成功`);
       setIsConnected(true);
       // 設置位置（選擇真實或假資料）
       // socket.emit("set_location", {
@@ -935,15 +950,15 @@ export default function TabLayout() {
       });
     });
     socket.on("connect_error", () => {
-      showNotification(`連接 WebSocket (id: ${socket.id}) 失敗`);
+      console.log(`連接 WebSocket (id: ${socket.id}) 失敗`);
       setIsConnected(false);
     });
     socket.on("error", (error) => {
-      showNotification(`連接 WebSocket 錯誤: ${error.message}`);
+      console.log(`連接 WebSocket 錯誤: ${error.message}`);
       setIsConnected(false);
     });
     socket.on("disconnect", () => {
-      showNotification("已斷開 WebSocket 連線");
+      console.log("已斷開 WebSocket 連線");
       setIsConnected(false);
     });
     socket.on("registration_success", (data) => {

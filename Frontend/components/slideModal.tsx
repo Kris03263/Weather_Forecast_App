@@ -1,33 +1,37 @@
 import {
   View,
   Modal,
-  TouchableOpacity,
+  Pressable,
   Animated,
   PanResponder,
   Text,
   StyleSheet,
   ScrollView,
+  FlatList,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { SvgImage } from "@/components/Svg";
 import { Dropdown } from "@/components/DropDown";
-import { Chart } from "@/components/Chart";
+import Chart from "@/components/Chart";
+import {
+  indicators,
+  indicatorsDictionary,
+  WeatherData,
+} from "@/app/(tabs)/_layout";
 
 interface modalVisibleCrontrollProps {
-  type: string;
+  indicatorType: indicators;
+  weatherDatas: WeatherData[];
   isModalShow: boolean;
   onClose: () => void;
 }
 
 export function SlideModal({
-  type,
+  indicatorType,
+  weatherDatas,
   isModalShow,
   onClose,
 }: modalVisibleCrontrollProps) {
-  const [ModalVisible, setModalVisible] = useState(isModalShow);
-  const [indicator, setIndicator] = useState<string>(type);
-  const [title, setTitle] = useState<React.ReactNode>();
-  const [content, setContent] = useState<React.ReactNode>();
   const [selectData, setSelectData] = useState<{
     time: string;
     value: number;
@@ -38,103 +42,7 @@ export function SlideModal({
   const [selectedDateIndex, setSelectedDateIndex] = useState(3);
   const pan = useRef(new Animated.ValueXY()).current;
 
-  const renderPage = () => {
-    switch (indicator) {
-      case "temp":
-        setTitle(
-          <View style={styles.titleDisplay}>
-            <SvgImage style={styles.svgImage} name="weather" />
-            <Text style={styles.title}>天氣預報</Text>
-          </View>
-        );
-        setContent(
-          <Chart
-            type="temp"
-            onSelectDataChange={(newSelectData: {
-              time: string;
-              value: number;
-              maxValue: number;
-              minValue: number;
-              unit: string;
-            }) => {
-              setSelectData(newSelectData);
-            }}
-          />
-        );
-        break;
-      case "rainRate":
-        setTitle(
-          <View style={styles.titleDisplay}>
-            <SvgImage style={styles.svgImage} name="rainRate" />
-            <Text style={styles.title}>降雨機率</Text>
-          </View>
-        );
-        setContent(
-          <Chart
-            type="rainRate"
-            onSelectDataChange={(newSelectData: {
-              time: string;
-              value: number;
-              maxValue: number;
-              minValue: number;
-              unit: string;
-            }) => {
-              setSelectData(newSelectData);
-            }}
-          />
-        );
-        break;
-      case "windSpeed":
-        setTitle(
-          <View style={styles.titleDisplay}>
-            <SvgImage style={styles.svgImage} name="windSpeed" />
-            <Text style={styles.title}>風速</Text>
-          </View>
-        );
-        setContent(
-          <Chart
-            type="windSpeed"
-            onSelectDataChange={(newSelectData: {
-              time: string;
-              value: number;
-              maxValue: number;
-              minValue: number;
-              unit: string;
-            }) => {
-              setSelectData(newSelectData);
-            }}
-          />
-        );
-        break;
-      case "wet":
-        setTitle(
-          <View style={styles.titleDisplay}>
-            <SvgImage style={styles.svgImage} name="wet" />
-            <Text style={styles.title}>濕度</Text>
-          </View>
-        );
-        setContent(
-          <Chart
-            type="wet"
-            onSelectDataChange={(newSelectData: {
-              time: string;
-              value: number;
-              maxValue: number;
-              minValue: number;
-              unit: string;
-            }) => {
-              setSelectData(newSelectData);
-            }}
-          />
-        );
-        break;
-      default:
-        return null;
-    }
-  };
-
   useEffect(() => {
-    setModalVisible(isModalShow);
     if (isModalShow) {
       Animated.timing(pan, {
         toValue: { x: 0, y: 0 },
@@ -142,113 +50,101 @@ export function SlideModal({
         useNativeDriver: false,
       }).start();
     }
-    setIndicator(type);
-    renderPage();
   }, [isModalShow]);
 
-  useEffect(() => {
-    renderPage();
-  }, [indicator]);
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onPanResponderMove: (evt, gestureState) => {
-        if (gestureState.dy > 10) {
-          Animated.event([null, { dy: pan.y }], { useNativeDriver: false })(
-            evt,
-            gestureState
-          );
-        }
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dy > 100) {
-          setModalVisible(false);
-          onClose();
-        } else {
-          Animated.spring(pan, {
-            toValue: { x: 0, y: 0 },
-            useNativeDriver: false,
-          }).start();
-        }
-      },
-    })
-  ).current;
-
   return (
-    <View>
+    <View style={styles.modalBackground}>
       <Modal
         animationType="slide"
         transparent={true}
-        visible={ModalVisible}
-        onRequestClose={() => {
-          setModalVisible(!ModalVisible);
-          onClose();
-        }}
+        visible={isModalShow}
+        onRequestClose={() => onClose()}
       >
-        <View style={styles.centeredView}>
+        <View style={styles.modalBackground}>
           <Animated.View
             style={[styles.modalView, { transform: [{ translateY: pan.y }] }]}
           >
-            <View style={styles.header} {...panResponder.panHandlers}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => {
-                  setModalVisible(!ModalVisible);
-                  onClose();
-                }}
-              >
-                <SvgImage style={{ height: 20, weight: 30 }} name="close" />
-              </TouchableOpacity>
-              {title}
+            {/* Header */}
+            <View style={styles.headerLayout}>
+              <Pressable />
+
+              <View style={styles.titleLayout}>
+                <SvgImage
+                  style={styles.svgImage}
+                  name={indicatorsDictionary[indicatorType].svgName}
+                />
+                <Text style={styles.titleText}>
+                  {indicatorsDictionary[indicatorType].title}
+                </Text>
+              </View>
+
+              <Pressable style={styles.closeButton} onPress={() => onClose()}>
+                <SvgImage style={styles.svgImage} name="close" />
+              </Pressable>
             </View>
-            {/* Horizontal Scrollable Date Selector */}
-            <View style={{ height: 80 }}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.dateSelectorContainer}
-              >
-                {["一", "二", "三", "四", "五", "六", "日"].map(
-                  (day, index) => (
-                    <TouchableOpacity
+
+            <ScrollView contentContainerStyle={styles.scrollViewContent}>
+              {/* Date Selector */}
+              <View style={styles.dateSelecterLayout}>
+                <FlatList
+                  horizontal
+                  style={styles.dateSelectorContainer}
+                  contentContainerStyle={styles.dateSelectorContentContainer}
+                  data={["一", "二", "三", "四", "五", "六", "日"]}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item: day, index }) => (
+                    <Pressable
                       key={index}
                       style={[
-                        styles.dateItem,
-                        selectedDateIndex === index && styles.selectedDate,
+                        styles.dateSelectorItem,
+                        selectedDateIndex === index &&
+                          styles.dateSelectorItem_Selected,
                       ]}
                       onPress={() => setSelectedDateIndex(index)}
                     >
                       <Text style={styles.dayText}>{day}</Text>
                       <Text style={styles.dateText}>{13 + index}</Text>
-                    </TouchableOpacity>
-                  )
-                )}
-              </ScrollView>
-            </View>
-            {/* Weather Info Section */}
-            <View style={styles.weatherInfo}>
-              <Text style={styles.tempText}>
-                {selectData.value}
-                {selectData.unit}
-              </Text>
-              <Text style={styles.maxMinText}>
-                最高 {selectData.maxValue}
-                {selectData.unit} 最低 {selectData.minValue}
-                {selectData.unit}
-              </Text>
-            </View>
-            <View>
-              <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                <View style={styles.container}>
-                  <Dropdown
-                    onIndicatorChange={(newIndicator: string) => {
-                      setIndicator(newIndicator);
-                    }}
-                  />
+                    </Pressable>
+                  )}
+                />
+              </View>
+
+              <View style={styles.separator} />
+
+              <View style={styles.row}>
+                {/* Weather Info Section */}
+                <View style={styles.weatherInfoLayout}>
+                  <Text style={styles.weatherInfoMainText}>
+                    {selectData.value}
+                    {selectData.unit}
+                  </Text>
+
+                  <Text style={styles.weatherInfoSubText}>
+                    最高 {selectData.maxValue}
+                    {selectData.unit} 最低 {selectData.minValue}
+                    {selectData.unit}
+                  </Text>
                 </View>
-                {content}
-              </ScrollView>
-            </View>
+
+                {/* Dropdown */}
+                <Dropdown onIndicatorChange={() => {}} />
+              </View>
+
+              <View style={styles.contentLayout}>
+                {/* Chart */}
+                <Chart
+                  indicatorType={indicatorType}
+                  weatherDatas={weatherDatas}
+                  onSelectDataChange={(newSelectData: {
+                    time: string;
+                    value: number;
+                    maxValue: number;
+                    minValue: number;
+                    unit: string;
+                  }) => setSelectData(newSelectData)}
+                />
+              </View>
+            </ScrollView>
           </Animated.View>
         </View>
       </Modal>
@@ -257,38 +153,80 @@ export function SlideModal({
 }
 
 const styles = StyleSheet.create({
-  centeredView: {
+  modalBackground: {
     flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
     alignItems: "center",
   },
-  titleDisplay: {
+  modalView: {
+    width: "100%",
+    height: "90%",
+    backgroundColor: "#21262c",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    elevation: 5,
+  },
+  scrollViewContent: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+
+  // Separator
+  separator: {
+    height: 1,
+    width: "100%",
+    backgroundColor: "#9ca8b7",
+    marginVertical: 10,
+  },
+
+  // Header
+  headerLayout: {
+    width: "100%",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  // Title
+  titleLayout: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
     gap: 10,
   },
-  title: {
+  titleText: {
     color: "white",
     fontSize: 20,
     textAlign: "left",
   },
+
+  // Date Selector
+  dateSelecterLayout: {
+    width: "100%",
+    height: "auto",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   dateSelectorContainer: {
     flexDirection: "row",
-    backgroundColor: "#292e36",
-    paddingHorizontal: 5,
-    borderRadius: 20,
+    justifyContent: "space-between",
+  },
+  dateSelectorContentContainer: {},
+  dateSelectorItem: {
+    padding: 10,
     alignItems: "center",
   },
-  dateItem: {
-    alignItems: "center",
-    marginHorizontal: 10,
-    paddingVertical: 5,
-  },
-  selectedDate: {
+  dateSelectorItem_Selected: {
     backgroundColor: "#3a95ff",
     borderRadius: 15,
-    padding: 5,
   },
   dayText: {
     color: "white",
@@ -299,85 +237,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 3,
   },
-  weatherInfo: {
-    alignItems: "center",
-    marginVertical: 10,
+
+  // Weather Info
+  weatherInfoLayout: {
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
-  tempText: {
+  weatherInfoMainText: {
     fontSize: 48,
     color: "white",
   },
-  maxMinText: {
+  weatherInfoSubText: {
     fontSize: 16,
     color: "#aaa",
   },
-  header: {
-    width: "100%",
-    height: "10%",
-    backgroundColor: "#21262c",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  modalView: {
-    width: "100%",
-    height: "90%",
-    backgroundColor: "#21262c",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalHandle: {
-    width: 40,
-    height: 5,
-    backgroundColor: "#ccc",
-    borderRadius: 2.5,
-    alignSelf: "center",
-    marginVertical: 10,
-    marginBottom: 20,
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  modalButton: {
-    backgroundColor: "#2196F3",
-    borderRadius: 10,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
+  // Close Button
   closeButtonText: {
     color: "#9ca8b7",
     fontWeight: "bold",
     textAlign: "center",
   },
   closeButton: {
-    position: "absolute",
-    top: 20,
-    right: 30,
     backgroundColor: "#2f363e",
     borderRadius: 30,
     width: 30,
@@ -386,29 +267,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 2,
   },
+
+  // Svg
   svgImage: {
-    width: 30,
-    height: 30,
+    width: 20,
+    height: 20,
   },
-  container: {
-    paddingHorizontal: 20,
+
+  // Content
+  contentLayout: {
+    width: "100%",
   },
-  dropdownText: {
-    fontSize: 16,
-    padding: 10,
-    color: "#fff",
-  },
-  dropdownStyle: {
-    width: 150,
-    backgroundColor: "#333", // Set background color
-  },
-  dropdownRow: {
+
+  row: {
+    minWidth: "100%",
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
-  },
-  label: {
-    fontSize: 16,
-    color: "#fff",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
 });
