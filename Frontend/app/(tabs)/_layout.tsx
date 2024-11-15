@@ -131,6 +131,7 @@ export interface GlobalMessage {
 //////////////////////
 
 export const userLogin = async (_account: string, _password: string) => {
+  await userLogout();
   const user = await HandleUserLogin(_account, _password);
   if (!user) return;
 
@@ -222,12 +223,6 @@ export const userAddRegion = async (_city: string, _district: string) => {
 export const userRemoveRegion = async (_index: number) => {
   const regions = store.getState().regions;
 
-  // Consider to remove this
-  // if (!regions.find((r, index) => index === _index)) {
-  //   showNotification(`${regions[_index]} 不存在`);
-  //   return;
-  // }
-
   store.dispatch(setRegions(regions.filter((r, index) => index !== _index)));
   AsyncStorage.setItem(
     "regions",
@@ -306,8 +301,9 @@ export const updateWeatherData_3h = async (_region?: Region) => {
 
   await Promise.all(
     regions.map(async (region) => {
-      const weatherData3h =
-        (await HandleGetWeatherData3h(userID, region)) ?? [];
+      const weatherData3h = await HandleGetWeatherData3h(userID, region);
+
+      if (!weatherData3h) return;
 
       store.dispatch(updateWeatherData3h(weatherData3h));
     })
@@ -323,8 +319,9 @@ export const updateWeatherData_12h = async (_region?: Region) => {
 
   await Promise.all(
     regions.map(async (region) => {
-      const weatherData12h =
-        (await HandleGetWeatherData12h(userID, region)) ?? [];
+      const weatherData12h = await HandleGetWeatherData12h(userID, region);
+
+      if (!weatherData12h) return;
 
       store.dispatch(updateWeatherData12h(weatherData12h));
     })
@@ -683,7 +680,7 @@ const HandleGetWeatherDataCoords = async (
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(`獲取地區資料失敗 \n錯誤訊息: ${String(e)}`);
     return null;
   }
 };
@@ -700,8 +697,6 @@ const HandleGetWeatherData3h = async (
       },
       body: JSON.stringify({
         userID: _userID,
-        longitude: "-1",
-        latitude: "-1",
         cusloc: {
           city: city,
           district: district,
@@ -715,7 +710,9 @@ const HandleGetWeatherData3h = async (
 
     return data;
   } catch (e) {
-    showNotification(`獲取 ${_region} 3h 資料失敗 \n錯誤訊息: ` + String(e));
+    showNotification(
+      `獲取 ${_region.name} 3h 資料失敗 \n錯誤訊息: ` + String(e)
+    );
     return null;
   }
 };
@@ -732,8 +729,6 @@ const HandleGetWeatherData12h = async (
       },
       body: JSON.stringify({
         userID: _userID,
-        longitude: "-1",
-        latitude: "-1",
         cusloc: {
           city: city,
           district: district,
@@ -747,7 +742,20 @@ const HandleGetWeatherData12h = async (
 
     return data;
   } catch (e) {
-    showNotification(`獲取 ${_region} 12h 資料失敗 \n錯誤訊息: ` + String(e));
+    showNotification(
+      `獲取 ${_region.name} 12h 資料失敗 \n錯誤訊息: ` + String(e)
+    );
+    const [city, district] = _region.name.split(", ");
+    console.log(
+      `獲取 ${_region.name} 12h 資料失敗 \n測資: ` +
+        JSON.stringify({
+          userID: _userID,
+          cusloc: {
+            city: city,
+            district: district,
+          },
+        })
+    );
     return null;
   }
 };
@@ -764,8 +772,6 @@ const HandleGetDailySug = async (
       },
       body: JSON.stringify({
         userID: _userID,
-        longitude: "0",
-        latitude: "0",
         cusloc: {
           city: city,
           district: district,
