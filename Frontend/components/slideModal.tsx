@@ -10,23 +10,129 @@ import {
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { SvgImage } from "@/components/Svg";
-import ModalDropdown from "react-native-modal-dropdown";
+import { Dropdown } from "@/components/DropDown";
+import { Chart } from "@/components/Chart";
 
 interface modalVisibleCrontrollProps {
+  type: string;
   isModalShow: boolean;
-  title: React.ReactNode;
-  content: React.ReactNode;
   onClose: () => void;
 }
 
 export function SlideModal({
+  type,
   isModalShow,
-  content,
-  title,
   onClose,
 }: modalVisibleCrontrollProps) {
   const [ModalVisible, setModalVisible] = useState(isModalShow);
+  const [indicator, setIndicator] = useState<string>(type);
+  const [title, setTitle] = useState<React.ReactNode>();
+  const [content, setContent] = useState<React.ReactNode>();
+  const [selectData, setSelectData] = useState<{
+    time: string;
+    value: number;
+    maxValue: number;
+    minValue: number;
+    unit: string;
+  }>({ time: "", value: 0, maxValue: 0, minValue: 0, unit: "" });
+  const [selectedDateIndex, setSelectedDateIndex] = useState(3);
   const pan = useRef(new Animated.ValueXY()).current;
+
+  const renderPage = () => {
+    switch (indicator) {
+      case "temp":
+        setTitle(
+          <View style={styles.titleDisplay}>
+            <SvgImage style={styles.svgImage} name="weather" />
+            <Text style={styles.title}>天氣預報</Text>
+          </View>
+        );
+        setContent(
+          <Chart
+            type="temp"
+            onSelectDataChange={(newSelectData: {
+              time: string;
+              value: number;
+              maxValue: number;
+              minValue: number;
+              unit: string;
+            }) => {
+              setSelectData(newSelectData);
+            }}
+          />
+        );
+        break;
+      case "rainRate":
+        setTitle(
+          <View style={styles.titleDisplay}>
+            <SvgImage style={styles.svgImage} name="rainRate" />
+            <Text style={styles.title}>降雨機率</Text>
+          </View>
+        );
+        setContent(
+          <Chart
+            type="rainRate"
+            onSelectDataChange={(newSelectData: {
+              time: string;
+              value: number;
+              maxValue: number;
+              minValue: number;
+              unit: string;
+            }) => {
+              setSelectData(newSelectData);
+            }}
+          />
+        );
+        break;
+      case "windSpeed":
+        setTitle(
+          <View style={styles.titleDisplay}>
+            <SvgImage style={styles.svgImage} name="windSpeed" />
+            <Text style={styles.title}>風速</Text>
+          </View>
+        );
+        setContent(
+          <Chart
+            type="windSpeed"
+            onSelectDataChange={(newSelectData: {
+              time: string;
+              value: number;
+              maxValue: number;
+              minValue: number;
+              unit: string;
+            }) => {
+              setSelectData(newSelectData);
+            }}
+          />
+        );
+        break;
+      case "wet":
+        setTitle(
+          <View style={styles.titleDisplay}>
+            <SvgImage style={styles.svgImage} name="wet" />
+            <Text style={styles.title}>濕度</Text>
+          </View>
+        );
+        setContent(
+          <Chart
+            type="wet"
+            onSelectDataChange={(newSelectData: {
+              time: string;
+              value: number;
+              maxValue: number;
+              minValue: number;
+              unit: string;
+            }) => {
+              setSelectData(newSelectData);
+            }}
+          />
+        );
+        break;
+      default:
+        return null;
+    }
+  };
+
   useEffect(() => {
     setModalVisible(isModalShow);
     if (isModalShow) {
@@ -36,18 +142,14 @@ export function SlideModal({
         useNativeDriver: false,
       }).start();
     }
+    setIndicator(type);
+    renderPage();
   }, [isModalShow]);
 
-  const options = [
-    "天氣狀況",
-    "紫外線指數",
-    "風",
-    "降水",
-    "體感溫度",
-    "濕度",
-    "能見度",
-    "氣壓",
-  ];
+  useEffect(() => {
+    renderPage();
+  }, [indicator]);
+
   const panResponder = useRef(
     PanResponder.create({
       onPanResponderMove: (evt, gestureState) => {
@@ -78,7 +180,10 @@ export function SlideModal({
         animationType="slide"
         transparent={true}
         visible={ModalVisible}
-        onRequestClose={() => {}}
+        onRequestClose={() => {
+          setModalVisible(!ModalVisible);
+          onClose();
+        }}
       >
         <View style={styles.centeredView}>
           <Animated.View
@@ -92,20 +197,58 @@ export function SlideModal({
                   onClose();
                 }}
               >
-                <SvgImage style={styles.svgImage} name="close" />
+                <SvgImage style={{ height: 20, weight: 30 }} name="close" />
               </TouchableOpacity>
               {title}
             </View>
-            <ScrollView contentContainerStyle={styles.scrollViewContent}>
-              <View style={styles.container}>
-                <ModalDropdown
-                  options={options}
-                  style={{ justifyContent: "flex-end" }}
-                  dropdownStyle={styles.dropdownStyle}
-                ></ModalDropdown>
-              </View>
-              {content}
-            </ScrollView>
+            {/* Horizontal Scrollable Date Selector */}
+            <View style={{ height: 80 }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.dateSelectorContainer}
+              >
+                {["一", "二", "三", "四", "五", "六", "日"].map(
+                  (day, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.dateItem,
+                        selectedDateIndex === index && styles.selectedDate,
+                      ]}
+                      onPress={() => setSelectedDateIndex(index)}
+                    >
+                      <Text style={styles.dayText}>{day}</Text>
+                      <Text style={styles.dateText}>{13 + index}</Text>
+                    </TouchableOpacity>
+                  )
+                )}
+              </ScrollView>
+            </View>
+            {/* Weather Info Section */}
+            <View style={styles.weatherInfo}>
+              <Text style={styles.tempText}>
+                {selectData.value}
+                {selectData.unit}
+              </Text>
+              <Text style={styles.maxMinText}>
+                最高 {selectData.maxValue}
+                {selectData.unit} 最低 {selectData.minValue}
+                {selectData.unit}
+              </Text>
+            </View>
+            <View>
+              <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                <View style={styles.container}>
+                  <Dropdown
+                    onIndicatorChange={(newIndicator: string) => {
+                      setIndicator(newIndicator);
+                    }}
+                  />
+                </View>
+                {content}
+              </ScrollView>
+            </View>
           </Animated.View>
         </View>
       </Modal>
@@ -118,6 +261,55 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
+  },
+  titleDisplay: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 10,
+  },
+  title: {
+    color: "white",
+    fontSize: 20,
+    textAlign: "left",
+  },
+  dateSelectorContainer: {
+    flexDirection: "row",
+    backgroundColor: "#292e36",
+    paddingHorizontal: 5,
+    borderRadius: 20,
+    alignItems: "center",
+  },
+  dateItem: {
+    alignItems: "center",
+    marginHorizontal: 10,
+    paddingVertical: 5,
+  },
+  selectedDate: {
+    backgroundColor: "#3a95ff",
+    borderRadius: 15,
+    padding: 5,
+  },
+  dayText: {
+    color: "white",
+    fontSize: 12,
+  },
+  dateText: {
+    color: "white",
+    fontSize: 16,
+    marginTop: 3,
+  },
+  weatherInfo: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  tempText: {
+    fontSize: 48,
+    color: "white",
+  },
+  maxMinText: {
+    fontSize: 16,
+    color: "#aaa",
   },
   header: {
     width: "100%",
@@ -195,11 +387,11 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   svgImage: {
-    width: 20,
-    height: 20,
+    width: 30,
+    height: 30,
   },
   container: {
-    paddingTop: 50,
+    paddingHorizontal: 20,
   },
   dropdownText: {
     fontSize: 16,

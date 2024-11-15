@@ -1,17 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Dimensions, Text } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { useSelector } from "react-redux";
+
 import {
   WeatherDataList,
   Selecter,
   indicatorsDictionary,
+  Region,
 } from "@/app/(tabs)/_layout";
+
 interface ChartProps {
   type: string;
+  onSelectDataChange: (selectData: {
+    time: string;
+    value: number;
+    maxValue: number;
+    minValue: number;
+    unit: string;
+  }) => void;
 }
 
-export function Chart({ type }: ChartProps) {
+export function Chart({ type, onSelectDataChange }: ChartProps) {
   const screenWidth = Dimensions.get("window").width - 40;
 
   const [selectedValue, setselectedValue] = useState<number>(0);
@@ -23,13 +33,13 @@ export function Chart({ type }: ChartProps) {
   const selecter = useSelector(
     (state: { selecter: Selecter }) => state.selecter
   );
-
-  const data = weatherDataList?.[selecter.region]?.[0] ?? [];
-  console.log(data);
+  const regions = useSelector((state: { regions: Region[] }) => state.regions);
+  const weatherDatas =
+    weatherDataList?.[regions[selecter.regionIndex]?.name]?.[0] ?? [];
 
   const segments = [];
-  for (let i = 0; i < data.length; i += 9) {
-    segments.push(data.slice(i, i + 9));
+  for (let i = 0; i < weatherDatas.length; i += 9) {
+    segments.push(weatherDatas.slice(i, i + 9));
   }
 
   const segment = segments[0] || [];
@@ -65,15 +75,15 @@ export function Chart({ type }: ChartProps) {
     datasets: [
       {
         data: valueData,
-        color: (opacity = 1) => `rgba(139, 92, 246, ${opacity})`,
+        color: (opacity = 1) => `rgba(255, 200, 0, ${opacity})`,
         strokeWidth: 2,
       },
     ],
   };
 
   const chartConfig = {
-    backgroundGradientFrom: "#1e3a8a",
-    backgroundGradientTo: "#1e40af",
+    backgroundGradientFrom: "#0f172a",
+    backgroundGradientTo: "#1f2937",
     decimalPlaces: 0,
     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -83,20 +93,29 @@ export function Chart({ type }: ChartProps) {
     propsForDots: {
       r: "3",
       strokeWidth: "1",
-      stroke: "#8b5cf6",
+      stroke: "#ffcc00",
     },
     yAxisSuffix: indicator.unit,
     yAxisInterval: 1,
   };
 
+  const selectData = {
+    time: selectedTime,
+    value: selectedValue,
+    maxValue: Math.max(...valueData),
+    minValue: Math.min(...valueData),
+    unit: indicator.unit,
+  };
+
+  useEffect(() => {
+    onSelectDataChange(selectData);
+  }, [selectedTime, selectedValue, type]);
+  useEffect(() => {
+    selectData.value = parseInt(indicator.value);
+  }, [type]);
+
   return (
     <>
-      <View>
-        <Text style={styles.modalText}>
-          {selectedTime} - {selectedValue}
-          {indicator.unit}
-        </Text>
-      </View>
       <LineChart
         data={chartData}
         width={screenWidth}
@@ -116,7 +135,7 @@ export function Chart({ type }: ChartProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#0f172a",
     borderRadius: 16,
     paddingVertical: 8,
   },

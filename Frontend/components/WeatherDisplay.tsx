@@ -1,30 +1,25 @@
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { useSelector } from "react-redux";
 
-import { WeatherDataList, indicatorsDictionary } from "@/app/(tabs)/_layout";
+import { WeatherData, indicatorsDictionary } from "@/app/(tabs)/_layout";
 
 import { DynamicImage } from "./DynamicImage";
 
 interface WeatherDisplayProps {
   isSecendLayout: boolean;
-  region: string;
+  weatherData: WeatherData;
 }
 
 export function WeatherDisplay({
   isSecendLayout,
-  region,
+  weatherData
 }: WeatherDisplayProps) {
-  const weatherDataList = useSelector(
-    (state: { weatherData: WeatherDataList }) => state.weatherData
-  );
-  const weatherData = weatherDataList?.[region]?.[0]?.[0] ?? null;
-
   const temp =
     indicatorsDictionary["temp" as keyof typeof indicatorsDictionary];
-  temp.value = weatherDataList?.[region]?.[0]?.[0]?.temp ?? "--";
+  temp.value = weatherData?.temp ?? "--";
   const bodyTemp =
     indicatorsDictionary["bodyTemp" as keyof typeof indicatorsDictionary];
-  bodyTemp.value = weatherDataList?.[region]?.[0]?.[0]?.bodyTemp ?? "";
+  bodyTemp.value = weatherData?.bodyTemp ?? "";
 
   if (isSecendLayout) {
     return (

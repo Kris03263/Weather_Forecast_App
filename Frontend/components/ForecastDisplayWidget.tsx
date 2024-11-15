@@ -5,32 +5,26 @@ import {
   Text,
   FlatList,
 } from "react-native";
-import { useSelector } from "react-redux";
 
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 import { DynamicImage } from "@/components/DynamicImage";
 
-import { WeatherDataList } from "@/app/(tabs)/_layout";
+import { WeatherData } from "@/app/(tabs)/_layout";
 import { SlideModal } from "@/components/SlideModal";
 import { useState } from "react";
-import Chart from "@/components/Chart";
 
 interface ForecastDisplayWidgetProps {
-  region: string;
+  weatherDatas: WeatherData[];
 }
 
-export function ForecastDisplayWidget({ region }: ForecastDisplayWidgetProps) {
+export function ForecastDisplayWidget({ weatherDatas }: ForecastDisplayWidgetProps) {
   const [ModalVisible, setModalVisible] = useState(false);
-
-  const weatherDataList = useSelector(
-    (state: { weatherData: WeatherDataList }) => state.weatherData
-  );
 
   return (
     <>
       <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Widget style={styles.customWidgetStyle} isShow={!!weatherDataList}>
+        <Widget style={styles.customWidgetStyle} isShow={true}>
           <View style={styles.titleLayout}>
             <SvgImage style={{ width: 30, height: 30 }} name="weather" />
             <Text style={styles.title}>天氣預報</Text>
@@ -38,10 +32,10 @@ export function ForecastDisplayWidget({ region }: ForecastDisplayWidgetProps) {
 
           <View style={styles.contentLayout}>
             <FlatList
-              nestedScrollEnabled={true}
-              horizontal={true}
+              nestedScrollEnabled
+              horizontal
               style={styles.weatherCardGroundLayout}
-              data={weatherDataList?.[region]?.[0] ?? []}
+              data={weatherDatas ?? []}
               renderItem={({ item }) => (
                 <View style={styles.weatherCardLayout}>
                   <Text style={styles.weatherTimeText}>
@@ -69,13 +63,7 @@ export function ForecastDisplayWidget({ region }: ForecastDisplayWidgetProps) {
       <SlideModal
         isModalShow={ModalVisible}
         onClose={() => setModalVisible(false)}
-        title={
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <SvgImage style={{ width: 30, height: 30 }} name="weather" />
-            <Text style={styles.title}>天氣預報</Text>
-          </View>
-        }
-        content={<Chart type="temp"></Chart>}
+        type="temp"
       />
     </>
   );

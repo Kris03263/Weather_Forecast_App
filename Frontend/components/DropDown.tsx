@@ -1,62 +1,117 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
-import ModalDropdown from "react-native-modal-dropdown";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { SelectList } from "react-native-dropdown-select-list";
+import { SvgImage } from "@/components/Svg";
 
-const WeatherDropdown = () => {
+interface DropdownProps {
+  onIndicatorChange: (indicator: string) => void;
+  defaultIndicator?: string;
+}
+
+export function Dropdown({ onIndicatorChange }: DropdownProps) {
   // Data for the dropdown
-  const options = [
-    "天氣狀況",
-    "紫外線指數",
-    "風",
-    "降水",
-    "體感溫度",
-    "濕度",
-    "能見度",
-    "氣壓",
+  const [selected, setSelected] = useState<string>("");
+  const [indicator, setIndicator] = useState<string>("");
+
+  useEffect(() => {
+    switch (selected) {
+      case "1":
+        setIndicator("temp");
+        break;
+      case "2":
+        setIndicator("windSpeed");
+        break;
+      case "3":
+        setIndicator("rainRate");
+        break;
+      case "4":
+        setIndicator("wet");
+        break;
+      default:
+        setIndicator("");
+        break;
+    }
+  }, [selected]);
+
+  useEffect(() => {
+    onIndicatorChange(indicator);
+  }, [indicator]);
+
+  // Dropdown data with icons
+  const data = [
+    { key: "1", value: "天氣狀況", iconName: "weather" },
+    { key: "2", value: "風速", iconName: "windSpeed" },
+    { key: "3", value: "降水", iconName: "rainRate" },
+    { key: "4", value: "濕度", iconName: "wet" },
   ];
+
+  const formattedData = data.map((item) => ({
+    key: item.key,
+    value: (
+      <View style={styles.dropdownItem}>
+        <SvgImage
+          style={{ width: 30, height: 30 }}
+          name={item.iconName}
+        ></SvgImage>
+        <Text style={styles.dropdownText}>{item.value}</Text>
+      </View>
+    ),
+    indicator: item.iconName,
+  }));
+
   return (
     <View style={styles.container}>
-      <ModalDropdown
-        options={options}
-        renderRow={(option, index) => (
-          <View style={styles.dropdownRow}>
-            <Text style={styles.label}>{label}</Text>
-          </View>
-        )}
-        dropdownStyle={styles.dropdownStyle}
-        renderButtonText={() => "選擇天氣資訊"}
+      <SelectList
+        setSelected={(val: string) => setSelected(val)}
+        data={formattedData}
+        placeholder="選擇天氣資訊"
+        search={false}
+        boxStyles={styles.dropdownBox}
+        dropdownStyles={styles.dropdownStyles}
+        dropdownTextStyles={styles.dropdownText}
+        inputStyles={styles.inputStyles}
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     paddingTop: 50,
+    paddingHorizontal: 20,
+  },
+  dropdownBox: {
+    backgroundColor: "#333",
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: "center",
+  },
+  dropdownStyles: {
+    backgroundColor: "#333",
+    borderRadius: 20,
+    marginTop: 5,
+  },
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   dropdownText: {
     fontSize: 16,
-    padding: 10,
     color: "#fff",
-  },
-  dropdownStyle: {
-    width: 150,
-    backgroundColor: "#333", // Set background color
   },
   dropdownRow: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
   },
   label: {
     fontSize: 16,
     color: "#fff",
   },
+  inputStyles: {
+    color: "#fff",
+    fontSize: 15,
+  },
 });
-
-export default WeatherDropdown;

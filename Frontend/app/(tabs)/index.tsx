@@ -10,12 +10,11 @@ import {
 import { useSelector } from "react-redux";
 import { FlatList } from "react-native-gesture-handler";
 
-import { Region, Selecter, WeatherDataList } from "./_layout";
+import { Region, Selecter, WeatherDataList, DailySug } from "./_layout";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
-import { IndicatorsDisplayWidget_single } from "@/components/IndicatorsDisplayWidget_single";
-import { IndicatorsDisplayWidget_double } from "@/components/IndicatorsDisplayWidget_double";
+import { IndicatorsDisplayWidget } from "@/components/IndicatorsDisplayWidget";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
 import { EarthQuakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
@@ -35,8 +34,9 @@ export default function HomeScreen() {
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
   );
-  const weatherData =
-    weatherDataList?.[regions[selecter.regionIndex]?.name]?.[0]?.[0] ?? null;
+  const dailySug = useSelector((state: { dailySug: DailySug }) => state.dailySug);
+  const weatherDatas = weatherDataList?.[regions[selecter.regionIndex]?.name]?.[0] ?? null;
+  const weatherData = weatherDatas?.[0] ?? null;
 
   // Header Control
   const [isSecendLayout, setIsSecendLayout] = useState(false);
@@ -102,7 +102,7 @@ export default function HomeScreen() {
           ]}
         >
           <WeatherDisplay
-            region={regions[selecter.regionIndex]?.name ?? null}
+            weatherData={weatherData}
             isSecendLayout={isSecendLayout}
           />
         </Animated.View>
@@ -132,37 +132,37 @@ export default function HomeScreen() {
             <View style={{ width: screenWidth }}>
               {/* Body Section */}
               <View style={styles.bodySection}>
-                <ForecastDisplayWidget region={item.name} />
+                <ForecastDisplayWidget weatherDatas={weatherDataList?.[item.name]?.[0] ?? null} />
                 <View style={styles.row}>
-                  <IndicatorsDisplayWidget_single
+                  <IndicatorsDisplayWidget
                     type="wet"
-                    region={item.name}
+                    weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
                   />
-                  <IndicatorsDisplayWidget_single
+                  <IndicatorsDisplayWidget
                     type="rainRate"
-                    region={item.name}
+                    weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
                   />
                 </View>
                 <View style={styles.row}>
-                  <IndicatorsDisplayWidget_single
+                  <IndicatorsDisplayWidget
                     type="windSpeed"
-                    region={item.name}
+                    weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
                   />
-                  <IndicatorsDisplayWidget_single
+                  <IndicatorsDisplayWidget
                     type="windDirection"
-                    region={item.name}
+                    weatherData={weatherDataList?.[item.name]?.[0]?.[0] ?? null}
                   />
                 </View>
                 <View style={styles.row}>
-                  <SuggestionDisplayWidget type="dressing" />
-                  <SuggestionDisplayWidget type="health" />
+                  <SuggestionDisplayWidget type="dressing" dailySug={dailySug}/>
+                  <SuggestionDisplayWidget type="health" dailySug={dailySug} />
                 </View>
                 <View style={styles.row}>
-                  <SuggestionDisplayWidget type="sport" />
-                  <SuggestionDisplayWidget type="transportation" />
+                  <SuggestionDisplayWidget type="sport" dailySug={dailySug}/>
+                  <SuggestionDisplayWidget type="transportation"dailySug={dailySug} />
                 </View>
                 <View style={styles.row}>
-                  <SuggestionDisplayWidget type="activity" />
+                  <SuggestionDisplayWidget type="activity"dailySug={dailySug} />
                 </View>
                 <View style={styles.row}>
                   <EarthQuakeDisplayWidget />
