@@ -129,7 +129,10 @@ export function SlideModal({
                 {/* Weather Info Section */}
                 <View style={styles.weatherInfoLayout}>
                   <Text style={styles.weatherInfoMainText}>
-                    {selectedData.value}
+                    {selectedData.value ||
+                      weatherDatas?.find(
+                        (data) => data.indicator === indicatorType
+                      )?.value}
                     {selectedData.unit}
                   </Text>
 

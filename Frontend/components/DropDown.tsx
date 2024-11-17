@@ -15,7 +15,11 @@ export function Dropdown({ indicatorType, onIndicatorChange }: DropdownProps) {
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<View>(null);
-  const ignoreList = [indicators.windDirection];
+  const ignoreList = [
+    indicators.windDirection,
+    indicators.pm2_5,
+    indicators.aqi,
+  ];
 
   return (
     <>

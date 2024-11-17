@@ -38,8 +38,8 @@ import { setMessage, setVisible } from "@/redux/globalMessageSlice";
 // - [V] Change region-selector to number
 
 export enum indicators {
-  aqi = "aqi",
   bodyTemp = "bodyTemp",
+  aqi = "aqi",
   pm2_5 = "pm2.5",
   rainRate = "rainRate",
   temp = "temp",

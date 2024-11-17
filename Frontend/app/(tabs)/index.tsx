@@ -185,6 +185,18 @@ export default function HomeScreen() {
                   />
                 </View>
                 <View style={styles.row}>
+                  <IndicatorsDisplayWidget
+                    indicatorType={indicators.pm2_5}
+                    onPress={() => {}}
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                  />
+                  <IndicatorsDisplayWidget
+                    indicatorType={indicators.aqi}
+                    onPress={() => {}}
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                  />
+                </View>
+                <View style={styles.row}>
                   <SuggestionDisplayWidget
                     type="dressing"
                     dailySug={dailySug}
