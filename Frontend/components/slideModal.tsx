@@ -51,6 +51,7 @@ export function SlideModal({
   });
   const [selectedDateIndex, setSelectedDateIndex] = useState(3);
   const pan = useRef(new Animated.ValueXY()).current;
+  const [segmentDates, setSegmentDates] = useState<string[]>([]);
 
   useEffect(() => {
     if (isModalShow) {
@@ -104,22 +105,29 @@ export function SlideModal({
                   horizontal
                   style={styles.dateSelectorContainer}
                   contentContainerStyle={styles.dateSelectorContentContainer}
-                  data={["一", "二", "三", "四", "五", "六", "日"]}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item: day, index }) => (
-                    <Pressable
-                      key={index}
-                      style={[
-                        styles.dateSelectorItem,
-                        selectedDateIndex === index &&
-                          styles.dateSelectorItem_Selected,
-                      ]}
-                      onPress={() => setSelectedDateIndex(index)}
-                    >
-                      <Text style={styles.dayText}>{day}</Text>
-                      <Text style={styles.dateText}>{13 + index}</Text>
-                    </Pressable>
-                  )}
+                  data={segmentDates}
+                  keyExtractor={(_, index) => index.toString()}
+                  renderItem={({ item: dateStr, index }) => {
+                    const dateObj = new Date(dateStr);
+                    const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
+                    const day = dayNames[dateObj.getDay()];
+                    const date = dateObj.getDate();
+
+                    return (
+                      <Pressable
+                        key={index}
+                        style={[
+                          styles.dateSelectorItem,
+                          selectedDateIndex === index &&
+                            styles.dateSelectorItem_Selected,
+                        ]}
+                        onPress={() => setSelectedDateIndex(index)}
+                      >
+                        <Text style={styles.dayText}>{`${day}`}</Text>
+                        <Text style={styles.dateText}>{date}</Text>
+                      </Pressable>
+                    );
+                  }}
                 />
               </View>
 
@@ -129,10 +137,7 @@ export function SlideModal({
                 {/* Weather Info Section */}
                 <View style={styles.weatherInfoLayout}>
                   <Text style={styles.weatherInfoMainText}>
-                    {selectedData.value ||
-                      weatherDatas?.find(
-                        (data) => data.indicator === indicatorType
-                      )?.value}
+                    {selectedData.value || weatherDatas?.[0]?.[indicatorType]}
                     {selectedData.unit}
                   </Text>
 
@@ -157,8 +162,12 @@ export function SlideModal({
                 <Chart
                   indicatorType={selectedIndicator}
                   weatherDatas={weatherDatas}
+                  selectedDatesIndex={selectedDateIndex}
                   onSelectDataChange={(newSelectData: selectedData) =>
                     setSelectedData(newSelectData)
+                  }
+                  onSegmentDatesChange={(newSegmentDates: string[]) =>
+                    setSegmentDates(newSegmentDates)
                   }
                 />
               </View>

@@ -15,6 +15,7 @@ import {
 interface ChartProps {
   indicatorType: indicators;
   weatherDatas: WeatherData[];
+  selectedDatesIndex: number;
   onSelectDataChange: (selectData: {
     time: string;
     value: number;
@@ -22,12 +23,15 @@ interface ChartProps {
     minValue: number;
     unit: string;
   }) => void;
+  onSegmentDatesChange: (segmentDates: string[]) => void;
 }
 
 export default function Chart({
   indicatorType,
   weatherDatas,
+  selectedDatesIndex,
   onSelectDataChange,
+  onSegmentDatesChange,
 }: ChartProps) {
   const [selectedValue, setselectedValue] = useState<number>(0);
   const [selectedTime, setselectedTime] = useState<string>("");
@@ -44,21 +48,33 @@ export default function Chart({
   // 將currentDate設為當天的 00:00
   let currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
+  let endOfDay = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    currentDate.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+
   for (let i = 0; i < weatherDatas.length; i++) {
     const data = weatherDatas[i];
     const dataTime = new Date(data.time);
 
     if (isFirstDay) {
-      // 如果是第一天，且資料時間大於等於現在時間
+      // 如果資料的日期是今天，且時間在現在之後，且在今天的23:59:59之前
       if (
         dataTime.getDate() === now.getDate() &&
         dataTime.getMonth() === now.getMonth() &&
         dataTime.getFullYear() === now.getFullYear() &&
-        dataTime.getTime() >= now.getTime()
+        dataTime.getTime() >= now.getTime() &&
+        dataTime.getTime() <= endOfDay.getTime()
       ) {
         currentSegment.push(data);
-      } else if (dataTime.getTime() >= currentDate.getTime()) {
-        // 開始下一天，先保存當前一天的資料
+      }
+      //開始下一天
+      else if (dataTime.getTime() > endOfDay.getTime()) {
         if (currentSegment.length > 0) {
           segments.push(currentSegment);
         }
@@ -68,19 +84,23 @@ export default function Chart({
           dataTime.getMonth(),
           dataTime.getDate()
         );
+        endOfDay = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          currentDate.getDate(),
+          23,
+          59,
+          59,
+          999
+        );
         isFirstDay = false;
       }
-    } else {
-      // 計算當天的24:00
-      const nextDay = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        currentDate.getDate() + 1
-      );
-      if (dataTime.getTime() <= nextDay.getTime()) {
+    }
+    // 其他天(除了第一天)
+    else {
+      if (dataTime.getTime() <= endOfDay.getTime()) {
         currentSegment.push(data);
       } else {
-        // 開始下一天，先保存當前一天的資料
         if (currentSegment.length > 0) {
           segments.push(currentSegment);
         }
@@ -89,6 +109,15 @@ export default function Chart({
           dataTime.getFullYear(),
           dataTime.getMonth(),
           dataTime.getDate()
+        );
+        endOfDay = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          currentDate.getDate(),
+          23,
+          59,
+          59,
+          999
         );
       }
     }
@@ -99,7 +128,7 @@ export default function Chart({
     segments.push(currentSegment);
   }
 
-  console.log("Segments:", segments);
+  //console.log("Segments:", segments);
 
   // 選擇要畫的segment
   const segment = segments[segmentIndex] || [];
@@ -162,6 +191,29 @@ export default function Chart({
     });
   }, [selectedTime, selectedValue, indicatorType]);
 
+  useEffect(() => {
+    const segmentDates = segments
+      .map((segment, index) => {
+        if (segment.length > 0) {
+          const firstData = segment[0];
+          const date = new Date(firstData.time);
+          date.setDate(date.getDate() + 1);
+          const dateString = date.toISOString().split("T")[0];
+
+          console.log(`Segment ${index} first date: ${dateString}`);
+          return dateString;
+        }
+        return null;
+      })
+      .filter((date) => date !== null);
+
+    onSegmentDatesChange(segmentDates as string[]);
+  }, [segments.length]);
+
+  useEffect(() => {
+    setSegmentIndex(selectedDatesIndex);
+  }, [selectedDatesIndex]);
+
   return (
     <View>
       <LineChart
@@ -186,7 +238,6 @@ export default function Chart({
               styles.pageDot,
               idx === segmentIndex && styles.activePageDot,
             ]}
-            onPress={() => setSegmentIndex(idx)}
           >
             ●
           </Text>

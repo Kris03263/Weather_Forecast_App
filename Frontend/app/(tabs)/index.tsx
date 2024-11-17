@@ -197,6 +197,13 @@ export default function HomeScreen() {
                   />
                 </View>
                 <View style={styles.row}>
+                  <IndicatorsDisplayWidget
+                    indicatorType={indicators.bodyTemp}
+                    onPress={() => openSlideModal(item.id, indicators.bodyTemp)}
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                  />
+                </View>
+                <View style={styles.row}>
                   <SuggestionDisplayWidget
                     type="dressing"
                     dailySug={dailySug}
