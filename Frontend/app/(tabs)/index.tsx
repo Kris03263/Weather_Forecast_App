@@ -23,8 +23,8 @@ import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
 import { IndicatorsDisplayWidget } from "@/components/IndicatorsDisplayWidget";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
-import { EarthquakeDisplayWidget } from "@/components/EarthquakeDisplayWidget";
-import { SlideModal } from "@/components/SlideModal";
+import { EarthquakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
+import { IndicatorInfoModal } from "@/components/IndicatorInfoModal";
 import store from "@/redux/store";
 import {
   setSelectedRegionIndex,
@@ -229,7 +229,7 @@ export default function HomeScreen() {
                   />
                 </View>
               </View>
-              <SlideModal
+              <IndicatorInfoModal
                 indicatorType={modalIndicatorType}
                 weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
                 isModalShow={activeModalId === item.id}

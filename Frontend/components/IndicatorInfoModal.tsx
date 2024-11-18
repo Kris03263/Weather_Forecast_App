@@ -27,19 +27,19 @@ interface selectedData {
   unit: string;
 }
 
-interface modalVisibleCrontrollProps {
+interface IndicatorInfoModalProps {
   indicatorType: indicators;
   weatherDatas: WeatherData[];
   isModalShow: boolean;
   onClose: () => void;
 }
 
-export function SlideModal({
+export function IndicatorInfoModal({
   indicatorType,
   weatherDatas,
   isModalShow,
   onClose,
-}: modalVisibleCrontrollProps) {
+}: IndicatorInfoModalProps) {
   const [selectedIndicator, setSelectedIndicator] =
     useState<indicators>(indicatorType);
   const [selectedData, setSelectedData] = useState<selectedData>({
