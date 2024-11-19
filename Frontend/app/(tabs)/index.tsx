@@ -23,7 +23,7 @@ import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
 import { IndicatorsDisplayWidget } from "@/components/IndicatorsDisplayWidget";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
-import { EarthquakeDisplayWidget } from "@/components/EarthquakeDisplayWidget";
+import { EarthquakesDisplayWidget } from "@/components/EarthquakesDisplayWidget";
 import { IndicatorInfoModal } from "@/components/IndicatorInfoModal";
 import store from "@/redux/store";
 import {
@@ -224,7 +224,7 @@ export default function HomeScreen() {
                   />
                 </View>
                 <View style={styles.row}>
-                  <EarthquakeDisplayWidget
+                  <EarthquakesDisplayWidget
                     onPress={() => openSlideModal(item.id, indicators.aqi)}
                   />
                 </View>
