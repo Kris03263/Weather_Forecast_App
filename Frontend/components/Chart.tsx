@@ -40,86 +40,47 @@ export function Chart({
   const segments: WeatherData[][] = [];
   let currentSegment: WeatherData[] = [];
 
-  let isFirstDay = true;
-
-  // 取得當前時間
   let now = new Date();
 
-  // 將currentDate設為當天的 00:00
   let currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  let endOfDay = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    currentDate.getDate(),
-    23,
-    59,
-    59,
-    999
-  );
 
   for (let i = 0; i < weatherDatas.length; i++) {
     const data = weatherDatas[i];
     const dataTime = new Date(data.time);
 
-    if (isFirstDay) {
-      // 如果資料的日期是今天，且時間在現在之後，且在今天的23:59:59之前
-      if (
-        dataTime.getDate() === now.getDate() &&
-        dataTime.getMonth() === now.getMonth() &&
-        dataTime.getFullYear() === now.getFullYear() &&
-        dataTime.getTime() >= now.getTime() &&
-        dataTime.getTime() <= endOfDay.getTime()
-      ) {
-        currentSegment.push(data);
-      }
-      //開始下一天
-      else if (dataTime.getTime() > endOfDay.getTime()) {
+    const nextDay = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate() + 1
+    );
+
+    // 如果 dataTime 在 currentDate 和 nextDay 之間（包括 nextDay 的 00:00）
+    if (dataTime >= currentDate && dataTime <= nextDay) {
+      currentSegment.push(data);
+
+      if (dataTime.getTime() === nextDay.getTime()) {
+        // 碰到 00:00，將 currentSegment 儲存，同時在下一段開始時包括該數據點
         if (currentSegment.length > 0) {
-          segments.push(currentSegment);
+          segments.push([...currentSegment]); // 儲存當前段
         }
+        // 開始新段，包含同一個數據點
         currentSegment = [data];
-        currentDate = new Date(
-          dataTime.getFullYear(),
-          dataTime.getMonth(),
-          dataTime.getDate()
-        );
-        endOfDay = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          currentDate.getDate(),
-          23,
-          59,
-          59,
-          999
-        );
-        isFirstDay = false;
+        currentDate = nextDay;
+        // nextDay 將在下一次循環中重新計算
       }
-    }
-    // 其他天(除了第一天)
-    else {
-      if (dataTime.getTime() <= endOfDay.getTime()) {
-        currentSegment.push(data);
-      } else {
-        if (currentSegment.length > 0) {
-          segments.push(currentSegment);
-        }
-        currentSegment = [data];
-        currentDate = new Date(
-          dataTime.getFullYear(),
-          dataTime.getMonth(),
-          dataTime.getDate()
-        );
-        endOfDay = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          currentDate.getDate(),
-          23,
-          59,
-          59,
-          999
-        );
+    } else {
+      // dataTime 超過 nextDay，處理新的一天
+      if (currentSegment.length > 0) {
+        segments.push([...currentSegment]); // 儲存當前段
       }
+      // 開始新段，包含該數據點
+      currentSegment = [data];
+      currentDate = new Date(
+        dataTime.getFullYear(),
+        dataTime.getMonth(),
+        dataTime.getDate()
+      );
+      // nextDay 將在下一次循環中重新計算
     }
   }
 
