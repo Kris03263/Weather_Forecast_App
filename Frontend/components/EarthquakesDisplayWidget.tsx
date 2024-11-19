@@ -6,13 +6,13 @@ import { EarthquakeData, getEarthquakeData } from "@/app/(tabs)/_layout";
 import { Widget } from "@/components/Widget";
 import { SvgImage } from "@/components/Svg";
 
-interface EarthquakeDisplayWidgetProps {
+interface EarthquakesDisplayWidgetProps {
   onPress: () => void;
 }
 
-export function EarthquakeDisplayWidget({
+export function EarthquakesDisplayWidget({
   onPress,
-}: EarthquakeDisplayWidgetProps) {
+}: EarthquakesDisplayWidgetProps) {
   const [earthquakeData, setEarthquakeData] = useState<EarthquakeData[]>();
 
   useEffect(() => {
