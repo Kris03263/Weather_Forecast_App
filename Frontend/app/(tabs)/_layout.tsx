@@ -25,6 +25,10 @@ import { removeUser, setUser } from "@/redux/userSlice";
 import { setHabit, setSport, setUserSettings } from "@/redux/userSettingsSlice";
 import { setDailySug } from "@/redux/dailySugSlice";
 import { setMessage, setVisible } from "@/redux/globalMessageSlice";
+import {
+  setHistoryEarthquakeData,
+  setRecentEarthquakeData,
+} from "@/redux/earthquakeDataSlice";
 
 // TODO list:
 // - [V] Add weather data API
@@ -102,6 +106,10 @@ export interface WeatherDataList {
 }
 export interface WeatherData {
   [key: string]: string;
+}
+export interface EarthquakeDataList {
+  recent: EarthquakeData;
+  history: EarthquakeData[];
 }
 export interface EarthquakeData {
   color: string;
@@ -289,7 +297,7 @@ export const getAllHabitList = async (): Promise<Habit[]> => {
 
   return habitList ?? [];
 };
-export const getEarthquakeData = async (): Promise<EarthquakeData[]> => {
+export const updateEarthquakeData = async () => {
   const userID = store.getState().user.id;
   const regions = store.getState().regions;
 
@@ -299,7 +307,10 @@ export const getEarthquakeData = async (): Promise<EarthquakeData[]> => {
     regions[0].longitude
   );
 
-  return data ?? [];
+  if (!data) return [];
+
+  store.dispatch(setRecentEarthquakeData(data[0]));
+  store.dispatch(setHistoryEarthquakeData(data));
 };
 export const updateRegion0 = async () => {
   const regions = store.getState().regions;
@@ -425,8 +436,6 @@ export const syncLocalDataToGlobal = async () => {
   const userSettings = JSON.parse(
     (await AsyncStorage.getItem("userSettings")) ?? "{}"
   );
-
-  console.log("local data: ", userID, regions, userSettings);
 
   store.dispatch(
     setUser({ id: userID, account: "", password: "", status: "" })
@@ -997,22 +1006,31 @@ export default function TabLayout() {
 
   useEffect(() => {
     // Update current location and current time every minute
+    let time = 0;
     const Update = async () => {
-      console.log("Updating data......");
+      console.log(`${new Date()}: 
++---------------------------------------------------+
+|                                      /\\_/\\        |
+| Starting update data                ( o.o )       |
+|                                      >-0-<        |
++---------------------------------------------------+`);
+      const timer = setInterval(() => (time += 10), 10);
 
       await syncLocalDataToGlobal();
-      await Promise.all([updateRegion0(), updateRegions(), updateUser()]);
+      await Promise.all([
+        updateRegion0(),
+        updateRegions(),
+        updateUser(),
+        updateEarthquakeData(),
+      ]);
 
-      console.log(
-        "-----------------------------------------------------\n" +
-          `| ${new Date()} \t|` +
-          "\n" +
-          "-----------------------------------------------------\n" +
-          "| Data update success! \t\t\t\t\t\t\t\t|" +
-          "\n" +
-          "-----------------------------------------------------\n" +
-          `Region list: ${JSON.stringify(store.getState().regions)}`
-      );
+      console.log(`${new Date()}: 
++---------------------------------------------------+
+|                                      /\\_/\\        | 
+| Data update success!(${time}ms)\t      ( o.o )       |
+|                                      >-0-<        |
++---------------------------------------------------+`);
+      clearInterval(timer);
     };
 
     const init = async () => {

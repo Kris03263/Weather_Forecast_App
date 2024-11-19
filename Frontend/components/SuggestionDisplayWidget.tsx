@@ -6,19 +6,18 @@ import { SvgImage } from "@/components/Svg";
 import { DailySug } from "@/app/(tabs)/_layout";
 
 interface SuggestionDisplayWidgetProps {
-  type: string;
   dailySug: DailySug;
+  type: string;
 }
 
 export function SuggestionDisplayWidget({
+  dailySug,
   type,
-  dailySug
 }: SuggestionDisplayWidgetProps) {
-
   const suggestion = dailySug?.[type as keyof typeof dailySug] ?? null;
 
   return (
-    <Widget style={styles.customWidgetStyle} isShow={true}>
+    <Widget style={styles.customWidgetStyle} isVisible={true}>
       <View style={styles.layout}>
         <SvgImage style={styles.svgImage} name={type} />
         <Text style={styles.text}>
@@ -42,7 +41,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "white",
-    fontSize: 20,
+    fontSize: 16,
     textAlign: "left",
   },
   svgImage: {

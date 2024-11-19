@@ -7,52 +7,55 @@ import { DynamicImage } from "@/components/DynamicImage";
 import { WeatherData } from "@/app/(tabs)/_layout";
 
 interface ForecastDisplayWidgetProps {
-  onPress: () => void;
   weatherDatas: WeatherData[];
+  onPress: () => void;
 }
 
 export function ForecastDisplayWidget({
-  onPress,
   weatherDatas,
+  onPress,
 }: ForecastDisplayWidgetProps) {
   return (
-    <Pressable onPress={() => onPress()}>
-      <Widget style={styles.customWidgetStyle} isShow={true}>
-        <View style={styles.titleLayout}>
-          <SvgImage style={{ width: 30, height: 30 }} name="weather" />
-          <Text style={styles.title}>天氣預報</Text>
-        </View>
+    <Widget
+      style={styles.customWidgetStyle}
+      isVisible={true}
+      isPressable={true}
+      onPress={onPress}
+    >
+      <View style={styles.titleLayout}>
+        <SvgImage style={styles.svgImage} name="weather" />
+        <Text style={styles.titleText}>天氣預報</Text>
+      </View>
 
-        <View style={styles.contentLayout}>
-          <FlatList
-            nestedScrollEnabled
-            horizontal
-            style={styles.weatherCardGroundLayout}
-            data={weatherDatas ?? []}
-            renderItem={({ item }) => (
-              <View style={styles.weatherCardLayout}>
-                <Text style={styles.weatherTimeText}>
-                  {item.time.split(" ")[1].split(":")[0] + "時"}
-                </Text>
-                <DynamicImage
-                  style={styles.weatherIcon}
-                  path={
-                    item.time.split(" ")[1] < "18:00:00" &&
-                    item.time.split(" ")[1] >= "06:00:00"
-                      ? `day/${item.weatherCode}.png`
-                      : `night/${item.weatherCode}.png`
-                  }
-                />
-                <Text style={styles.weatherTemperatureText}>
-                  {item.temp + "°C"}
-                </Text>
-              </View>
-            )}
-            keyExtractor={(item) => item.time}
-          />
-        </View>
-      </Widget>
-    </Pressable>
+      <View style={styles.contentLayout}>
+        <FlatList
+          nestedScrollEnabled
+          horizontal
+          style={styles.weatherCardGroupLayout}
+          data={weatherDatas ?? []}
+          renderItem={({ item }) => (
+            <View style={styles.weatherCardLayout}>
+              <Text style={styles.weatherTimeText}>
+                {item.time.split(" ")[1].split(":")[0] + "時"}
+              </Text>
+              <DynamicImage
+                style={styles.weatherIcon}
+                path={
+                  item.time.split(" ")[1] < "18:00:00" &&
+                  item.time.split(" ")[1] >= "06:00:00"
+                    ? `day/${item.weatherCode}.png`
+                    : `night/${item.weatherCode}.png`
+                }
+              />
+              <Text style={styles.weatherTemperatureText}>
+                {item.temp + "°C"}
+              </Text>
+            </View>
+          )}
+          keyExtractor={(item) => item.time}
+        />
+      </View>
+    </Widget>
   );
 }
 
@@ -69,7 +72,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     gap: 10,
   },
-  title: {
+  titleText: {
     color: "white",
     fontSize: 20,
     textAlign: "left",
@@ -84,7 +87,7 @@ const styles = StyleSheet.create({
   weatherScroll: {
     flexDirection: "row",
   },
-  weatherCardGroundLayout: {
+  weatherCardGroupLayout: {
     flexDirection: "row",
     width: "100%",
     height: 150,
@@ -110,11 +113,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  row: {
-    minWidth: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 20,
+  svgImage: {
+    width: 30,
+    height: 30,
   },
 });

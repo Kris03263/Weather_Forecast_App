@@ -11,35 +11,38 @@ import {
 } from "@/app/(tabs)/_layout";
 
 interface IndicatorsDisplayWidgetProps {
+  weatherData: WeatherData;
   indicatorType: indicators;
   onPress: () => void;
-  weatherData: WeatherData;
 }
 
 export function IndicatorsDisplayWidget({
+  weatherData,
   indicatorType,
   onPress,
-  weatherData,
 }: IndicatorsDisplayWidgetProps) {
   const indicator = indicatorsDictionary[indicatorType];
 
   indicator.value = weatherData?.[indicatorType] ?? "--";
 
   return (
-    <Pressable style={{ flex: 1, width: "100%" }} onPress={() => onPress()}>
-      <Widget style={styles.customWidgetStyle} isShow={true}>
-        <View style={styles.layout}>
-          <View style={styles.titleDisplay}>
-            <SvgImage
-              style={styles.svgImage}
-              name={indicatorsDictionary[indicatorType].svgName}
-            />
-            <Text style={styles.title}>{indicator.title}</Text>
-          </View>
-          <Text style={styles.value}>{indicator.value + indicator.unit}</Text>
+    <Widget
+      style={styles.customWidgetStyle}
+      isVisible={true}
+      isPressable={true}
+      onPress={onPress}
+    >
+      <View style={styles.layout}>
+        <View style={styles.titleDisplay}>
+          <SvgImage
+            style={styles.svgImage}
+            name={indicatorsDictionary[indicatorType].svgName}
+          />
+          <Text style={styles.titleText}>{indicator.title}</Text>
         </View>
-      </Widget>
-    </Pressable>
+        <Text style={styles.valueText}>{indicator.value + indicator.unit}</Text>
+      </View>
+    </Widget>
   );
 }
 
@@ -61,15 +64,15 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     gap: 10,
   },
-  title: {
+  titleText: {
     color: "white",
     fontSize: 20,
     textAlign: "left",
   },
-  value: {
+  valueText: {
     color: "white",
-    fontSize: 32,
-    fontWeight: "bold",
+    fontSize: 30,
+    // fontWeight: "bold",
     textAlign: "left",
   },
   svgImage: {

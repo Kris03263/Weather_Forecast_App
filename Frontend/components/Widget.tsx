@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import Animated, {
   useDerivedValue,
   useSharedValue,
@@ -9,13 +9,17 @@ import Animated, {
 interface WidgetProps {
   children?: ReactNode;
   style?: object;
-  isShow?: boolean;
+  isVisible?: boolean;
+  isPressable?: boolean;
+  onPress?: () => void;
 }
 
 export function Widget({
   children = null,
   style = {},
-  isShow = false,
+  isVisible = false,
+  isPressable = false,
+  onPress = () => {},
 }: WidgetProps) {
   // Animation Control
   const [opacityValue, setOpacityValue_page] = useState(0);
@@ -24,25 +28,36 @@ export function Widget({
   useEffect(() => {
     const fetchWeatherData = async () => {
       // Wait for weather data to load
-      if (isShow) {
+      if (isVisible) {
         opacity.value = withTiming(1, { duration: 2000 });
       }
     };
 
     fetchWeatherData();
-  }, [isShow]);
+  }, [isVisible]);
 
   useDerivedValue(() => {
     setOpacityValue_page(opacity.value);
   }, []);
 
-  return (
-    <Animated.View
-      style={[styles.emptyWidget, style, { opacity: opacityValue }]}
-    >
-      {children}
-    </Animated.View>
-  );
+  if (isPressable)
+    return (
+      <Pressable style={{ flex: 1, width: "100%" }} onPress={onPress}>
+        <Animated.View
+          style={[styles.emptyWidget, style, { opacity: opacityValue }]}
+        >
+          {children}
+        </Animated.View>
+      </Pressable>
+    );
+  else
+    return (
+      <Animated.View
+        style={[styles.emptyWidget, style, { opacity: opacityValue }]}
+      >
+        {children}
+      </Animated.View>
+    );
 }
 
 // Default Style

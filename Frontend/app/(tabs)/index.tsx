@@ -16,6 +16,7 @@ import {
   WeatherDataList,
   DailySug,
   indicators,
+  EarthquakeDataList,
 } from "./_layout";
 
 import { WeatherDisplay } from "@/components/WeatherDisplay";
@@ -40,6 +41,9 @@ export default function HomeScreen() {
   const regions = useSelector((state: { regions: Region[] }) => state.regions);
   const weatherDataList = useSelector(
     (state: { weatherData: WeatherDataList }) => state.weatherData
+  );
+  const earthquakeDataList = useSelector(
+    (state: { earthquakeData: EarthquakeDataList }) => state.earthquakeData
   );
   const dailySug = useSelector(
     (state: { dailySug: DailySug }) => state.dailySug
@@ -109,7 +113,7 @@ export default function HomeScreen() {
       {/* Top Section */}
       <View style={[styles.topSection]}>
         <View style={styles.regionNameDisplay}>
-          <Text style={styles.regionName}>
+          <Text style={styles.regionNameText}>
             {`${region?.city}, ${region?.district}` ?? null}
           </Text>
         </View>
@@ -158,7 +162,7 @@ export default function HomeScreen() {
                   onPress={() => openSlideModal(item.id, indicators.temp)}
                   weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
                 />
-                <View style={styles.row}>
+                <View style={styles.rowLayout}>
                   <IndicatorsDisplayWidget
                     indicatorType={indicators.wet}
                     onPress={() => openSlideModal(item.id, indicators.wet)}
@@ -170,7 +174,7 @@ export default function HomeScreen() {
                     weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                 </View>
-                <View style={styles.row}>
+                <View style={styles.rowLayout}>
                   <IndicatorsDisplayWidget
                     indicatorType={indicators.windSpeed}
                     onPress={() =>
@@ -184,7 +188,7 @@ export default function HomeScreen() {
                     weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                 </View>
-                <View style={styles.row}>
+                <View style={styles.rowLayout}>
                   <IndicatorsDisplayWidget
                     indicatorType={indicators.pm2_5}
                     onPress={() => {}}
@@ -196,36 +200,35 @@ export default function HomeScreen() {
                     weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
                 </View>
-                <View style={styles.row}>
+                <View style={styles.rowLayout}>
                   <IndicatorsDisplayWidget
                     indicatorType={indicators.bodyTemp}
                     onPress={() => openSlideModal(item.id, indicators.bodyTemp)}
                     weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   />
+                  <SuggestionDisplayWidget
+                    type="activity"
+                    dailySug={dailySug}
+                  />
                 </View>
-                <View style={styles.row}>
+                <View style={styles.rowLayout}>
                   <SuggestionDisplayWidget
                     type="dressing"
                     dailySug={dailySug}
                   />
                   <SuggestionDisplayWidget type="health" dailySug={dailySug} />
                 </View>
-                <View style={styles.row}>
+                <View style={styles.rowLayout}>
                   <SuggestionDisplayWidget type="sport" dailySug={dailySug} />
                   <SuggestionDisplayWidget
                     type="transportation"
                     dailySug={dailySug}
                   />
                 </View>
-                <View style={styles.row}>
-                  <SuggestionDisplayWidget
-                    type="activity"
-                    dailySug={dailySug}
-                  />
-                </View>
-                <View style={styles.row}>
+                <View style={styles.rowLayout}>
                   <EarthquakesDisplayWidget
                     onPress={() => openSlideModal(item.id, indicators.aqi)}
+                    earthquakeData={earthquakeDataList.recent ?? null}
                   />
                 </View>
               </View>
@@ -265,18 +268,18 @@ const styles = StyleSheet.create({
     position: "relative",
     padding: "3%",
   },
-  regionName: {
-    color: "white",
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "left",
-  },
   regionNameDisplay: {
     paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     minWidth: "100%",
     flexDirection: "row",
+  },
+  regionNameText: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "left",
   },
   temperatureDisplay: {
     flexDirection: "row",
@@ -288,70 +291,10 @@ const styles = StyleSheet.create({
     padding: "3%",
     paddingBottom: 80,
   },
-  row: {
+  rowLayout: {
     minWidth: "100%",
     flexDirection: "row",
     alignItems: "stretch",
     justifyContent: "center",
-  },
-  dropdown: {
-    marginLeft: 20,
-    width: 150,
-    height: 32,
-    fontSize: 16,
-    padding: 4,
-    color: "white",
-    backgroundColor: "none",
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "white",
-  },
-  dropdownBox: {
-    marginTop: 10,
-    marginLeft: 20,
-    width: 150,
-    height: "auto",
-    color: "none",
-    backgroundColor: "none",
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "white",
-  },
-  dropdownText: {
-    padding: 4,
-    fontSize: 16,
-    color: "white",
-    backgroundColor: "none",
-  },
-  dropdownHightlight: {
-    backgroundColor: "pink",
-    fontWeight: "bold",
-  },
-  pagination: {
-    position: "absolute",
-    bottom: 65, // 調整此處可設置距離底部的距離
-    left: 0,
-    right: 0,
-    justifyContent: "center", // 將圓點居中
-  },
-  dot: {
-    backgroundColor: "rgba(255,255,255,0.3)",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginLeft: 3,
-    marginRight: 3,
-    marginTop: 3,
-    marginBottom: 3,
-  },
-  activeDot: {
-    backgroundColor: "#fff",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginLeft: 3,
-    marginRight: 3,
-    marginTop: 3,
-    marginBottom: 3,
   },
 });

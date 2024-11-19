@@ -7,6 +7,7 @@ import userSlice from "./userSlice";
 import userSettingsSlice from "./userSettingsSlice";
 import dailySugSlice from "./dailySugSlice";
 import globalMessageSlice from "./globalMessageSlice";
+import earthquakeDataSlice from "./earthquakeDataSlice";
 
 const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ const store = configureStore({
     userSettings: userSettingsSlice,
     dailySug: dailySugSlice,
     globalMessage: globalMessageSlice,
+    earthquakeData: earthquakeDataSlice,
   },
 });
 

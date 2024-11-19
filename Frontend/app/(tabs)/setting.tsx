@@ -371,7 +371,7 @@ export default function SettingsScreen() {
       {user.id && user.id !== "-1" && (
         <View style={styles.bodySection}>
           {/* 天氣偏好區塊 */}
-          <Widget isShow={true}>
+          <Widget isVisible={true}>
             <Text style={styles.boxTitle}>天氣偏好</Text>
             <View style={styles.boxInputLayout}>
               <Text style={styles.boxInputLabel}>溫度偏好:</Text>
@@ -383,7 +383,7 @@ export default function SettingsScreen() {
             </View>
           </Widget>
           {/* 活動偏好區塊 */}
-          <Widget isShow={true}>
+          <Widget isVisible={true}>
             <Text style={styles.boxTitle}>活動偏好</Text>
             <View style={styles.boxInputLayout}>
               <Text style={styles.boxInputLabel}>運動偏好:</Text>
@@ -409,7 +409,7 @@ export default function SettingsScreen() {
 
       {(!user.id || user.id === "-1") && (
         <View style={styles.bodySection}>
-          <Widget isShow={true}>
+          <Widget isVisible={true}>
             <Text style={styles.boxTitle}>登入以使用設定</Text>
             <Pressable
               style={styles.modalButton}
