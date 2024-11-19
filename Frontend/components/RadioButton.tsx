@@ -6,7 +6,7 @@ interface RadioButtonProps {
   onPress: () => void;
 }
 
-export const RadioButton = ({ label, selected, onPress }: RadioButtonProps) => {
+export function RadioButton({ label, selected, onPress }: RadioButtonProps) {
   return (
     <Pressable style={styles.radioButtonLayout} onPress={onPress}>
       <View
@@ -15,7 +15,7 @@ export const RadioButton = ({ label, selected, onPress }: RadioButtonProps) => {
       <Text style={styles.radioLabel}>{label}</Text>
     </Pressable>
   );
-};
+}
 
 const styles = StyleSheet.create({
   radioButtonLayout: {

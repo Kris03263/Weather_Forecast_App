@@ -9,7 +9,7 @@ export interface PopupModalProps {
   footer: ReactNode;
 }
 
-export default function PopupModal({
+export function PopupModal({
   isVisible,
   onClose,
   header,

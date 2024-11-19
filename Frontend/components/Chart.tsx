@@ -26,7 +26,7 @@ interface ChartProps {
   onSegmentDatesChange: (segmentDates: string[]) => void;
 }
 
-export default function Chart({
+export function Chart({
   indicatorType,
   weatherDatas,
   selectedDatesIndex,

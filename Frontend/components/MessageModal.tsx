@@ -1,13 +1,11 @@
 import { StyleSheet, Pressable, Text } from "react-native";
 import { useSelector } from "react-redux";
 
-import PopupModal from "@/components/PopupModal";
+import { PopupModal } from "@/components/PopupModal";
 import store from "@/redux/store";
 import { setVisible } from "@/redux/globalMessageSlice";
 
-interface MessageModalProps {}
-
-export function MessageModal({}: MessageModalProps) {
+export function MessageModal() {
   const message = useSelector(
     (state: { globalMessage: { message: string } }) =>
       state.globalMessage.message

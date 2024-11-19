@@ -12,7 +12,7 @@ import {
 import React, { useState, useRef, useEffect } from "react";
 import { SvgImage } from "@/components/Svg";
 import { Dropdown } from "@/components/DropDown";
-import Chart from "@/components/Chart";
+import { Chart } from "@/components/Chart";
 import {
   indicators,
   indicatorsDictionary,
@@ -50,8 +50,8 @@ export function IndicatorInfoModal({
     unit: "",
   });
   const [selectedDateIndex, setSelectedDateIndex] = useState(3);
-  const pan = useRef(new Animated.ValueXY()).current;
   const [segmentDates, setSegmentDates] = useState<string[]>([]);
+  const pan = useRef(new Animated.ValueXY()).current;
 
   useEffect(() => {
     if (isModalShow) {
@@ -134,7 +134,7 @@ export function IndicatorInfoModal({
               <View style={styles.separator} />
 
               <View style={styles.row}>
-                {/* Weather Info Section */}
+                {/* Indicator Text */}
                 <View style={styles.weatherInfoLayout}>
                   <Text style={styles.weatherInfoMainText}>
                     {selectedData.value || weatherDatas?.[0]?.[indicatorType]}
@@ -148,7 +148,7 @@ export function IndicatorInfoModal({
                   </Text>
                 </View>
 
-                {/* Dropdown */}
+                {/* Indicator Type Selector */}
                 <Dropdown
                   indicatorType={selectedIndicator}
                   onIndicatorChange={(indicator: indicators) =>
@@ -157,20 +157,20 @@ export function IndicatorInfoModal({
                 />
               </View>
 
-              <View style={styles.contentLayout}>
-                {/* Chart */}
-                <Chart
-                  indicatorType={selectedIndicator}
-                  weatherDatas={weatherDatas}
-                  selectedDatesIndex={selectedDateIndex}
-                  onSelectDataChange={(newSelectData: selectedData) =>
-                    setSelectedData(newSelectData)
-                  }
-                  onSegmentDatesChange={(newSegmentDates: string[]) =>
-                    setSegmentDates(newSegmentDates)
-                  }
-                />
-              </View>
+              {/* Chart */}
+              <Chart
+                indicatorType={selectedIndicator}
+                weatherDatas={weatherDatas}
+                selectedDatesIndex={selectedDateIndex}
+                onSelectDataChange={(newSelectData: selectedData) =>
+                  setSelectedData(newSelectData)
+                }
+                onSegmentDatesChange={(newSegmentDates: string[]) =>
+                  setSegmentDates(newSegmentDates)
+                }
+              />
+
+              <Text>當日小結</Text>
             </ScrollView>
           </Animated.View>
         </View>

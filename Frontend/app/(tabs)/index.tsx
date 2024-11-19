@@ -23,7 +23,7 @@ import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
 import { IndicatorsDisplayWidget } from "@/components/IndicatorsDisplayWidget";
 import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
-import { EarthquakeDisplayWidget } from "@/components/EarthQuakeDisplayWidget";
+import { EarthquakeDisplayWidget } from "@/components/EarthquakeDisplayWidget";
 import { IndicatorInfoModal } from "@/components/IndicatorInfoModal";
 import store from "@/redux/store";
 import {

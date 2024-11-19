@@ -319,7 +319,6 @@ export const updateRegion0 = async () => {
   ]);
 
   console.log(`Updated region[0] to: ${region.city}, ${region.district}`);
-  console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
 export const updateRegions = async () => {
   const regions = store.getState().regions;
@@ -330,7 +329,6 @@ export const updateRegions = async () => {
   await Promise.all([updateWeatherData_3h(), updateWeatherData_12h()]);
 
   console.log("Updated all regions");
-  console.log("Region list: " + JSON.stringify(store.getState().regions));
 };
 export const updateWeatherData_3h = async (_region?: Region) => {
   const userID = store.getState().user.id;
@@ -469,7 +467,16 @@ const HandleSetUser = async (
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleSetUser failed!" +
+        "\n" +
+        `Sending: ${JSON.stringify({
+          userAccount: _account,
+          password: _password,
+        })}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -489,7 +496,13 @@ const HandleGetUser = async (_userID: string): Promise<User | null> => {
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleGetUser failed!" +
+        "\n" +
+        `URL: ${hostURL}/Users/?id=${_userID}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -515,7 +528,15 @@ const HandleDeleteUser = async (_userID: string): Promise<any> => {
 
     return response;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleDeleteUser failed!" +
+        "\n" +
+        `Sending: ${JSON.stringify({
+          userID: _userID,
+        })}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -545,7 +566,16 @@ const HandleUserLogin = async (
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleUserLogin failed!" +
+        "\n" +
+        `Sending: ${JSON.stringify({
+          userAccount: _account,
+          password: _password,
+        })}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -575,7 +605,16 @@ const HandleSetUserSports = async (
 
     return response;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleSetUserSport failed!" +
+        "\n" +
+        `Sending: ${JSON.stringify({
+          userID: _userID,
+          sportIDs: _sportIDs,
+        })}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -600,7 +639,13 @@ const HandleGetUserSports = async (
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleGetUserSports failed!" +
+        "\n" +
+        `URL: ${hostURL}/Users/UserSports?ID=${_userID}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -630,7 +675,16 @@ const HandleSetUserHabits = async (
 
     return response;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleSetUserHabit failed!" +
+        "\n" +
+        `Sending: ${JSON.stringify({
+          userID: _userID,
+          habitIDs: _habitIDs,
+        })}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -657,7 +711,13 @@ const HandleGetUserHabits = async (
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleGetUserHabits failed!" +
+        "\n" +
+        `URL: ${hostURL}/Users/UserHabits?ID=${_userID}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -701,8 +761,6 @@ const HandleGetRegionCoords = async (
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("HandleGetRegionCoords: " + JSON.stringify(data));
-
         return {
           id: md5(`${data.city}${data.district}`),
           city: data.city,
@@ -714,7 +772,16 @@ const HandleGetRegionCoords = async (
 
     return data;
   } catch (e) {
-    showNotification(`獲取地區資料失敗 \n錯誤訊息: ${String(e)}`);
+    showNotification(
+      "HandleGetRegionCoords failed!" +
+        "\n" +
+        `Sending: ${JSON.stringify({
+          longitude: _longitude,
+          latitude: _latitude,
+        })}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -744,8 +811,17 @@ const HandleGetWeatherData3h = async (
     return data;
   } catch (e) {
     showNotification(
-      `獲取 ${_region.city}, ${_region.district} 3h 資料失敗 \n錯誤訊息: ` +
-        String(e)
+      "HandleGetWeatherData3h failed!" +
+        "\n" +
+        `Sending: ${JSON.stringify({
+          userID: _userID,
+          cusloc: {
+            city: _region.city,
+            district: _region.district,
+          },
+        })}` +
+        "\n" +
+        `Error: ${String(e)}`
     );
     return null;
   }
@@ -776,18 +852,17 @@ const HandleGetWeatherData12h = async (
     return data;
   } catch (e) {
     showNotification(
-      `獲取 ${_region.city}, ${_region.district} 12h 資料失敗 \n錯誤訊息: ` +
-        String(e)
-    );
-    console.log(
-      `獲取 ${_region.city}, ${_region.district} 12h 資料失敗 \n測資: ` +
-        JSON.stringify({
+      "HandleGetWeatherData12h failed!" +
+        "\n" +
+        `Sending: ${JSON.stringify({
           userID: _userID,
           cusloc: {
             city: _region.city,
             district: _region.district,
           },
-        })
+        })}` +
+        "\n" +
+        `Error: ${String(e)}`
     );
     return null;
   }
@@ -817,7 +892,19 @@ const HandleGetDailySug = async (
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleGetDailySug failed!" +
+        "\n" +
+        `Sending: ${JSON.stringify({
+          userID: _userID,
+          cusloc: {
+            city: _region.city,
+            district: _region.district,
+          },
+        })}` +
+        "\n" +
+        `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -833,7 +920,9 @@ const HandleGetAllRegion = async (): Promise<RegionList | null> => {
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleGetAllRegion failed!" + "\n" + `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -849,7 +938,9 @@ const HandleGetAllSport = async (): Promise<Sport[] | null> => {
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleGetAllSport failed!" + "\n" + `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -865,7 +956,9 @@ const HandleGetAllHabit = async (): Promise<Habit[] | null> => {
 
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification(
+      "HandleGetAllHabit failed!" + "\n" + `Error: ${String(e)}`
+    );
     return null;
   }
 };
@@ -891,13 +984,9 @@ const HandleGetEarthquakeData = async (
         return data as EarthquakeData[];
       });
 
-    if (!data) {
-      throw new Error("無地震資料");
-    }
-
     return data;
   } catch (e) {
-    showNotification(String(e));
+    showNotification("HandleGetEarthquakeData failed!" + "\n" + `Error: ${e}`);
     return null;
   }
 };
@@ -922,7 +1011,7 @@ export default function TabLayout() {
           "| Data update success! \t\t\t\t\t\t\t\t|" +
           "\n" +
           "-----------------------------------------------------\n" +
-          JSON.stringify(store.getState().regions)
+          `Region list: ${JSON.stringify(store.getState().regions)}`
       );
     };
 

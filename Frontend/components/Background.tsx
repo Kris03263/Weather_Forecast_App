@@ -14,7 +14,7 @@ interface BackgroundProps {
   style?: object;
 }
 
-export const Background = ({ weatherData, style }: BackgroundProps) => {
+export function Background({ weatherData, style }: BackgroundProps) {
   // Background Control
   const [backgroundColor, setBackgroundColor] = useState(
     BackgroundGradient.default
@@ -56,4 +56,4 @@ export const Background = ({ weatherData, style }: BackgroundProps) => {
       ]}
     />
   );
-};
+}

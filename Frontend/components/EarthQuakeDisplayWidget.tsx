@@ -10,9 +10,9 @@ interface EarthquakeDisplayWidgetProps {
   onPress: () => void;
 }
 
-export const EarthquakeDisplayWidget = ({
+export function EarthquakeDisplayWidget({
   onPress,
-}: EarthquakeDisplayWidgetProps) => {
+}: EarthquakeDisplayWidgetProps) {
   const [earthquakeData, setEarthquakeData] = useState<EarthquakeData[]>();
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export const EarthquakeDisplayWidget = ({
       </Widget>
     </Pressable>
   );
-};
+}
 
 const styles = StyleSheet.create({
   customWidgetStyle: {

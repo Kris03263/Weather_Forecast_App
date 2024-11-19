@@ -22,7 +22,7 @@ import {
 import store from "@/redux/store";
 import { Widget } from "@/components/Widget";
 import { Background } from "@/components/Background";
-import PopupModal from "@/components/PopupModal";
+import { PopupModal } from "@/components/PopupModal";
 import { SvgImage } from "@/components/Svg";
 import { RadioButton } from "@/components/RadioButton";
 
