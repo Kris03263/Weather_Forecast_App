@@ -192,15 +192,23 @@ export function Chart({
   }, [selectedTime, selectedValue, indicatorType]);
 
   useEffect(() => {
+    onSelectDataChange({
+      time: selectedTime,
+      value: parseInt(weatherDatas?.[0]?.[indicatorType]),
+      maxValue: Math.max(...valueData),
+      minValue: Math.min(...valueData),
+      unit: indicatorsDictionary[indicatorType].unit,
+    });
+  }, [indicatorType]);
+
+  useEffect(() => {
     const segmentDates = segments
       .map((segment, index) => {
         if (segment.length > 0) {
           const firstData = segment[0];
           const date = new Date(firstData.time);
-          date.setDate(date.getDate() + 1);
+          date.setHours(date.getHours() + 8); //GMT+8(台灣時間)
           const dateString = date.toISOString().split("T")[0];
-
-          console.log(`Segment ${index} first date: ${dateString}`);
           return dateString;
         }
         return null;
@@ -213,6 +221,16 @@ export function Chart({
   useEffect(() => {
     setSegmentIndex(selectedDatesIndex);
   }, [selectedDatesIndex]);
+
+  useEffect(() => {
+    onSelectDataChange({
+      time: selectedTime,
+      value: parseInt(weatherDatas?.[0]?.[indicatorType]),
+      maxValue: Math.max(...valueData),
+      minValue: Math.min(...valueData),
+      unit: indicatorsDictionary[indicatorType].unit,
+    });
+  }, [segmentIndex]);
 
   return (
     <View>
