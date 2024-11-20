@@ -31,6 +31,7 @@ import {
   setSelectedRegionIndex,
   setSelectedTargetRegionIndex,
 } from "@/redux/selecterSlice";
+import { DynamicImage } from "@/components/DynamicImage";
 
 export default function HomeScreen() {
   const selecter = useSelector(
@@ -78,7 +79,7 @@ export default function HomeScreen() {
 
   const headerHeight = scrollY.interpolate({
     inputRange: [0, screenHeight / 5],
-    outputRange: [150, 80],
+    outputRange: [100, 60],
     extrapolate: "clamp",
   });
   const opacity = scrollY.interpolate({
@@ -116,7 +117,7 @@ export default function HomeScreen() {
       <Background weatherData={weatherData} />
 
       {/* Loading */}
-      {!weatherDataList && (
+      {!weatherData && (
         <View style={styles.topSection}>
           <Text style={styles.loadingText}>{"載入資料中..."}</Text>
           <Text style={styles.hintText}>
@@ -126,28 +127,41 @@ export default function HomeScreen() {
       )}
 
       {/* Top Section */}
-      <View style={[styles.topSection]}>
-        <View style={styles.regionNameDisplay}>
-          <Text style={styles.regionNameText}>
-            {`${region?.city}, ${region?.district}` ?? null}
-          </Text>
-        </View>
+      {weatherData && (
+        <View style={[styles.topSection]}>
+          <View style={styles.regionNameDisplay}>
+            <Text style={styles.regionNameText}>
+              {`${region?.city}, ${region?.district}` ?? null}
+            </Text>
+            <DynamicImage
+              style={styles.weatherIcon}
+              path={
+                !weatherData
+                  ? ""
+                  : weatherData.time.split(" ")[1] < "18:00:00" &&
+                    weatherData.time.split(" ")[1] >= "06:00:00"
+                  ? `day/${weatherData.weatherCode}.png`
+                  : `night/${weatherData.weatherCode}.png`
+              }
+            />
+          </View>
 
-        <Animated.View
-          style={[
-            styles.weatherDisplayLayout,
-            {
-              opacity: opacity,
-              height: headerHeight,
-            },
-          ]}
-        >
-          <WeatherDisplay
-            weatherData={weatherData}
-            isSecendLayout={isSecendLayout}
-          />
-        </Animated.View>
-      </View>
+          <Animated.View
+            style={[
+              styles.weatherDisplayLayout,
+              {
+                opacity: opacity,
+                height: headerHeight,
+              },
+            ]}
+          >
+            <WeatherDisplay
+              weatherData={weatherData}
+              isSecendLayout={isSecendLayout}
+            />
+          </Animated.View>
+        </View>
+      )}
 
       <ScrollView
         nestedScrollEnabled={true}
@@ -170,60 +184,73 @@ export default function HomeScreen() {
           pagingEnabled={true}
           nestedScrollEnabled={true}
           renderItem={({ item, index }) => (
-            <View style={{ width: screenWidth }}>
+            <>
               {/* Body Section */}
-              <View style={styles.bodySection}>
+              <View style={[styles.bodySection, { width: screenWidth }]}>
                 <ForecastDisplayWidget
-                  onPress={() => openSlideModal(item.id, indicators.temp)}
                   weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
+                  onPress={() => openSlideModal(item.id, indicators.temp)}
                 />
                 <IndicatorsDisplayWidget
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   indicatorType={indicators.wet}
                   onPress={() => openSlideModal(item.id, indicators.wet)}
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                 />
                 <IndicatorsDisplayWidget
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   indicatorType={indicators.rainRate}
                   onPress={() => openSlideModal(item.id, indicators.rainRate)}
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                 />
                 <IndicatorsDisplayWidget
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                   indicatorType={indicators.windSpeed}
                   onPress={() => openSlideModal(item.id, indicators.windSpeed)}
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
                 />
                 <IndicatorsDisplayWidget
-                  indicatorType={indicators.windDirection}
-                  onPress={() => {}}
                   weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                />
-                <IndicatorsDisplayWidget
-                  indicatorType={indicators.pm2_5}
-                  onPress={() => {}}
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                />
-                <IndicatorsDisplayWidget
-                  indicatorType={indicators.aqi}
-                  onPress={() => {}}
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                />
-                <IndicatorsDisplayWidget
                   indicatorType={indicators.bodyTemp}
                   onPress={() => openSlideModal(item.id, indicators.bodyTemp)}
+                />
+                <IndicatorsDisplayWidget
                   weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                  indicatorType={indicators.windDirection}
+                  onPress={() => {}}
                 />
-                <SuggestionDisplayWidget type="activity" dailySug={dailySug} />
-                <SuggestionDisplayWidget type="dressing" dailySug={dailySug} />
-                <SuggestionDisplayWidget type="health" dailySug={dailySug} />
-                <SuggestionDisplayWidget type="sport" dailySug={dailySug} />
-                <SuggestionDisplayWidget
-                  type="transportation"
-                  dailySug={dailySug}
+                <IndicatorsDisplayWidget
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                  indicatorType={indicators.pm2_5}
+                  onPress={() => {}}
                 />
-                <EarthquakesDisplayWidget
-                  onPress={() => openSlideModal(item.id, indicators.aqi)}
-                  earthquakeData={earthquakeDataList.recent ?? null}
+                <IndicatorsDisplayWidget
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                  indicatorType={indicators.aqi}
+                  onPress={() => {}}
                 />
+                {index == 0 && (
+                  <>
+                    <SuggestionDisplayWidget
+                      dailySug={dailySug}
+                      type="activity"
+                    />
+                    <SuggestionDisplayWidget
+                      dailySug={dailySug}
+                      type="dressing"
+                    />
+                    <SuggestionDisplayWidget
+                      dailySug={dailySug}
+                      type="health"
+                    />
+                    <SuggestionDisplayWidget dailySug={dailySug} type="sport" />
+                    <SuggestionDisplayWidget
+                      dailySug={dailySug}
+                      type="transportation"
+                    />
+                    <EarthquakesDisplayWidget
+                      earthquakeData={earthquakeDataList.recent ?? null}
+                      onPress={() => {}}
+                    />
+                  </>
+                )}
               </View>
               <IndicatorInfoModal
                 indicatorType={modalIndicatorType}
@@ -231,7 +258,7 @@ export default function HomeScreen() {
                 isModalShow={activeModalId === item.id}
                 onClose={() => setActiveModalId("-1")}
               />
-            </View>
+            </>
           )}
         />
       </ScrollView>
@@ -243,6 +270,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
+  // Loading
   loadingText: {
     color: "white",
     fontSize: 22,
@@ -254,6 +283,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
   },
+
+  // Top Section
   topSection: {
     marginTop: 40,
     justifyContent: "center",
@@ -273,11 +304,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "left",
   },
+  weatherIcon: {
+    height: "100%",
+  },
   weatherDisplayLayout: {
     flexDirection: "row",
     width: "100%",
     justifyContent: "flex-start",
   },
+
+  // Body Section
   bodySection: {
     flexDirection: "row",
     flexWrap: "wrap",

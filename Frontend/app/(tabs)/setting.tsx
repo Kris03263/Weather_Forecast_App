@@ -357,13 +357,17 @@ export default function SettingsScreen() {
           <Text style={styles.headerText}>設定</Text>
           <View>
             <Pressable
-              style={styles.avatar}
+              style={styles.userInfoButton}
               onPress={() => {
                 user.id && user.id !== "-1"
                   ? openModal(ModalType.USER)
                   : openModal(ModalType.LOGIN);
               }}
-            ></Pressable>
+            >
+              <Text style={styles.buttonText}>
+                {user.id && user.id !== "-1" ? "使用者資訊" : "登入"}
+              </Text>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -371,37 +375,39 @@ export default function SettingsScreen() {
       {user.id && user.id !== "-1" && (
         <View style={styles.bodySection}>
           {/* 天氣偏好區塊 */}
-          <Widget isVisible={true}>
-            <Text style={styles.boxTitle}>天氣偏好</Text>
-            <View style={styles.boxInputLayout}>
-              <Text style={styles.boxInputLabel}>溫度偏好:</Text>
-              <TextInput style={styles.boxInput} placeholder="輸入溫度(°C)" />
-            </View>
-            <View style={styles.boxInputLayout}>
-              <Text style={styles.boxInputLabel}>濕度偏好:</Text>
-              <TextInput style={styles.boxInput} placeholder="輸入濕度" />
+          <Widget title="天氣偏好" isVisible={true} style={{ width: "100%" }}>
+            <View style={styles.boxLayout}>
+              <View style={styles.boxInputLayout}>
+                <Text style={styles.boxInputLabel}>溫度偏好:</Text>
+                <TextInput style={styles.boxInput} placeholder="輸入溫度(°C)" />
+              </View>
+              <View style={styles.boxInputLayout}>
+                <Text style={styles.boxInputLabel}>濕度偏好:</Text>
+                <TextInput style={styles.boxInput} placeholder="輸入濕度" />
+              </View>
             </View>
           </Widget>
           {/* 活動偏好區塊 */}
-          <Widget isVisible={true}>
-            <Text style={styles.boxTitle}>活動偏好</Text>
-            <View style={styles.boxInputLayout}>
-              <Text style={styles.boxInputLabel}>運動偏好:</Text>
-              <Pressable
-                style={styles.boxButton}
-                onPress={() => openModal(ModalType.SPORT)}
-              >
-                <Text style={styles.buttonText}>選擇運動</Text>
-              </Pressable>
-            </View>
-            <View style={styles.boxInputLayout}>
-              <Text style={styles.boxInputLabel}>興趣偏好:</Text>
-              <Pressable
-                style={styles.boxButton}
-                onPress={() => openModal(ModalType.HABIT)}
-              >
-                <Text style={styles.buttonText}>選擇嗜好</Text>
-              </Pressable>
+          <Widget title="活動偏好" isVisible={true} style={{ width: "100%" }}>
+            <View style={styles.boxLayout}>
+              <View style={styles.boxInputLayout}>
+                <Text style={styles.boxInputLabel}>運動偏好:</Text>
+                <Pressable
+                  style={styles.boxButton}
+                  onPress={() => openModal(ModalType.SPORT)}
+                >
+                  <Text style={styles.buttonText}>選擇運動</Text>
+                </Pressable>
+              </View>
+              <View style={styles.boxInputLayout}>
+                <Text style={styles.boxInputLabel}>興趣偏好:</Text>
+                <Pressable
+                  style={styles.boxButton}
+                  onPress={() => openModal(ModalType.HABIT)}
+                >
+                  <Text style={styles.buttonText}>選擇嗜好</Text>
+                </Pressable>
+              </View>
             </View>
           </Widget>
         </View>
@@ -409,14 +415,12 @@ export default function SettingsScreen() {
 
       {(!user.id || user.id === "-1") && (
         <View style={styles.bodySection}>
-          <Widget isVisible={true}>
-            <Text style={styles.boxTitle}>登入以使用設定</Text>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => openModal(ModalType.LOGIN)}
-            >
-              <Text style={styles.buttonText}>登入</Text>
-            </Pressable>
+          <Widget
+            title="登入以使用設定"
+            isVisible={true}
+            style={{ width: "100%" }}
+          >
+            <View style={styles.boxLayout}></View>
           </Widget>
         </View>
       )}
@@ -435,16 +439,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  buttonText: {
-    fontSize: 16,
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  linkText: {
-    color: "gray",
-    textDecorationLine: "underline",
   },
   topSection: {
     flexDirection: "row",
@@ -465,56 +459,68 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
   },
-  avatar: {
-    width: 30,
+  userInfoButton: {
     height: 30,
-    borderRadius: 20,
-    backgroundColor: "#ccc",
+    backgroundColor: "#2196F3",
+    borderRadius: 5,
+    justifyContent: "center",
+    padding: 10,
   },
   bodySection: {
     backgroundColor: "#FFFFFF01",
+    alignItems: "center",
     padding: "3%",
     paddingBottom: 80,
   },
 
   // Box
-  boxTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 10,
+  boxLayout: {
+    height: 100,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "space-evenly",
   },
   boxInputLayout: {
+    gap: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   boxInput: {
+    height: 30,
     width: 180,
     backgroundColor: "#ffffff00",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 5,
     borderColor: "white",
     borderWidth: 2,
   },
   boxInputLabel: {
     color: "white",
-    fontSize: 16,
+    fontSize: 14,
   },
   boxButton: {
+    height: 30,
+    width: 180,
     backgroundColor: "#4f8ef7",
-    maxWidth: 180,
-    flex: 1,
-    borderRadius: 10,
-    alignItems: "center",
     padding: 10,
+    borderRadius: 5,
+    borderColor: "white",
+    borderWidth: 2,
+    justifyContent: "center",
+  },
+  buttonText: {
+    fontSize: 14,
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 
   // Modal
   modalButton: {
     backgroundColor: "#2196F3",
     borderRadius: 10,
-    alignItems: "center",
+    justifyContent: "center",
     padding: 10,
   },
   modalInputLayout: {
@@ -535,5 +541,9 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 5,
+  },
+  linkText: {
+    color: "gray",
+    textDecorationLine: "underline",
   },
 });

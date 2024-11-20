@@ -49,28 +49,27 @@ export function Widget({
 
   if (isPressable)
     return (
-      <Pressable style={[styles.emptyWidget, style]} onPress={onPress}>
-        <Animated.View style={{ width: "100%", opacity: opacityValue }}>
-          <View style={styles.titleLayout}>
-            <SvgImage style={styles.svgImage} name={svgName} />
-            <Text style={styles.titleText}>{title}</Text>
-          </View>
-          <View style={styles.separator} />
-          {children}
-        </Animated.View>
+      <Pressable
+        style={[styles.emptyWidget, style, { opacity: opacityValue }]}
+        onPress={onPress}
+      >
+        <View style={styles.titleLayout}>
+          <SvgImage style={styles.svgImage} name={svgName} />
+          <Text style={styles.titleText}>{title}</Text>
+        </View>
+        <View style={styles.separator} />
+        {children}
       </Pressable>
     );
   else
     return (
-      <View style={[styles.emptyWidget, style]}>
-        <Animated.View style={{ width: "100%", opacity: opacityValue }}>
-          <View style={styles.titleLayout}>
-            <SvgImage style={styles.svgImage} name={svgName} />
-            <Text style={styles.titleText}>{title}</Text>
-          </View>
-          <View style={styles.separator} />
-          {children}
-        </Animated.View>
+      <View style={[styles.emptyWidget, style, { opacity: opacityValue }]}>
+        <View style={styles.titleLayout}>
+          <SvgImage style={styles.svgImage} name={svgName} />
+          <Text style={styles.titleText}>{title}</Text>
+        </View>
+        <View style={styles.separator} />
+        {children}
       </View>
     );
 }
@@ -82,13 +81,13 @@ const styles = StyleSheet.create({
     width: 150,
     alignItems: "flex-start",
     padding: 10,
-    margin: 5,
+    margin: 10,
     backgroundColor: "#0000000A",
     borderRadius: 15,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: 8,
   },
   titleLayout: {
     width: "100%",

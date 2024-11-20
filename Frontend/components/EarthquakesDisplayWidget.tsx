@@ -24,7 +24,7 @@ export function EarthquakesDisplayWidget({
     >
       <View style={styles.contentLayout}>
         <Text style={styles.contentText}>{earthquakeData?.content ?? ""}</Text>
-        <View style={styles.listLayout}>
+        {/* <View style={styles.listLayout}>
           <Text style={styles.listTitleText}>時間:</Text>
           <Text style={styles.listContentText}>
             {earthquakeData?.time ?? "--"}
@@ -53,7 +53,7 @@ export function EarthquakesDisplayWidget({
           <Text style={styles.listContentText}>
             {earthquakeData?.distance ?? "--"}公里
           </Text>
-        </View>
+        </View> */}
       </View>
     </Widget>
   );
@@ -62,7 +62,6 @@ export function EarthquakesDisplayWidget({
 const styles = StyleSheet.create({
   customWidgetStyle: {
     width: 310,
-    height: 310,
   },
   layout: {
     width: "100%",
@@ -84,15 +83,15 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   contentLayout: {
+    height: 260,
     flexDirection: "column",
     alignItems: "flex-start",
-    justifyContent: "flex-start",
-    width: "100%",
+    justifyContent: "space-between",
     gap: 10,
   },
   contentText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 16,
     textAlign: "left",
   },
   listLayout: {

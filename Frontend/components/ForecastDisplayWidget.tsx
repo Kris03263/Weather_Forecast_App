@@ -1,7 +1,6 @@
-import { StyleSheet, View, Pressable, Text, FlatList } from "react-native";
+import { StyleSheet, View, Text, FlatList } from "react-native";
 
 import { Widget } from "@/components/Widget";
-import { SvgImage } from "@/components/Svg";
 import { DynamicImage } from "@/components/DynamicImage";
 
 import { WeatherData } from "@/app/(tabs)/_layout";
@@ -29,8 +28,7 @@ export function ForecastDisplayWidget({
       <View style={styles.contentLayout}>
         <FlatList
           nestedScrollEnabled
-          horizontal
-          style={styles.weatherCardGroupLayout}
+          contentContainerStyle={styles.weatherCardGroupLayout}
           data={weatherDatas ?? []}
           renderItem={({ item }) => (
             <View style={styles.weatherCardLayout}>
@@ -62,45 +60,33 @@ export function ForecastDisplayWidget({
 const styles = StyleSheet.create({
   customWidgetStyle: {
     width: 310,
-    height: 310,
     overflow: "hidden",
   },
   contentLayout: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    overflow: "hidden",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
+    height: 100,
     gap: 10,
-  },
-  weatherScroll: {
-    flexDirection: "row",
   },
   weatherCardGroupLayout: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    height: "100%",
+    justifyContent: "flex-start",
   },
   weatherCardLayout: {
     width: 60,
-    height: "100%",
+    height: 100,
     backgroundColor: "none",
-    justifyContent: "space-between",
+    flexDirection: "column",
+    justifyContent: "space-evenly",
     alignItems: "center",
-    borderRadius: 8,
   },
   weatherIcon: {
+    height: "40%",
     width: "40%",
     marginBottom: 5,
   },
   weatherTimeText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 14,
   },
   weatherTemperatureText: {
     color: "white",

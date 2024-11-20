@@ -2,8 +2,6 @@ import { StyleSheet, View, Text } from "react-native";
 
 import { WeatherData, indicatorsDictionary } from "@/app/(tabs)/_layout";
 
-import { DynamicImage } from "./DynamicImage";
-
 interface WeatherDisplayProps {
   isSecendLayout: boolean;
   weatherData: WeatherData;
@@ -37,21 +35,10 @@ export function WeatherDisplay({
     <View style={styles.layout}>
       <View style={styles.temperatureDisplay}>
         <Text style={styles.temperature}>{`${temp.value}${temp.unit}`}</Text>
-        <DynamicImage
-          style={styles.weatherIcon}
-          path={
-            !weatherData
-              ? ""
-              : weatherData.time.split(" ")[1] < "18:00:00" &&
-                weatherData.time.split(" ")[1] >= "06:00:00"
-              ? `day/${weatherData.weatherCode}.png`
-              : `night/${weatherData.weatherCode}.png`
-          }
-        />
+        <Text style={styles.body_temperature}>
+          {`| ${bodyTemp.value}${bodyTemp.unit}`}
+        </Text>
       </View>
-      <Text style={styles.body_temperature}>
-        {`| ${bodyTemp.value}${bodyTemp.unit}`}
-      </Text>
     </View>
   );
 }
@@ -61,7 +48,7 @@ const styles = StyleSheet.create({
   layout: {
     width: "100%",
     flexDirection: "column",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "center",
     padding: 20,
     gap: 10,
@@ -80,15 +67,11 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   body_temperature: {
-    marginBottom: 2,
+    marginBottom: 10,
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "left",
-  },
-  weatherIcon: {
-    height: "100%",
-    marginRight: 10,
   },
 });
 
