@@ -17,16 +17,15 @@ export function ForecastDisplayWidget({
 }: ForecastDisplayWidgetProps) {
   return (
     <Widget
+      title="天氣預報"
+      svgName="weather"
       style={styles.customWidgetStyle}
       isVisible={true}
       isPressable={true}
       onPress={onPress}
+      widthMutiplier={2}
+      heightMultiplier={2}
     >
-      <View style={styles.titleLayout}>
-        <SvgImage style={styles.svgImage} name="weather" />
-        <Text style={styles.titleText}>天氣預報</Text>
-      </View>
-
       <View style={styles.contentLayout}>
         <FlatList
           nestedScrollEnabled
@@ -62,25 +61,17 @@ export function ForecastDisplayWidget({
 // Default Style
 const styles = StyleSheet.create({
   customWidgetStyle: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  titleLayout: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    gap: 10,
-  },
-  titleText: {
-    color: "white",
-    fontSize: 20,
-    textAlign: "left",
+    width: 310,
+    height: 310,
+    overflow: "hidden",
   },
   contentLayout: {
+    flex: 1,
     width: "100%",
+    height: "100%",
     overflow: "hidden",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 10,
     gap: 10,
   },
@@ -89,18 +80,21 @@ const styles = StyleSheet.create({
   },
   weatherCardGroupLayout: {
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     width: "100%",
-    height: 150,
+    height: "100%",
   },
   weatherCardLayout: {
     width: 60,
+    height: "100%",
     backgroundColor: "none",
     justifyContent: "space-between",
     alignItems: "center",
     borderRadius: 8,
   },
   weatherIcon: {
-    width: "80%",
+    width: "40%",
     marginBottom: 5,
   },
   weatherTimeText: {
@@ -112,9 +106,5 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  svgImage: {
-    width: 30,
-    height: 30,
   },
 });

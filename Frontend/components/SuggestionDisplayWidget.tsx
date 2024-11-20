@@ -1,7 +1,6 @@
 import { StyleSheet, View, Text } from "react-native";
 
 import { Widget } from "@/components/Widget";
-import { SvgImage } from "@/components/Svg";
 
 import { DailySug } from "@/app/(tabs)/_layout";
 
@@ -17,10 +16,14 @@ export function SuggestionDisplayWidget({
   const suggestion = dailySug?.[type as keyof typeof dailySug] ?? null;
 
   return (
-    <Widget style={styles.customWidgetStyle} isVisible={true}>
-      <View style={styles.layout}>
-        <SvgImage style={styles.svgImage} name={type} />
-        <Text style={styles.text}>
+    <Widget
+      title="建議"
+      svgName={type}
+      style={styles.customWidgetStyle}
+      isVisible={true}
+    >
+      <View style={styles.contentLayout}>
+        <Text style={styles.suggestionText}>
           {suggestion?.[0]?.suggestion ?? "無資料"}
         </Text>
       </View>
@@ -30,22 +33,16 @@ export function SuggestionDisplayWidget({
 
 // Default Style
 const styles = StyleSheet.create({
-  customWidgetStyle: {
-    alignItems: "center",
-  },
-  layout: {
+  customWidgetStyle: {},
+  contentLayout: {
     flexDirection: "column",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 10,
   },
-  text: {
+  suggestionText: {
     color: "white",
     fontSize: 16,
     textAlign: "left",
-  },
-  svgImage: {
-    width: 30,
-    height: 30,
   },
 });

@@ -27,19 +27,14 @@ export function IndicatorsDisplayWidget({
 
   return (
     <Widget
+      title={indicator.title}
+      svgName={indicator.svgName}
       style={styles.customWidgetStyle}
       isVisible={true}
       isPressable={true}
       onPress={onPress}
     >
-      <View style={styles.layout}>
-        <View style={styles.titleDisplay}>
-          <SvgImage
-            style={styles.svgImage}
-            name={indicatorsDictionary[indicatorType].svgName}
-          />
-          <Text style={styles.titleText}>{indicator.title}</Text>
-        </View>
+      <View style={styles.contentLayout}>
         <Text style={styles.valueText}>{indicator.value + indicator.unit}</Text>
       </View>
     </Widget>
@@ -48,36 +43,17 @@ export function IndicatorsDisplayWidget({
 
 // Default Style
 const styles = StyleSheet.create({
-  customWidgetStyle: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  layout: {
+  customWidgetStyle: {},
+  contentLayout: {
     flexDirection: "column",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 10,
-  },
-  titleDisplay: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    gap: 10,
-  },
-  titleText: {
-    color: "white",
-    fontSize: 20,
-    textAlign: "left",
   },
   valueText: {
     color: "white",
     fontSize: 30,
     // fontWeight: "bold",
     textAlign: "left",
-  },
-  svgImage: {
-    width: 30,
-    height: 30,
-    color: "#9ca8b7",
   },
 });

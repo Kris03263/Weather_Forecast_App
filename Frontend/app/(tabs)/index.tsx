@@ -32,8 +32,6 @@ import {
   setSelectedTargetRegionIndex,
 } from "@/redux/selecterSlice";
 
-const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
-
 export default function HomeScreen() {
   const selecter = useSelector(
     (state: { selecter: Selecter }) => state.selecter
@@ -52,6 +50,23 @@ export default function HomeScreen() {
     weatherDataList?.[regions[selecter.regionIndex]?.id]?.[0] ?? null;
   const weatherData = weatherDatas?.[0] ?? null;
   const region = regions[selecter.regionIndex];
+
+  // Screen Size Control
+  const [screenHeight, setScreenHeight] = useState(
+    Dimensions.get("window").height
+  );
+  const [screenWidth, setScreenWidth] = useState(
+    Dimensions.get("window").width
+  );
+
+  useEffect(() => {
+    const updateScreen = () => {
+      setScreenWidth(Dimensions.get("window").width);
+      setScreenHeight(Dimensions.get("window").height);
+    };
+    Dimensions.addEventListener("change", updateScreen);
+    updateScreen();
+  }, []);
 
   // Header Control
   const [isSecendLayout, setIsSecendLayout] = useState(false);
@@ -120,7 +135,7 @@ export default function HomeScreen() {
 
         <Animated.View
           style={[
-            styles.temperatureDisplay,
+            styles.weatherDisplayLayout,
             {
               opacity: opacity,
               height: headerHeight,
@@ -162,75 +177,53 @@ export default function HomeScreen() {
                   onPress={() => openSlideModal(item.id, indicators.temp)}
                   weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
                 />
-                <View style={styles.rowLayout}>
-                  <IndicatorsDisplayWidget
-                    indicatorType={indicators.wet}
-                    onPress={() => openSlideModal(item.id, indicators.wet)}
-                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  />
-                  <IndicatorsDisplayWidget
-                    indicatorType={indicators.rainRate}
-                    onPress={() => openSlideModal(item.id, indicators.rainRate)}
-                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  />
-                </View>
-                <View style={styles.rowLayout}>
-                  <IndicatorsDisplayWidget
-                    indicatorType={indicators.windSpeed}
-                    onPress={() =>
-                      openSlideModal(item.id, indicators.windSpeed)
-                    }
-                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  />
-                  <IndicatorsDisplayWidget
-                    indicatorType={indicators.windDirection}
-                    onPress={() => {}}
-                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  />
-                </View>
-                <View style={styles.rowLayout}>
-                  <IndicatorsDisplayWidget
-                    indicatorType={indicators.pm2_5}
-                    onPress={() => {}}
-                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  />
-                  <IndicatorsDisplayWidget
-                    indicatorType={indicators.aqi}
-                    onPress={() => {}}
-                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  />
-                </View>
-                <View style={styles.rowLayout}>
-                  <IndicatorsDisplayWidget
-                    indicatorType={indicators.bodyTemp}
-                    onPress={() => openSlideModal(item.id, indicators.bodyTemp)}
-                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  />
-                  <SuggestionDisplayWidget
-                    type="activity"
-                    dailySug={dailySug}
-                  />
-                </View>
-                <View style={styles.rowLayout}>
-                  <SuggestionDisplayWidget
-                    type="dressing"
-                    dailySug={dailySug}
-                  />
-                  <SuggestionDisplayWidget type="health" dailySug={dailySug} />
-                </View>
-                <View style={styles.rowLayout}>
-                  <SuggestionDisplayWidget type="sport" dailySug={dailySug} />
-                  <SuggestionDisplayWidget
-                    type="transportation"
-                    dailySug={dailySug}
-                  />
-                </View>
-                <View style={styles.rowLayout}>
-                  <EarthquakesDisplayWidget
-                    onPress={() => openSlideModal(item.id, indicators.aqi)}
-                    earthquakeData={earthquakeDataList.recent ?? null}
-                  />
-                </View>
+                <IndicatorsDisplayWidget
+                  indicatorType={indicators.wet}
+                  onPress={() => openSlideModal(item.id, indicators.wet)}
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                />
+                <IndicatorsDisplayWidget
+                  indicatorType={indicators.rainRate}
+                  onPress={() => openSlideModal(item.id, indicators.rainRate)}
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                />
+                <IndicatorsDisplayWidget
+                  indicatorType={indicators.windSpeed}
+                  onPress={() => openSlideModal(item.id, indicators.windSpeed)}
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                />
+                <IndicatorsDisplayWidget
+                  indicatorType={indicators.windDirection}
+                  onPress={() => {}}
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                />
+                <IndicatorsDisplayWidget
+                  indicatorType={indicators.pm2_5}
+                  onPress={() => {}}
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                />
+                <IndicatorsDisplayWidget
+                  indicatorType={indicators.aqi}
+                  onPress={() => {}}
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                />
+                <IndicatorsDisplayWidget
+                  indicatorType={indicators.bodyTemp}
+                  onPress={() => openSlideModal(item.id, indicators.bodyTemp)}
+                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                />
+                <SuggestionDisplayWidget type="activity" dailySug={dailySug} />
+                <SuggestionDisplayWidget type="dressing" dailySug={dailySug} />
+                <SuggestionDisplayWidget type="health" dailySug={dailySug} />
+                <SuggestionDisplayWidget type="sport" dailySug={dailySug} />
+                <SuggestionDisplayWidget
+                  type="transportation"
+                  dailySug={dailySug}
+                />
+                <EarthquakesDisplayWidget
+                  onPress={() => openSlideModal(item.id, indicators.aqi)}
+                  earthquakeData={earthquakeDataList.recent ?? null}
+                />
               </View>
               <IndicatorInfoModal
                 indicatorType={modalIndicatorType}
@@ -249,7 +242,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: screenWidth,
   },
   loadingText: {
     color: "white",
@@ -281,12 +273,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "left",
   },
-  temperatureDisplay: {
+  weatherDisplayLayout: {
     flexDirection: "row",
     width: "100%",
     justifyContent: "flex-start",
   },
   bodySection: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
     backgroundColor: "#FFFFFF01",
     padding: "3%",
     paddingBottom: 80,

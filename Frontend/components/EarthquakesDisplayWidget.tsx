@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
-import { StyleSheet, View, Pressable, Text, Image } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 
 import { EarthquakeData } from "@/app/(tabs)/_layout";
 
 import { Widget } from "@/components/Widget";
-import { SvgImage } from "@/components/Svg";
 
 interface EarthquakesDisplayWidgetProps {
   earthquakeData: EarthquakeData;
@@ -17,50 +15,44 @@ export function EarthquakesDisplayWidget({
 }: EarthquakesDisplayWidgetProps) {
   return (
     <Widget
+      title="最近地震資訊"
+      svgName="earthquake"
       style={styles.customWidgetStyle}
       isVisible={true}
       isPressable={true}
       onPress={onPress}
     >
-      <View style={styles.layout}>
-        <View style={styles.titleLayout}>
-          <SvgImage style={styles.svgImage} name="earthquake" />
-          <Text style={styles.titleText}>最近地震資訊</Text>
-        </View>
-        <View style={styles.contentDisplay}>
-          <Text style={styles.contentText}>
-            {earthquakeData?.content ?? ""}
+      <View style={styles.contentLayout}>
+        <Text style={styles.contentText}>{earthquakeData?.content ?? ""}</Text>
+        <View style={styles.listLayout}>
+          <Text style={styles.listTitleText}>時間:</Text>
+          <Text style={styles.listContentText}>
+            {earthquakeData?.time ?? "--"}
           </Text>
-          <View style={styles.listLayout}>
-            <Text style={styles.listTitleText}>時間:</Text>
-            <Text style={styles.listContentText}>
-              {earthquakeData?.time ?? "--"}
-            </Text>
-          </View>
-          <View style={styles.listLayout}>
-            <Text style={styles.listTitleText}>規模:</Text>
-            <Text style={styles.listContentText}>
-              {earthquakeData?.magnitude ?? "--"}
-            </Text>
-          </View>
-          <View style={styles.listLayout}>
-            <Text style={styles.listTitleText}>所在地區震度:</Text>
-            <Text style={styles.listContentText}>
-              {earthquakeData?.nowLocationIntensity ?? "--"}
-            </Text>
-          </View>
-          <View style={styles.listLayout}>
-            <Text style={styles.listTitleText}>深度:</Text>
-            <Text style={styles.listContentText}>
-              {earthquakeData?.depth ?? "--"}公里
-            </Text>
-          </View>
-          <View style={styles.listLayout}>
-            <Text style={styles.listTitleText}>距離:</Text>
-            <Text style={styles.listContentText}>
-              {earthquakeData?.distance ?? "--"}公里
-            </Text>
-          </View>
+        </View>
+        <View style={styles.listLayout}>
+          <Text style={styles.listTitleText}>規模:</Text>
+          <Text style={styles.listContentText}>
+            {earthquakeData?.magnitude ?? "--"}
+          </Text>
+        </View>
+        <View style={styles.listLayout}>
+          <Text style={styles.listTitleText}>所在地區震度:</Text>
+          <Text style={styles.listContentText}>
+            {earthquakeData?.nowLocationIntensity ?? "--"}
+          </Text>
+        </View>
+        <View style={styles.listLayout}>
+          <Text style={styles.listTitleText}>深度:</Text>
+          <Text style={styles.listContentText}>
+            {earthquakeData?.depth ?? "--"}公里
+          </Text>
+        </View>
+        <View style={styles.listLayout}>
+          <Text style={styles.listTitleText}>距離:</Text>
+          <Text style={styles.listContentText}>
+            {earthquakeData?.distance ?? "--"}公里
+          </Text>
         </View>
       </View>
     </Widget>
@@ -69,8 +61,8 @@ export function EarthquakesDisplayWidget({
 
 const styles = StyleSheet.create({
   customWidgetStyle: {
-    alignItems: "center",
-    justifyContent: "center",
+    width: 310,
+    height: 310,
   },
   layout: {
     width: "100%",
@@ -91,7 +83,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: "left",
   },
-  contentDisplay: {
+  contentLayout: {
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "flex-start",
