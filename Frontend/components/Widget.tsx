@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   titleText: {
-    color: "#9ca8b7",
+    color: "white",
     fontSize: 14,
     textAlign: "left",
   },
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     width: "100%",
-    backgroundColor: "#9ca8b7",
+    backgroundColor: "white",
     marginVertical: 2,
   },
 });
