@@ -20,6 +20,7 @@ import DownIcon from "@/assets/svgs/down-icon.svg";
 import AqiIcon from "@/assets/svgs/aqi-icon.svg";
 import TempIcon from "@/assets/svgs/temp-icon.svg";
 import Pm2_5Icon from "@/assets/svgs/pm2_5-icon.svg";
+import ShareIcon from "@/assets/svgs/share.svg";
 
 interface SvgProps {
   style?: object;
@@ -48,6 +49,7 @@ export function SvgImage({ style = {}, name = "" }: SvgProps) {
     aqi: AqiIcon,
     temp: TempIcon,
     pm2_5: Pm2_5Icon,
+    share: ShareIcon,
   }[name];
 
   return (
