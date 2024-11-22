@@ -8,7 +8,7 @@ import {
   Text,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { FlatList } from "react-native-gesture-handler";
+import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 
 import {
   Region,
