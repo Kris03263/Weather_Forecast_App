@@ -34,7 +34,7 @@ import {
 // - [V] Add weather data API
 // - [V] Add weather image
 // - [X] Fix muti-day weather forecast view (Cancel)
-// - [ ] Switch to use region name to fetch weather data
+// - [V] Switch to use region name to fetch weather data
 // - [V] Switch to use Redux for global state management
 // - [V] Move weatherDataList, region, currentTime to index.tsx
 // - [V] Use a global variable to save wrong msg
@@ -177,8 +177,13 @@ export interface GlobalMessage {
 
 export const userLogin = async (_account: string, _password: string) => {
   await userLogout();
+
   const user = await HandleUserLogin(_account, _password);
-  if (!user) return;
+
+  if (!user) {
+    showNotification("帳號或密碼錯誤");
+    return;
+  }
 
   store.dispatch(setUser(user));
   AsyncStorage.setItem("userID", user.id);
@@ -195,7 +200,11 @@ export const userLogout = async () => {
 };
 export const userDelete = async (_userID: string) => {
   const response = await HandleDeleteUser(_userID);
-  if (!response) return;
+
+  if (!response) {
+    showNotification("刪除帳號失敗，請稍後再試");
+    return;
+  }
 
   store.dispatch(removeUser());
   AsyncStorage.setItem("userID", "-1");
@@ -204,7 +213,11 @@ export const userDelete = async (_userID: string) => {
 };
 export const userRegister = async (_account: string, _password: string) => {
   const user = await HandleSetUser(_account, _password);
-  if (!user) return;
+
+  if (!user) {
+    showNotification("註冊失敗，請稍後再試");
+    return;
+  }
 
   store.dispatch(setUser(user));
   AsyncStorage.setItem("userID", user.id);
@@ -218,7 +231,11 @@ export const userSetSports = async (_sportIDs: number[]) => {
 
   const response = await HandleSetUserSports(userID, _sportIDs);
   const sports = await HandleGetUserSports(userID);
-  if (!sports || !response) return;
+
+  if (!sports || !response) {
+    showNotification("運動資料更新失敗，請稍後再試");
+    return;
+  }
 
   store.dispatch(setSport(sports));
 
@@ -230,7 +247,10 @@ export const userSetHabits = async (_habitIDs: number[]) => {
   const response = await HandleSetUserHabits(userID, _habitIDs);
   const habits = await HandleGetUserHabits(userID);
 
-  if (!habits || !response) return;
+  if (!habits || !response) {
+    showNotification("喜好資料更新失敗，請稍後再試");
+    return;
+  }
 
   store.dispatch(setHabit(habits));
 
@@ -269,6 +289,15 @@ export const userAddRegion = async (_city: string, _district: string) => {
 export const userRemoveRegion = async (_index: number) => {
   const regions = store.getState().regions;
 
+  if (_index === 0) {
+    showNotification("無法刪除目前位置");
+    return;
+  }
+  if (_index >= regions.length) {
+    showNotification("地區不存在");
+    return;
+  }
+
   store.dispatch(setRegions(regions.filter((r, index) => index !== _index)));
   AsyncStorage.setItem(
     "regions",
@@ -285,17 +314,32 @@ export const userRemoveRegion = async (_index: number) => {
 export const getAllRegionList = async (): Promise<RegionList> => {
   const regionList = await HandleGetAllRegion();
 
-  return regionList ?? ({} as RegionList);
+  if (!regionList) {
+    showNotification("獲取所有地區選項失敗");
+    return {} as RegionList;
+  }
+
+  return regionList;
 };
 export const getAllSportList = async (): Promise<Sport[]> => {
   const sportList = await HandleGetAllSport();
 
-  return sportList ?? [];
+  if (!sportList) {
+    showNotification("獲取所有運動選項失敗");
+    return [];
+  }
+
+  return sportList;
 };
 export const getAllHabitList = async (): Promise<Habit[]> => {
   const habitList = await HandleGetAllHabit();
 
-  return habitList ?? [];
+  if (!habitList) {
+    showNotification("獲取所有喜好選項失敗");
+    return [];
+  }
+
+  return habitList;
 };
 export const updateEarthquakeData = async () => {
   const userID = store.getState().user.id;
@@ -307,7 +351,10 @@ export const updateEarthquakeData = async () => {
     regions[0].longitude
   );
 
-  if (!data) return [];
+  if (!data) {
+    showNotification("更新地震資料失敗");
+    return;
+  }
 
   store.dispatch(setRecentEarthquakeData(data[0]));
   store.dispatch(setHistoryEarthquakeData(data));
@@ -316,7 +363,11 @@ export const updateRegion0 = async () => {
   const regions = store.getState().regions;
 
   const region = await HandleGetLocation();
-  if (!region) return;
+
+  if (!region) {
+    showNotification("獲取目前位置失敗");
+    return;
+  }
 
   store.dispatch(setRegions([region, ...regions.filter((_, i) => i !== 0)]));
   AsyncStorage.setItem(
@@ -349,7 +400,12 @@ export const updateWeatherData_3h = async (_region?: Region) => {
     regions.map(async (region) => {
       const weatherData3h = await HandleGetWeatherData3h(userID, region);
 
-      if (!weatherData3h) return;
+      if (!weatherData3h) {
+        showNotification(
+          `更新${region.city}, ${region.district}天氣資料(3h)失敗`
+        );
+        return;
+      }
 
       store.dispatch(updateWeatherData3h(weatherData3h));
     })
@@ -369,7 +425,12 @@ export const updateWeatherData_12h = async (_region?: Region) => {
     regions.map(async (region) => {
       const weatherData12h = await HandleGetWeatherData12h(userID, region);
 
-      if (!weatherData12h) return;
+      if (!weatherData12h) {
+        showNotification(
+          `更新${region.city}, ${region.district}天氣資料(12h)失敗`
+        );
+        return;
+      }
 
       store.dispatch(updateWeatherData12h(weatherData12h));
     })
@@ -387,7 +448,11 @@ export const updateUser = async () => {
   if (userID === "-1") return;
 
   const user = await HandleGetUser(userID);
-  if (!user) return;
+
+  if (!user) {
+    showNotification("更新使用者資料失敗");
+    return;
+  }
 
   store.dispatch(setUser(user));
   AsyncStorage.setItem("userID", user?.id ?? "-1");
@@ -400,7 +465,12 @@ export const updateDailySuggestions = async () => {
   let userID = store.getState().user.id;
   let regions = store.getState().regions;
 
-  const dailySuggestions = (await HandleGetDailySug(userID, regions[0])) ?? {};
+  const dailySuggestions = await HandleGetDailySug(userID, regions[0]);
+
+  if (!dailySuggestions) {
+    showNotification("更新每日建議失敗");
+    return;
+  }
 
   store.dispatch(setDailySug(dailySuggestions));
 
@@ -408,8 +478,6 @@ export const updateDailySuggestions = async () => {
 };
 export const updateUserSettings = async () => {
   let userID = store.getState().user.id;
-
-  if (userID === "-1") return;
 
   const userSettings = {
     sport: (await HandleGetUserSports(userID)) ?? [],
@@ -476,15 +544,15 @@ const HandleSetUser = async (
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleSetUser failed!" +
-        "\n" +
-        `Sending: ${JSON.stringify({
+    console.log(
+      "HandleSetUser failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
           userAccount: _account,
           password: _password,
-        })}` +
-        "\n" +
-        `Error: ${String(e)}`
+        }) +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -505,12 +573,12 @@ const HandleGetUser = async (_userID: string): Promise<User | null> => {
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetUser failed!" +
-        "\n" +
-        `URL: ${hostURL}/Users/?id=${_userID}` +
-        "\n" +
-        `Error: ${String(e)}`
+    console.log(
+      "HandleGetUser failed! \n" +
+        "URL: \n" +
+        `${hostURL}/Users/?id=${_userID}` +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -537,14 +605,14 @@ const HandleDeleteUser = async (_userID: string): Promise<any> => {
 
     return response;
   } catch (e) {
-    showNotification(
-      "HandleDeleteUser failed!" +
-        "\n" +
-        `Sending: ${JSON.stringify({
+    console.log(
+      "HandleDeleteUser failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
           userID: _userID,
-        })}` +
-        "\n" +
-        `Error: ${String(e)}`
+        }) +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -575,15 +643,15 @@ const HandleUserLogin = async (
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleUserLogin failed!" +
-        "\n" +
-        `Sending: ${JSON.stringify({
+    console.log(
+      "HandleUserLogin failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
           userAccount: _account,
           password: _password,
-        })}` +
-        "\n" +
-        `Error: ${String(e)}`
+        }) +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -614,15 +682,15 @@ const HandleSetUserSports = async (
 
     return response;
   } catch (e) {
-    showNotification(
-      "HandleSetUserSport failed!" +
-        "\n" +
-        `Sending: ${JSON.stringify({
+    console.log(
+      "HandleSetUserSports failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
           userID: _userID,
           sportIDs: _sportIDs,
-        })}` +
-        "\n" +
-        `Error: ${String(e)}`
+        }) +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -648,12 +716,12 @@ const HandleGetUserSports = async (
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetUserSports failed!" +
-        "\n" +
-        `URL: ${hostURL}/Users/UserSports?ID=${_userID}` +
-        "\n" +
-        `Error: ${String(e)}`
+    console.log(
+      "HandleGetUserSports failed! \n" +
+        "URL: \n" +
+        `${hostURL}/Users/UserSports?ID=${_userID}` +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -684,15 +752,15 @@ const HandleSetUserHabits = async (
 
     return response;
   } catch (e) {
-    showNotification(
-      "HandleSetUserHabit failed!" +
-        "\n" +
-        `Sending: ${JSON.stringify({
+    console.log(
+      "HandleSetUserHabits failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
           userID: _userID,
           habitIDs: _habitIDs,
-        })}` +
-        "\n" +
-        `Error: ${String(e)}`
+        }) +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -720,12 +788,12 @@ const HandleGetUserHabits = async (
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetUserHabits failed!" +
-        "\n" +
-        `URL: ${hostURL}/Users/UserHabits?ID=${_userID}` +
-        "\n" +
-        `Error: ${String(e)}`
+    console.log(
+      "HandleGetUserHabits failed! \n" +
+        "URL: \n" +
+        `${hostURL}/Users/UserHabits?ID=${_userID}` +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -749,7 +817,7 @@ const HandleGetLocation = async (): Promise<Region | null> => {
 
     return region;
   } catch (e) {
-    showNotification(String(e));
+    console.log("HandleGetLocation failed! \n" + "Error: \n" + String(e));
     return null;
   }
 };
@@ -781,15 +849,15 @@ const HandleGetRegionCoords = async (
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetRegionCoords failed!" +
-        "\n" +
-        `Sending: ${JSON.stringify({
+    console.log(
+      "HandleGetRegionCoords failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
           longitude: _longitude,
           latitude: _latitude,
-        })}` +
-        "\n" +
-        `Error: ${String(e)}`
+        }) +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -819,18 +887,18 @@ const HandleGetWeatherData3h = async (
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetWeatherData3h failed!" +
-        "\n" +
-        `Sending: ${JSON.stringify({
+    console.log(
+      "HandleGetWeatherData3h failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
           userID: _userID,
           cusloc: {
             city: _region.city,
             district: _region.district,
           },
-        })}` +
-        "\n" +
-        `Error: ${String(e)}`
+        }) +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -860,18 +928,18 @@ const HandleGetWeatherData12h = async (
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetWeatherData12h failed!" +
-        "\n" +
-        `Sending: ${JSON.stringify({
+    console.log(
+      "HandleGetWeatherData12h failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
           userID: _userID,
           cusloc: {
             city: _region.city,
             district: _region.district,
           },
-        })}` +
-        "\n" +
-        `Error: ${String(e)}`
+        }) +
+        "Error: \n" +
+        String(e)
     );
     return null;
   }
@@ -901,18 +969,18 @@ const HandleGetDailySug = async (
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetDailySug failed!" +
-        "\n" +
-        `Sending: ${JSON.stringify({
+    console.log(
+      "HandleGetDailySug failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
           userID: _userID,
           cusloc: {
             city: _region.city,
             district: _region.district,
           },
-        })}` +
-        "\n" +
-        `Error: ${String(e)}`
+        }) +
+        "Error: \n" +
+        String
     );
     return null;
   }
@@ -929,9 +997,7 @@ const HandleGetAllRegion = async (): Promise<RegionList | null> => {
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetAllRegion failed!" + "\n" + `Error: ${String(e)}`
-    );
+    console.log("HandleGetAllRegion failed! \n" + "Error: \n" + String(e));
     return null;
   }
 };
@@ -947,9 +1013,7 @@ const HandleGetAllSport = async (): Promise<Sport[] | null> => {
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetAllSport failed!" + "\n" + `Error: ${String(e)}`
-    );
+    console.log("HandleGetAllSport failed! \n" + "Error: \n" + String(e));
     return null;
   }
 };
@@ -965,9 +1029,7 @@ const HandleGetAllHabit = async (): Promise<Habit[] | null> => {
 
     return data;
   } catch (e) {
-    showNotification(
-      "HandleGetAllHabit failed!" + "\n" + `Error: ${String(e)}`
-    );
+    console.log("HandleGetAllHabit failed! \n" + "Error: \n" + String(e));
     return null;
   }
 };
@@ -995,7 +1057,17 @@ const HandleGetEarthquakeData = async (
 
     return data;
   } catch (e) {
-    showNotification("HandleGetEarthquakeData failed!" + "\n" + `Error: ${e}`);
+    console.log(
+      "HandleGetEarthquakeData failed! \n" +
+        "Sending: \n" +
+        JSON.stringify({
+          userID: _userID,
+          longitude: _longitude,
+          latitude: _latitude,
+        }) +
+        "Error: \n" +
+        String(e)
+    );
     return null;
   }
 };
@@ -1050,14 +1122,14 @@ export default function TabLayout() {
 
   useEffect(() => {
     const socket = io(hostURL, {
-      transports: ["websocket", "polling"],
-      reconnectionAttempts: 1,
+      transports: ["websocket"],
+      reconnectionAttempts: 10,
     });
 
     setSocketInstance(socket);
 
     socket.on("connect", () => {
-      console.log(`連接 WebSocket (id: ${socket.id}) 成功`);
+      console.log(`Connect WebSocket (id: ${socket.id}) success`);
       setIsConnected(true);
       // 設置位置（選擇真實或假資料）
       // socket.emit("set_location", {
@@ -1066,21 +1138,21 @@ export default function TabLayout() {
       //   latitude: "24.21694034808",
       // });
       socket.emit("set_location_fake", {
-        userID: 1,
-        longitude: "120.62343304881064",
-        latitude: "24.21694034808",
+        userID: store.getState().user?.id ?? "-1",
+        longitude: store.getState().regions[0]?.longitude ?? "-1",
+        latitude: store.getState().regions[0]?.latitude ?? "-1",
       });
     });
     socket.on("connect_error", () => {
-      console.log(`連接 WebSocket (id: ${socket.id}) 失敗`);
+      console.log(`Connect WebSocket (id: ${socket.id}) failed`);
       setIsConnected(false);
     });
     socket.on("error", (error) => {
-      console.log(`連接 WebSocket 錯誤: ${error.message}`);
+      console.log(`Connect WebSocket error: ${error.message}`);
       setIsConnected(false);
     });
     socket.on("disconnect", () => {
-      console.log("已斷開 WebSocket 連線");
+      console.log("Disconnect from WebSocket");
       setIsConnected(false);
     });
     socket.on("registration_success", (data) => {

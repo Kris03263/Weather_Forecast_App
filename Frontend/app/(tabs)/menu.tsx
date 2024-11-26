@@ -193,13 +193,6 @@ export default function MenuScreen() {
               return (
                 <Pressable
                   onPress={() => {
-                    console.log(
-                      "Selected region: ",
-                      index,
-                      "Target region: ",
-                      store.getState().selecter.targetRegionIndex
-                    );
-
                     navigation.navigate("index" as never);
                     store.dispatch(setSelectedTargetRegionIndex(index));
                   }}

@@ -1,4 +1,5 @@
-import { StyleSheet, View, Text, FlatList } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 
 import { Widget } from "@/components/Widget";
 import { DynamicImage } from "@/components/DynamicImage";
@@ -27,7 +28,7 @@ export function ForecastDisplayWidget({
     >
       <View style={styles.contentLayout}>
         <FlatList
-          nestedScrollEnabled
+          nestedScrollEnabled={true}
           contentContainerStyle={styles.weatherCardGroupLayout}
           data={weatherDatas ?? []}
           renderItem={({ item }) => (
