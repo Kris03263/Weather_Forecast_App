@@ -8,7 +8,7 @@ import {
   Text,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { FlatList } from "react-native-gesture-handler";
+import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 
 import {
   Region,
@@ -26,6 +26,7 @@ import { SuggestionDisplayWidget } from "@/components/SuggestionDisplayWidget";
 import { Background } from "@/components/Background";
 import { EarthquakesDisplayWidget } from "@/components/EarthquakesDisplayWidget";
 import { IndicatorInfoModal } from "@/components/IndicatorInfoModal";
+import { DisasterInfoModal } from "@/components/DisasterInfoModal";
 import store from "@/redux/store";
 import {
   setSelectedRegionIndex,
@@ -106,10 +107,10 @@ export default function HomeScreen() {
     indicators.temp
   );
 
-  const openSlideModal = (id: string, indicatorType: indicators) => {
-    setModalIndicatorType(indicatorType);
+  function openSlideModal(id: string, indicatorType?: indicators) {
+    if (indicatorType) setModalIndicatorType(indicatorType);
     setActiveModalId(id);
-  };
+  }
 
   return (
     <View style={styles.container}>
@@ -247,7 +248,9 @@ export default function HomeScreen() {
                     />
                     <EarthquakesDisplayWidget
                       earthquakeData={earthquakeDataList.recent ?? null}
-                      onPress={() => {}}
+                      onPress={() => {
+                        openSlideModal("disaster");
+                      }}
                     />
                   </>
                 )}
@@ -256,6 +259,11 @@ export default function HomeScreen() {
                 indicatorType={modalIndicatorType}
                 weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
                 isModalShow={activeModalId === item.id}
+                onClose={() => setActiveModalId("-1")}
+              />
+              <DisasterInfoModal
+                earthquakeData={earthquakeDataList.recent ?? null}
+                isModalShow={activeModalId === "disaster"}
                 onClose={() => setActiveModalId("-1")}
               />
             </>
