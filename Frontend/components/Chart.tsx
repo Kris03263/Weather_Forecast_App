@@ -11,243 +11,119 @@ import {
   indicators,
   WeatherData,
 } from "@/app/(tabs)/_layout";
+import { SelectedData } from "./IndicatorInfoModal";
 
 interface ChartProps {
   indicatorType: indicators;
   weatherDatas: WeatherData[];
-  selectedDatesIndex: number;
-  onSelectDataChange: (selectData: {
-    time: string;
-    value: number;
-    maxValue: number;
-    minValue: number;
-    unit: string;
-  }) => void;
-  onSegmentDatesChange: (segmentDates: string[]) => void;
+  selectedDateIndex: number;
+  onSelectDataChange: (selectedData: SelectedData) => void;
 }
 
 export function Chart({
   indicatorType,
   weatherDatas,
-  selectedDatesIndex,
+  selectedDateIndex,
   onSelectDataChange,
-  onSegmentDatesChange,
 }: ChartProps) {
-  const [selectedValue, setselectedValue] = useState<number>(0);
-  const [selectedTime, setselectedTime] = useState<string>("");
-  const [segmentIndex, setSegmentIndex] = useState<number>(0);
-
-  const segments: WeatherData[][] = [];
-  let currentSegment: WeatherData[] = [];
-
-  let now = new Date();
-
-  let currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  for (let i = 0; i < weatherDatas.length; i++) {
-    const data = weatherDatas[i];
-    const dataTime = new Date(data.time);
-
-    const nextDay = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      currentDate.getDate() + 1
-    );
-
-    // 如果 dataTime 在 currentDate 和 nextDay 之間（包括 nextDay 的 00:00）
-    if (dataTime >= currentDate && dataTime <= nextDay) {
-      currentSegment.push(data);
-
-      if (dataTime.getTime() === nextDay.getTime()) {
-        // 碰到 00:00，將 currentSegment 儲存，同時在下一段開始時包括該數據點
-        if (currentSegment.length > 0) {
-          segments.push([...currentSegment]); // 儲存當前段
-        }
-        // 開始新段，包含同一個數據點
-        currentSegment = [data];
-        currentDate = nextDay;
-        // nextDay 將在下一次循環中重新計算
+  const segments: WeatherData[][] = weatherDatas.reduce(
+    (acc: WeatherData[][], current, index) => {
+      if (index % 8 === 0) {
+        const date = current.time.split(" ")[0];
+        acc.push(
+          weatherDatas.filter((item) => item.time.split(" ")[0] === date)
+        );
       }
-    } else {
-      // dataTime 超過 nextDay，處理新的一天
-      if (currentSegment.length > 0) {
-        segments.push([...currentSegment]); // 儲存當前段
-      }
-      // 開始新段，包含該數據點
-      currentSegment = [data];
-      currentDate = new Date(
-        dataTime.getFullYear(),
-        dataTime.getMonth(),
-        dataTime.getDate()
-      );
-      // nextDay 將在下一次循環中重新計算
-    }
-  }
+      return acc;
+    },
+    []
+  );
+  const segment: WeatherData[] = segments[selectedDateIndex];
+  const values = segment.map((item) => parseInt(item[indicatorType]));
+  const labels = segment.map((item) => item.time.split(" ")[1].split(":")[0]);
 
-  // 添加最後一天的資料(不到24:00)
-  if (currentSegment.length > 0) {
-    segments.push(currentSegment);
-  }
+  useEffect(() => {
+    onSelectDataChange({
+      value: parseInt(weatherDatas?.[0]?.[indicatorType] ?? "0"),
+      maxValue: Math.max(...values),
+      minValue: Math.min(...values),
+      unit: indicatorsDictionary[indicatorType].unit,
+    });
+  }, [indicatorType, selectedDateIndex]);
 
-  //console.log("Segments:", segments);
-
-  // 選擇要畫的segment
-  const segment = segments[segmentIndex] || [];
-
-  // 如果segment沒有資料，顯示提示
-  if (segment.length === 0) {
+  if (!segment || segment.length === 0) {
     return (
       <View>
         <Text style={{ color: "#fff", textAlign: "center", marginTop: 20 }}>
-          目前無可用資料，請聯絡開發者
+          目前無可用資料
         </Text>
       </View>
     );
   }
 
-  // chart data
-  const valueData: number[] = segment.map((item) =>
-    parseInt(item[indicatorType])
-  );
-  const labels: string[] = segment.map((item) => {
-    const hour = item.time.split(" ")[1].split(":")[0];
-    return hour + "時";
-  });
-
-  const chartData = {
-    labels: labels,
-    datasets: [
-      {
-        data: valueData,
-        color: (opacity = 1) => `rgba(255, 200, 0, ${opacity})`,
-        strokeWidth: 2,
-      },
-    ],
-  };
-  const chartConfig = {
-    backgroundGradientFrom: "#0f172a",
-    backgroundGradientTo: "#1f2937",
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    style: {
-      borderRadius: 16,
-    },
-    propsForDots: {
-      r: "3",
-      strokeWidth: "1",
-      stroke: "#ffcc00",
-    },
-    yAxisSuffix: indicatorsDictionary[indicatorType].unit,
-    yAxisInterval: 1,
-  };
-
-  useEffect(() => {
-    onSelectDataChange({
-      time: selectedTime,
-      value: selectedValue,
-      maxValue: Math.max(...valueData),
-      minValue: Math.min(...valueData),
-      unit: indicatorsDictionary[indicatorType].unit,
-    });
-  }, [selectedTime, selectedValue, indicatorType]);
-
-  useEffect(() => {
-    onSelectDataChange({
-      time: selectedTime,
-      value: parseInt(weatherDatas?.[0]?.[indicatorType]),
-      maxValue: Math.max(...valueData),
-      minValue: Math.min(...valueData),
-      unit: indicatorsDictionary[indicatorType].unit,
-    });
-  }, [indicatorType]);
-
-  useEffect(() => {
-    const segmentDates = segments
-      .map((segment, index) => {
-        if (segment.length > 0) {
-          const firstData = segment[0];
-          const date = new Date(firstData.time);
-          date.setHours(date.getHours() + 8); //GMT+8(台灣時間)
-          const dateString = date.toISOString().split("T")[0];
-          return dateString;
-        }
-        return null;
-      })
-      .filter((date) => date !== null);
-
-    onSegmentDatesChange(segmentDates as string[]);
-  }, [segments.length]);
-
-  useEffect(() => {
-    setSegmentIndex(selectedDatesIndex);
-  }, [selectedDatesIndex]);
-
-  useEffect(() => {
-    onSelectDataChange({
-      time: selectedTime,
-      value: parseInt(weatherDatas?.[0]?.[indicatorType]),
-      maxValue: Math.max(...valueData),
-      minValue: Math.min(...valueData),
-      unit: indicatorsDictionary[indicatorType].unit,
-    });
-  }, [segmentIndex]);
-
   return (
     <View>
       <LineChart
-        data={chartData}
+        data={{
+          labels: labels,
+          datasets: [
+            {
+              data: values,
+              color: () => "#59c3ff",
+              strokeWidth: 4,
+            },
+          ],
+        }}
         width={Dimensions.get("window").width - 40}
         height={220}
-        chartConfig={chartConfig}
+        yAxisSuffix={indicatorsDictionary[indicatorType].unit}
+        yLabelsOffset={20}
+        xAxisLabel="時"
+        fromZero
+        yAxisInterval={20}
+        chartConfig={{
+          backgroundGradientFrom: "#2c3136",
+          backgroundGradientTo: "#2c3136",
+          fillShadowGradient: "#3a95ff",
+          fillShadowGradientTo: "#423aff",
+          fillShadowGradientFromOpacity: 0.5,
+          fillShadowGradientToOpacity: 0.5,
+          decimalPlaces: 0,
+          color: (opacity = 0) => `rgba(255, 255, 255, 0)`,
+          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+          style: {
+            backgroundColor: "#3a95ff",
+            borderRadius: 10,
+          },
+          propsForDots: {
+            r: "4",
+            strokeWidth: "3",
+            stroke: "#2c3136",
+            fill: "white",
+          },
+        }}
         style={styles.chart}
-        fromZero={true}
         onDataPointClick={({ value, index }) => {
-          setselectedTime(segment[index].time);
-          setselectedValue(value);
+          onSelectDataChange({
+            value: value,
+            maxValue: Math.max(...values),
+            minValue: Math.min(...values),
+            unit: indicatorsDictionary[indicatorType].unit,
+          });
         }}
         bezier
       />
-      {/* 分頁指示icon */}
-      {/* <View style={styles.pagination}>
-        {segments.map((_, idx) => (
-          <Text
-            key={idx}
-            style={[
-              styles.pageDot,
-              idx === segmentIndex && styles.activePageDot,
-            ]}
-          >
-            ●
-          </Text>
-        ))}
-      </View> */}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   chart: {
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#9ca8b7",
+    borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-  },
-  pagination: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 10,
-  },
-  pageDot: {
-    fontSize: 20,
-    color: "gray",
-    marginHorizontal: 5,
-  },
-  activePageDot: {
-    color: "#3a95ff",
   },
 });

@@ -1,8 +1,7 @@
 import React from "react";
-import { StyleSheet, View, Text, Pressable } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 
 import { Widget } from "@/components/Widget";
-import { SvgImage } from "@/components/Svg";
 
 import {
   WeatherData,
@@ -53,7 +52,6 @@ const styles = StyleSheet.create({
   valueText: {
     color: "white",
     fontSize: 30,
-    // fontWeight: "bold",
     textAlign: "left",
   },
 });

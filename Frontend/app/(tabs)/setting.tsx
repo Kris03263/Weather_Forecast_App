@@ -189,14 +189,9 @@ export default function SettingsScreen() {
         );
       case ModalType.USER:
         return (
-          <>
-            <Text style={styles.modalInputLabel}>
-              {"使用者名稱: " + user.account}
-            </Text>
-            <Text style={styles.modalInputLabel}>
-              {"使用者密碼: " + user.password}
-            </Text>
-          </>
+          <Text style={styles.modalInputLabel}>
+            {"使用者名稱: " + user.account}
+          </Text>
         );
       case ModalType.SPORT:
         return (
@@ -325,7 +320,7 @@ export default function SettingsScreen() {
                 setModalVisible(false);
               }}
             >
-              <Text style={styles.buttonText}>儲存&關閉</Text>
+              <Text style={styles.buttonText}>儲存</Text>
             </Pressable>
           </>
         );
@@ -339,7 +334,7 @@ export default function SettingsScreen() {
                 setModalVisible(false);
               }}
             >
-              <Text style={styles.buttonText}>儲存&關閉</Text>
+              <Text style={styles.buttonText}>儲存</Text>
             </Pressable>
           </>
         );
