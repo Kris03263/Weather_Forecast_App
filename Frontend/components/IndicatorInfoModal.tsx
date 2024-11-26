@@ -68,7 +68,7 @@ export function IndicatorInfoModal({
   }, [indicatorType]);
 
   return (
-    <View style={styles.modalBackground}>
+    <View>
       <Modal
         animationType="slide"
         transparent={true}
@@ -170,7 +170,10 @@ export function IndicatorInfoModal({
                 }
               />
 
-              <Text>當日小結</Text>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>當日小結</Text>
+                <Text style={styles.cardText}></Text>
+              </View>
             </ScrollView>
           </Animated.View>
         </View>
@@ -202,6 +205,7 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "flex-start",
     alignItems: "center",
+    gap: 10,
   },
 
   // Separator
@@ -301,9 +305,27 @@ const styles = StyleSheet.create({
     height: 20,
   },
 
-  // Content
-  contentLayout: {
+  // Card
+  card: {
     width: "100%",
+    backgroundColor: "#2c3136",
+    borderRadius: 10,
+    padding: 15,
+    gap: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#9ca8b7",
+  },
+  cardText: {
+    fontSize: 14,
+    color: "#d1d5da",
   },
 
   row: {
@@ -312,6 +334,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingVertical: 10,
   },
 });

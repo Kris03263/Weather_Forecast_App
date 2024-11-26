@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  StyleSheet,
-  View,
-  ScrollView,
-  Animated,
-  Dimensions,
-  Text,
-} from "react-native";
+import { StyleSheet, View, Animated, Dimensions, Text } from "react-native";
 import { useSelector } from "react-redux";
-import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  FlatList,
+  ScrollView,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 
 import {
   Region,
@@ -165,6 +162,7 @@ export default function HomeScreen() {
       )}
 
       <ScrollView
+        showsVerticalScrollIndicator={false}
         nestedScrollEnabled={true}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -174,6 +172,7 @@ export default function HomeScreen() {
       >
         <FlatList
           ref={flatListRef}
+          showsVerticalScrollIndicator={false}
           initialScrollIndex={selecter.regionIndex}
           horizontal
           data={regions}

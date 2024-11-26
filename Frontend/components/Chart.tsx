@@ -209,7 +209,7 @@ export function Chart({
         bezier
       />
       {/* 分頁指示icon */}
-      <View style={styles.pagination}>
+      {/* <View style={styles.pagination}>
         {segments.map((_, idx) => (
           <Text
             key={idx}
@@ -221,7 +221,7 @@ export function Chart({
             ●
           </Text>
         ))}
-      </View>
+      </View> */}
     </View>
   );
 }
@@ -231,6 +231,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#9ca8b7",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   pagination: {
     flexDirection: "row",

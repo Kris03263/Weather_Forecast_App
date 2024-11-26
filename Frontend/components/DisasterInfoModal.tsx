@@ -122,12 +122,15 @@ export function DisasterInfoModal({
         <View style={styles.separator} />
 
         {/* Body */}
-        <ScrollView contentContainerStyle={styles.body}>
+        <ScrollView
+          contentContainerStyle={styles.body}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.card}>
             <Text style={styles.cardTitle}>地震示意圖</Text>
             <Text style={styles.cardText}>
               <Image
-                source={{ uri: earthquakeData.shakeImg || "" }}
+                source={{ uri: earthquakeData?.shakeImg ?? "" }}
                 style={{ width: "100%", height: 500 }}
               />
             </Text>
@@ -136,14 +139,14 @@ export function DisasterInfoModal({
           <View style={styles.card}>
             <Text style={styles.cardTitle}>震级</Text>
             <Text style={styles.cardText}>
-              {earthquakeData.magnitude || "未知"}
+              {earthquakeData?.magnitude ?? "未知"}
             </Text>
           </View>
 
           <View style={styles.card}>
             <Text style={styles.cardTitle}>震源深度</Text>
             <Text style={styles.cardText}>
-              {earthquakeData.depth || "未知"} km
+              {earthquakeData?.depth ?? "未知"} km
             </Text>
           </View>
 
