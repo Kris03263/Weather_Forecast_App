@@ -25,42 +25,7 @@ export function DisasterInfoModal({
   earthquakeData,
   onClose,
 }: DisasterInfoModalProps) {
-  const pan = useRef(new Animated.Value(300)).current; // Initial off-screen position
-  const backgroundOpacity = useRef(new Animated.Value(0)).current; // Background opacity
-
-  useEffect(() => {
-    if (isModalShow) {
-      // Open animation
-      Animated.parallel([
-        Animated.timing(pan, {
-          toValue: 0, // Slide to screen
-          duration: 300,
-          useNativeDriver: false,
-        }),
-        Animated.timing(backgroundOpacity, {
-          toValue: 1, // Full opacity
-          duration: 300,
-          useNativeDriver: false,
-        }),
-      ]).start();
-    } else {
-      // Close animation
-      Animated.parallel([
-        Animated.timing(pan, {
-          toValue: 300, // Slide off screen
-          duration: 300,
-          useNativeDriver: false,
-        }),
-        Animated.timing(backgroundOpacity, {
-          toValue: 0, // Transparent background
-          duration: 300,
-          useNativeDriver: false,
-        }),
-      ]).start(() => {
-        pan.setValue(300); // Reset position for next use
-      });
-    }
-  }, [isModalShow]);
+  const pan = useRef(new Animated.ValueXY()).current; // Initial off-screen position
 
   const shareContent = async () => {
     try {
@@ -74,142 +39,170 @@ export function DisasterInfoModal({
     }
   };
 
-  const handleClose = () => {
-    isModalShow = false;
-    onClose();
-  };
+  useEffect(() => {
+    if (isModalShow) {
+      Animated.timing(pan, {
+        toValue: { x: 0, y: 0 },
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [isModalShow]);
 
   return (
-    <Modal
-      animationType="none"
-      transparent={true}
-      visible={isModalShow}
-      onRequestClose={() => handleClose()}
-    >
-      {/* Background overlay */}
-      <Animated.View
-        style={[
-          styles.modalOverlay,
-          {
-            opacity: backgroundOpacity, // Opacity tied to background animation
-          },
-        ]}
-      />
-
-      {/* Modal container */}
-      <Animated.View
-        style={[
-          styles.modalContainer,
-          {
-            transform: [{ translateY: pan }], // Slide animation
-          },
-        ]}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>地震資訊</Text>
-          <Pressable
-            style={styles.closeButton}
-            onPress={() => {
-              handleClose();
-            }}
-          >
-            <SvgImage name="close" style={styles.icon} />
-          </Pressable>
-        </View>
-
-        {/* Separator */}
-        <View style={styles.separator} />
-
-        {/* Body */}
-        <ScrollView
-          contentContainerStyle={styles.body}
-          showsVerticalScrollIndicator={false}
+    <>
+      <View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isModalShow}
+          onRequestClose={() => onClose()}
         >
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>地震示意圖</Text>
-            <Text style={styles.cardText}>
-              <Image
-                source={{ uri: earthquakeData?.shakeImg ?? "" }}
-                style={{ width: "100%", height: 500 }}
-              />
-            </Text>
-          </View>
+          <View style={styles.modalBackground}>
+            <Animated.View
+              style={[styles.modalView, { transform: [{ translateY: pan.y }] }]}
+            >
+              {/* Header */}
+              <View style={styles.headerLayout}>
+                <Pressable />
 
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>震级</Text>
-            <Text style={styles.cardText}>
-              {earthquakeData?.magnitude ?? "未知"}
-            </Text>
-          </View>
+                <View style={styles.titleLayout}>
+                  <SvgImage style={styles.svgImage} name="earthquake" />
+                  <Text style={styles.titleText}>地震資訊</Text>
+                </View>
 
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>震源深度</Text>
-            <Text style={styles.cardText}>
-              {earthquakeData?.depth ?? "未知"} km
-            </Text>
-          </View>
+                <Pressable style={styles.closeButton} onPress={() => onClose()}>
+                  <SvgImage style={styles.svgImage} name="close" />
+                </Pressable>
+              </View>
 
-          {/* Share Button */}
-          <Pressable style={styles.shareButton} onPress={shareContent}>
-            <SvgImage name="share" style={styles.icon} />
-            <Text style={styles.shareButtonText}>分享</Text>
-          </Pressable>
-        </ScrollView>
-      </Animated.View>
-    </Modal>
+              <ScrollView
+                style={{ width: "100%" }}
+                contentContainerStyle={styles.scrollViewContent}
+              >
+                <View style={styles.separator} />
+
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>地震示意圖</Text>
+                  <Text style={styles.cardText}>
+                    <Image
+                      source={{ uri: earthquakeData?.shakeImg ?? "" }}
+                      style={{ width: "100%", height: 500 }}
+                    />
+                  </Text>
+                </View>
+
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>震級</Text>
+                  <Text style={styles.cardText}>
+                    {earthquakeData?.magnitude ?? "未知"}
+                  </Text>
+                </View>
+
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>震源深度</Text>
+                  <Text style={styles.cardText}>
+                    {earthquakeData?.depth ?? "未知"} km
+                  </Text>
+                </View>
+
+                {/* Share Button */}
+                <Pressable style={styles.shareButton} onPress={shareContent}>
+                  <SvgImage name="share" style={styles.svgImage} />
+                  <Text style={styles.shareButtonText}>分享</Text>
+                </Pressable>
+              </ScrollView>
+            </Animated.View>
+          </View>
+        </Modal>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
-  modalContainer: {
+  modalView: {
+    width: "100%",
+    height: "90%",
     backgroundColor: "#21262c",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
+    alignItems: "center",
     elevation: 5,
-    maxHeight: "90%",
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
   },
-  header: {
+  scrollViewContent: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    gap: 10,
+  },
+  // Separator
+  separator: {
+    height: 1,
+    width: "100%",
+    backgroundColor: "#9ca8b7",
+  },
+
+  // Header
+  headerLayout: {
+    width: "100%",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingBottom: 10,
+  },
+
+  // Title
+  titleLayout: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 10,
+  },
+  titleText: {
+    color: "white",
+    fontSize: 20,
+    textAlign: "left",
+  },
+  // Close Button
+  closeButtonText: {
+    color: "#9ca8b7",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   closeButton: {
-    backgroundColor: "#2c2f33",
-    borderRadius: 20,
-    padding: 10,
+    backgroundColor: "#2f363e",
+    borderRadius: 30,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
   },
-  icon: {
+
+  // Svg
+  svgImage: {
     width: 20,
     height: 20,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#444",
-    marginVertical: 10,
-  },
-  body: {
-    paddingBottom: 20,
-  },
+  // Card
   card: {
+    width: "100%",
     backgroundColor: "#2c3136",
     borderRadius: 10,
     padding: 15,
-    marginBottom: 10,
+    gap: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -219,12 +212,19 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 5,
     color: "#9ca8b7",
   },
   cardText: {
     fontSize: 14,
     color: "#d1d5da",
+  },
+
+  row: {
+    minWidth: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
   },
   shareButton: {
     flexDirection: "row",
