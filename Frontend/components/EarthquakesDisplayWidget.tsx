@@ -5,25 +5,29 @@ import { EarthquakeData } from "@/app/(tabs)/_layout";
 import { Widget } from "@/components/Widget";
 
 interface EarthquakesDisplayWidgetProps {
+  type: string;
   earthquakeData: EarthquakeData;
   onPress: () => void;
 }
 
 export function EarthquakesDisplayWidget({
+  type,
   earthquakeData,
   onPress,
 }: EarthquakesDisplayWidgetProps) {
   return (
     <Widget
-      title="最近地震資訊"
-      svgName="earthquake"
+      title={type === "earthquake" ? "最近地震資訊" : "最近颱風資訊"}
+      svgName={`${type}`}
       style={styles.customWidgetStyle}
       isVisible={true}
       isPressable={true}
       onPress={onPress}
     >
       <View style={styles.contentLayout}>
-        <Text style={styles.contentText}>{earthquakeData?.content ?? ""}</Text>
+        <Text style={styles.contentText}>
+          {type === "earthquake" ? earthquakeData?.content ?? "" : "--"}
+        </Text>
         {/* <View style={styles.listLayout}>
           <Text style={styles.listTitleText}>時間:</Text>
           <Text style={styles.listContentText}>

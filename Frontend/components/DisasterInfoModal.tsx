@@ -29,11 +29,16 @@ export function DisasterInfoModal({
 
   const shareContent = async () => {
     try {
-      await Share.share({
-        title: "地震資訊",
-        message: `查看地震信息：${earthquakeData.shakeImg || "暫無圖片"}`,
-        url: earthquakeData.shakeImg || "",
-      });
+      await Share.share(
+        {
+          title: "分享地震資訊",
+          message: `${earthquakeData?.content}\n`,
+          url: earthquakeData.shakeImg || "",
+        },
+        {
+          dialogTitle: "分享地震資訊",
+        }
+      );
     } catch (error: any) {
       Alert.alert("分享失敗", error.message || "發生未知错误");
     }
@@ -93,7 +98,7 @@ export function DisasterInfoModal({
                 </View>
 
                 <View style={styles.card}>
-                  <Text style={styles.cardTitle}>震級</Text>
+                  <Text style={styles.cardTitle}>芮氏規模</Text>
                   <Text style={styles.cardText}>
                     {earthquakeData?.magnitude ?? "未知"}
                   </Text>
@@ -103,6 +108,20 @@ export function DisasterInfoModal({
                   <Text style={styles.cardTitle}>震源深度</Text>
                   <Text style={styles.cardText}>
                     {earthquakeData?.depth ?? "未知"} km
+                  </Text>
+                </View>
+
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>發生時間</Text>
+                  <Text style={styles.cardText}>
+                    {earthquakeData?.time ?? "未知"}
+                  </Text>
+                </View>
+
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>與震源距離</Text>
+                  <Text style={styles.cardText}>
+                    {earthquakeData?.distance ?? "未知"} km
                   </Text>
                 </View>
 

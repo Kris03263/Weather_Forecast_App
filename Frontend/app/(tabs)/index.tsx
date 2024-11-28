@@ -13,6 +13,7 @@ import {
   WeatherDataList,
   DailySug,
   indicators,
+  disasterTypes,
   EarthquakeDataList,
 } from "./_layout";
 
@@ -103,9 +104,17 @@ export default function HomeScreen() {
   const [modalIndicatorType, setModalIndicatorType] = useState<indicators>(
     indicators.temp
   );
+  const [modalDisasterType, setModalDisasterType] = useState<disasterTypes>(
+    disasterTypes.earthquake
+  );
 
-  function openSlideModal(id: string, indicatorType?: indicators) {
+  function openSlideModal(
+    id: string,
+    indicatorType?: indicators,
+    disasterType?: disasterTypes
+  ) {
     if (indicatorType) setModalIndicatorType(indicatorType);
+    if (disasterType) setModalDisasterType(disasterType);
     setActiveModalId(id);
   }
 
@@ -246,6 +255,14 @@ export default function HomeScreen() {
                       type="transportation"
                     />
                     <EarthquakesDisplayWidget
+                      type="earthquake"
+                      earthquakeData={earthquakeDataList.recent ?? null}
+                      onPress={() => {
+                        openSlideModal("disaster");
+                      }}
+                    />
+                    <EarthquakesDisplayWidget
+                      type="typhoon"
                       earthquakeData={earthquakeDataList.recent ?? null}
                       onPress={() => {
                         openSlideModal("disaster");
