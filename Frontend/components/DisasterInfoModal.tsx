@@ -13,14 +13,17 @@ import {
 import React, { useRef, useEffect, useState } from "react";
 import { SvgImage } from "@/components/Svg";
 import { EarthquakeData } from "@/app/(tabs)/_layout";
+import { disasterTypes } from "@/app/(tabs)/_layout";
 
 interface DisasterInfoModalProps {
+  disasterType: disasterTypes;
   isModalShow: boolean;
   earthquakeData: EarthquakeData;
   onClose: () => void;
 }
 
 export function DisasterInfoModal({
+  disasterType,
   isModalShow,
   earthquakeData,
   onClose,

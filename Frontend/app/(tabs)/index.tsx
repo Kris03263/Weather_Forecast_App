@@ -255,17 +255,25 @@ export default function HomeScreen() {
                       type="transportation"
                     />
                     <EarthquakesDisplayWidget
-                      type="earthquake"
+                      type={disasterTypes.earthquake}
                       earthquakeData={earthquakeDataList.recent ?? null}
                       onPress={() => {
-                        openSlideModal("disaster");
+                        openSlideModal(
+                          "disaster",
+                          undefined,
+                          disasterTypes.earthquake
+                        );
                       }}
                     />
                     <EarthquakesDisplayWidget
-                      type="typhoon"
+                      type={disasterTypes.typhoon}
                       earthquakeData={earthquakeDataList.recent ?? null}
                       onPress={() => {
-                        openSlideModal("disaster");
+                        openSlideModal(
+                          "disaster",
+                          undefined,
+                          disasterTypes.typhoon
+                        );
                       }}
                     />
                   </>
@@ -278,6 +286,7 @@ export default function HomeScreen() {
                 onClose={() => setActiveModalId("-1")}
               />
               <DisasterInfoModal
+                disasterType={modalDisasterType}
                 earthquakeData={earthquakeDataList.recent ?? null}
                 isModalShow={activeModalId === "disaster"}
                 onClose={() => setActiveModalId("-1")}
