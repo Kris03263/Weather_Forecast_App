@@ -1,3 +1,4 @@
+// React Component and Package
 import { ReactNode, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
@@ -5,8 +6,8 @@ import {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-
-import { SvgImage } from "./Svg";
+// Components
+import { SvgImage } from "@/components/Svg";
 
 interface WidgetProps {
   title?: string;

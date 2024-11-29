@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef, ReactNode } from "react";
+// React Component and Package
+import { useState, useEffect, useRef, ReactNode } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
-
+// Interfaces and Enums
 import {
   User,
   Sport,
@@ -18,21 +19,22 @@ import {
   getAllSportList,
   Region,
 } from "./_layout";
-
-import store from "@/redux/store";
+// Components
 import { Widget } from "@/components/Widget";
 import { Background } from "@/components/Background";
 import { PopupModal } from "@/components/PopupModal";
 import { SvgImage } from "@/components/Svg";
 import { RadioButton } from "@/components/RadioButton";
+// Redux
+import store from "@/redux/store";
 
 export default function SettingsScreen() {
   // Modal control
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [modalHeader, setModalHeader] = useState("");
-  const [modalContent, setModalContent] = useState<ReactNode>();
-  const [modalFooter, setModalFooter] = useState<ReactNode>();
-  const [modalType, setModalType] = useState<ModalType>();
+  const [isLoginModalVisible, setLoginModalVisible] = useState(false);
+  const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
+  const [isUserModalVisible, setUserModalVisible] = useState(false);
+  const [isSportModalVisible, setSportModalVisible] = useState(false);
+  const [isHabitModalVisible, setHabitModalVisible] = useState(false);
 
   // Temp data
   const [account, setAccount] = useState("");
@@ -86,6 +88,7 @@ export default function SettingsScreen() {
     );
   }, [userSettings]);
 
+  // Modal Control
   enum ModalType {
     LOGIN = "登入",
     REGISTER = "註冊",
@@ -95,249 +98,24 @@ export default function SettingsScreen() {
   }
 
   const openModal = (modalType: ModalType) => {
-    setModalHeader(modalType);
-    setModalContent(getModalContent(modalType));
-    setModalFooter(getModalFooter(modalType));
-    setModalType(modalType);
-    setModalVisible(true);
-  };
-
-  useEffect(() => {
-    if (isModalVisible) {
-      switch (modalType) {
-        case ModalType.LOGIN:
-          openModal(ModalType.LOGIN);
-          break;
-        case ModalType.REGISTER:
-          openModal(ModalType.REGISTER);
-          break;
-        case ModalType.USER:
-          openModal(ModalType.USER);
-          break;
-        case ModalType.SPORT:
-          openModal(ModalType.SPORT);
-          break;
-        case ModalType.HABIT:
-          openModal(ModalType.HABIT);
-          break;
-        default:
-          break;
-      }
-    }
-  }, [sport, habit, account, password]);
-
-  const getModalContent = (type: ModalType) => {
-    switch (type) {
+    switch (modalType) {
       case ModalType.LOGIN:
-        return (
-          <>
-            <View style={styles.modalInputLayout}>
-              <SvgImage style={styles.modalInputSvg} name="userAccount" />
-              <Text style={styles.modalInputLabel}>使用者名稱: </Text>
-            </View>
-            <TextInput
-              style={styles.modalInput}
-              ref={usernameLoginInputRef}
-              placeholder="輸入名稱"
-              onChangeText={setAccount}
-            />
-            <View style={styles.modalInputLayout}>
-              <SvgImage style={styles.modalInputSvg} name="userPassword" />
-              <Text style={styles.modalInputLabel}>使用者密碼: </Text>
-            </View>
-            <TextInput
-              style={styles.modalInput}
-              ref={passwordLoginInputRef}
-              placeholder="輸入密碼"
-              secureTextEntry={true}
-              onChangeText={setPassword}
-            />
-            <Pressable
-              onPress={() => {
-                openModal(ModalType.REGISTER);
-              }}
-            >
-              <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
-            </Pressable>
-          </>
-        );
+        setLoginModalVisible(true);
+        break;
       case ModalType.REGISTER:
-        return (
-          <>
-            <View style={styles.modalInputLayout}>
-              <SvgImage style={styles.modalInputSvg} name="userAccount" />
-              <Text style={styles.modalInputLabel}>使用者名稱: </Text>
-            </View>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="輸入名稱"
-              ref={usernameRegisterInputRef}
-              onChangeText={setAccount}
-            />
-            <View style={styles.modalInputLayout}>
-              <SvgImage style={styles.modalInputSvg} name="userPassword" />
-              <Text style={styles.modalInputLabel}>使用者密碼: </Text>
-            </View>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="輸入密碼"
-              ref={passwordRegisterInputRef}
-              onChangeText={setPassword}
-              secureTextEntry={true}
-            />
-          </>
-        );
+        setRegisterModalVisible(true);
+        break;
       case ModalType.USER:
-        return (
-          <Text style={styles.modalInputLabel}>
-            {"使用者名稱: " + user.account}
-          </Text>
-        );
+        setUserModalVisible(true);
+        break;
       case ModalType.SPORT:
-        return (
-          <>
-            {sportList.map((option) => (
-              <RadioButton
-                key={option.id}
-                label={option.sportName}
-                selected={sport.includes(option.id)}
-                onPress={() => {
-                  setSport((pre) =>
-                    pre.includes(option.id)
-                      ? pre.filter((item) => item !== option.id)
-                      : [...pre, option.id]
-                  );
-                }}
-              />
-            ))}
-          </>
-        );
+        setSportModalVisible(true);
+        break;
       case ModalType.HABIT:
-        return (
-          <>
-            {habitList.map((option) => (
-              <RadioButton
-                key={option.id}
-                label={option.habitName}
-                selected={habit.includes(option.id)}
-                onPress={() => {
-                  setHabit((pre) =>
-                    pre.includes(option.id)
-                      ? pre.filter((item) => item !== option.id)
-                      : [...pre, option.id]
-                  );
-                }}
-              />
-            ))}
-          </>
-        );
+        setHabitModalVisible(true);
+        break;
       default:
-        return <></>;
-    }
-  };
-  const getModalFooter = (type: ModalType) => {
-    switch (type) {
-      case ModalType.LOGIN:
-        return (
-          <>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => {
-                usernameInput?.clear();
-                passwordInput?.clear();
-                userLogin(account, password);
-                setModalVisible(false);
-              }}
-            >
-              <Text style={styles.buttonText}>登入</Text>
-            </Pressable>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.buttonText}>關閉</Text>
-            </Pressable>
-          </>
-        );
-      case ModalType.REGISTER:
-        return (
-          <>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => {
-                usernameRegisterInput?.clear();
-                passwordRegisterInput?.clear();
-                userRegister(account, password);
-                setModalVisible(false);
-              }}
-            >
-              <Text style={styles.buttonText}>提交</Text>
-            </Pressable>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.buttonText}>關閉</Text>
-            </Pressable>
-          </>
-        );
-      case ModalType.USER:
-        return (
-          <>
-            <Pressable
-              onPress={() => {
-                userDelete(store.getState().user.id);
-                setModalVisible(false);
-              }}
-              style={styles.modalButton}
-            >
-              <Text style={styles.buttonText}>刪除使用者</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                userLogout();
-                setModalVisible(false);
-              }}
-              style={styles.modalButton}
-            >
-              <Text style={styles.buttonText}>登出</Text>
-            </Pressable>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.buttonText}>關閉</Text>
-            </Pressable>
-          </>
-        );
-      case ModalType.SPORT:
-        return (
-          <>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => {
-                userSetSports(sport);
-                setModalVisible(false);
-              }}
-            >
-              <Text style={styles.buttonText}>儲存</Text>
-            </Pressable>
-          </>
-        );
-      case ModalType.HABIT:
-        return (
-          <>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => {
-                userSetHabits(habit);
-                setModalVisible(false);
-              }}
-            >
-              <Text style={styles.buttonText}>儲存</Text>
-            </Pressable>
-          </>
-        );
+        break;
     }
   };
 
@@ -370,40 +148,30 @@ export default function SettingsScreen() {
       {user.id && user.id !== "-1" && (
         <View style={styles.bodySection}>
           {/* 天氣偏好區塊 */}
-          <Widget title="天氣偏好" isVisible={true} style={{ width: "100%" }}>
-            <View style={styles.boxLayout}>
-              <View style={styles.boxInputLayout}>
-                <Text style={styles.boxInputLabel}>溫度偏好:</Text>
-                <TextInput style={styles.boxInput} placeholder="輸入溫度(°C)" />
-              </View>
-              <View style={styles.boxInputLayout}>
-                <Text style={styles.boxInputLabel}>濕度偏好:</Text>
-                <TextInput style={styles.boxInput} placeholder="輸入濕度" />
-              </View>
-            </View>
+          <Widget
+            title="運動偏好"
+            svgName="sport"
+            isVisible={true}
+            style={styles.customWidgetStyle}
+            isPressable={true}
+            onPress={() => openModal(ModalType.SPORT)}
+          >
+            <Text style={styles.widgetText}>
+              選擇你喜歡的運動以接收每日運動建議
+            </Text>
           </Widget>
           {/* 活動偏好區塊 */}
-          <Widget title="活動偏好" isVisible={true} style={{ width: "100%" }}>
-            <View style={styles.boxLayout}>
-              <View style={styles.boxInputLayout}>
-                <Text style={styles.boxInputLabel}>運動偏好:</Text>
-                <Pressable
-                  style={styles.boxButton}
-                  onPress={() => openModal(ModalType.SPORT)}
-                >
-                  <Text style={styles.buttonText}>選擇運動</Text>
-                </Pressable>
-              </View>
-              <View style={styles.boxInputLayout}>
-                <Text style={styles.boxInputLabel}>興趣偏好:</Text>
-                <Pressable
-                  style={styles.boxButton}
-                  onPress={() => openModal(ModalType.HABIT)}
-                >
-                  <Text style={styles.buttonText}>選擇嗜好</Text>
-                </Pressable>
-              </View>
-            </View>
+          <Widget
+            title="活動偏好"
+            svgName="activity"
+            isVisible={true}
+            style={styles.customWidgetStyle}
+            isPressable={true}
+            onPress={() => openModal(ModalType.HABIT)}
+          >
+            <Text style={styles.widgetText}>
+              選擇你喜歡的活動以接收每日活動建議
+            </Text>
           </Widget>
         </View>
       )}
@@ -412,21 +180,220 @@ export default function SettingsScreen() {
         <View style={styles.bodySection}>
           <Widget
             title="登入以使用設定"
+            svgName="userAccount"
             isVisible={true}
-            style={{ width: "100%" }}
+            style={styles.customWidgetStyle}
+            isPressable={true}
+            onPress={() => openModal(ModalType.LOGIN)}
           >
-            <View style={styles.boxLayout}></View>
+            <Text style={styles.widgetText}>
+              登入以使用設定功能，或點擊註冊以創建新帳號
+            </Text>
           </Widget>
         </View>
       )}
 
+      {/* Login Modal */}
       <PopupModal
-        isVisible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        header={modalHeader}
-        content={modalContent}
-        footer={modalFooter}
-      />
+        isVisible={isLoginModalVisible}
+        onClose={() => setLoginModalVisible(false)}
+        header={ModalType.LOGIN}
+      >
+        <View style={styles.modalInputLayout}>
+          <SvgImage style={styles.modalInputSvg} name="userAccount" />
+          <Text style={styles.modalInputLabel}>使用者名稱: </Text>
+        </View>
+        <TextInput
+          style={styles.modalInput}
+          ref={usernameLoginInputRef}
+          placeholder="輸入名稱"
+          onChangeText={setAccount}
+        />
+
+        <View style={styles.modalInputLayout}>
+          <SvgImage style={styles.modalInputSvg} name="userPassword" />
+          <Text style={styles.modalInputLabel}>使用者密碼: </Text>
+        </View>
+        <TextInput
+          style={styles.modalInput}
+          ref={passwordLoginInputRef}
+          placeholder="輸入密碼"
+          secureTextEntry={true}
+          onChangeText={setPassword}
+        />
+
+        <Pressable
+          onPress={() => {
+            openModal(ModalType.REGISTER);
+          }}
+        >
+          <Text style={styles.linkText}>沒有帳號嗎，點擊此以註冊</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.modalButton}
+          onPress={() => {
+            usernameInput?.clear();
+            passwordInput?.clear();
+            userLogin(account, password);
+            setLoginModalVisible(false);
+          }}
+        >
+          <Text style={styles.buttonText}>登入</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.modalButton}
+          onPress={() => setLoginModalVisible(false)}
+        >
+          <Text style={styles.buttonText}>關閉</Text>
+        </Pressable>
+      </PopupModal>
+      {/* Regis Modal */}
+      <PopupModal
+        isVisible={isRegisterModalVisible}
+        onClose={() => setRegisterModalVisible(false)}
+        header={ModalType.REGISTER}
+      >
+        <View style={styles.modalInputLayout}>
+          <SvgImage style={styles.modalInputSvg} name="userAccount" />
+          <Text style={styles.modalInputLabel}>使用者名稱: </Text>
+        </View>
+        <TextInput
+          style={styles.modalInput}
+          placeholder="輸入名稱"
+          ref={usernameRegisterInputRef}
+          onChangeText={setAccount}
+        />
+
+        <View style={styles.modalInputLayout}>
+          <SvgImage style={styles.modalInputSvg} name="userPassword" />
+          <Text style={styles.modalInputLabel}>使用者密碼: </Text>
+        </View>
+        <TextInput
+          style={styles.modalInput}
+          placeholder="輸入密碼"
+          ref={passwordRegisterInputRef}
+          onChangeText={setPassword}
+          secureTextEntry={true}
+        />
+
+        <Pressable
+          style={styles.modalButton}
+          onPress={() => {
+            usernameRegisterInput?.clear();
+            passwordRegisterInput?.clear();
+            userRegister(account, password);
+            setRegisterModalVisible(false);
+          }}
+        >
+          <Text style={styles.buttonText}>提交</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.modalButton}
+          onPress={() => setRegisterModalVisible(false)}
+        >
+          <Text style={styles.buttonText}>關閉</Text>
+        </Pressable>
+      </PopupModal>
+      {/* User info Modal */}
+      <PopupModal
+        isVisible={isUserModalVisible}
+        onClose={() => setUserModalVisible(false)}
+        header={ModalType.USER}
+      >
+        <Text style={styles.modalInputLabel}>
+          {"使用者名稱: " + user.account}
+        </Text>
+
+        <Pressable
+          onPress={() => {
+            userDelete(store.getState().user.id);
+            setUserModalVisible(false);
+          }}
+          style={styles.modalButton}
+        >
+          <Text style={styles.buttonText}>刪除使用者</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            userLogout();
+            setUserModalVisible(false);
+          }}
+          style={styles.modalButton}
+        >
+          <Text style={styles.buttonText}>登出</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.modalButton}
+          onPress={() => setUserModalVisible(false)}
+        >
+          <Text style={styles.buttonText}>關閉</Text>
+        </Pressable>
+      </PopupModal>
+      {/* Sport Modal */}
+      <PopupModal
+        isVisible={isSportModalVisible}
+        onClose={() => setSportModalVisible(false)}
+        header={ModalType.SPORT}
+      >
+        {sportList.map((option) => (
+          <RadioButton
+            key={option.id}
+            label={option.sportName}
+            isSelected={sport.includes(option.id)}
+            onSelect={() => {
+              setSport((pre) =>
+                pre.includes(option.id)
+                  ? pre.filter((item) => item !== option.id)
+                  : [...pre, option.id]
+              );
+            }}
+          />
+        ))}
+        <Pressable
+          style={styles.modalButton}
+          onPress={() => {
+            userSetSports(sport);
+            setSportModalVisible(false);
+          }}
+        >
+          <Text style={styles.buttonText}>儲存</Text>
+        </Pressable>
+      </PopupModal>
+      {/* Habit Modal */}
+      <PopupModal
+        isVisible={isHabitModalVisible}
+        onClose={() => setHabitModalVisible(false)}
+        header={ModalType.HABIT}
+      >
+        {habitList.map((option) => (
+          <RadioButton
+            key={option.id}
+            label={option.habitName}
+            isSelected={habit.includes(option.id)}
+            onSelect={() => {
+              setHabit((pre) =>
+                pre.includes(option.id)
+                  ? pre.filter((item) => item !== option.id)
+                  : [...pre, option.id]
+              );
+            }}
+          />
+        ))}
+        <Pressable
+          style={styles.modalButton}
+          onPress={() => {
+            userSetHabits(habit);
+            setHabitModalVisible(false);
+          }}
+        >
+          <Text style={styles.buttonText}>儲存</Text>
+        </Pressable>
+      </PopupModal>
     </View>
   );
 }
@@ -462,55 +429,19 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   bodySection: {
+    flexDirection: "row",
     backgroundColor: "#FFFFFF01",
     alignItems: "center",
+    justifyContent: "center",
     padding: "3%",
     paddingBottom: 80,
   },
-
-  // Box
-  boxLayout: {
-    height: 100,
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-  },
-  boxInputLayout: {
-    gap: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  boxInput: {
-    height: 30,
-    width: 180,
-    backgroundColor: "#ffffff00",
-    padding: 10,
-    borderRadius: 5,
-    borderColor: "white",
-    borderWidth: 2,
-  },
-  boxInputLabel: {
+  // Widget
+  customWidgetStyle: {},
+  widgetText: {
     color: "white",
-    fontSize: 14,
+    fontSize: 16,
   },
-  boxButton: {
-    height: 30,
-    width: 180,
-    backgroundColor: "#4f8ef7",
-    padding: 10,
-    borderRadius: 5,
-    borderColor: "white",
-    borderWidth: 2,
-    justifyContent: "center",
-  },
-  buttonText: {
-    fontSize: 14,
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-
   // Modal
   modalButton: {
     backgroundColor: "#2196F3",
@@ -540,5 +471,9 @@ const styles = StyleSheet.create({
   linkText: {
     color: "gray",
     textDecorationLine: "underline",
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
   },
 });

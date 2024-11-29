@@ -1,6 +1,6 @@
 // React Component and Package
-import React, { useEffect } from "react";
-import { View, StyleSheet, Dimensions, Text } from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, Dimensions, Text } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 // Interfaces and Enums
 import {
@@ -9,7 +9,7 @@ import {
   WeatherData,
 } from "@/app/(tabs)/_layout";
 // Components
-import { SelectedData } from "./IndicatorInfoModal";
+import { SelectedData } from "@/components/IndicatorInfoModal";
 
 interface ChartProps {
   indicatorType: indicators;

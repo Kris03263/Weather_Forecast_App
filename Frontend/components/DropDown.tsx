@@ -2,16 +2,16 @@
 import React, { useRef, useState } from "react";
 import { View, Text, StyleSheet, Pressable, Modal } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-// Interfaces and Enums
 // Components
 import { SvgImage } from "@/components/Svg";
 
 interface DropdownProps {
   itemList: { title: string; svgName: string }[];
   onSelect: (index: number) => void;
+  style?: object;
 }
 
-export function Dropdown({ itemList, onSelect }: DropdownProps) {
+export function Dropdown({ itemList, onSelect, style }: DropdownProps) {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -45,7 +45,11 @@ export function Dropdown({ itemList, onSelect }: DropdownProps) {
       <Modal transparent={true} visible={isVisible} animationType="fade">
         <View style={styles.modalBackground}></View>
         <View
-          style={[styles.dropdown, { top: position.top, left: position.left }]}
+          style={[
+            styles.dropdown,
+            style,
+            { top: position.top, left: position.left },
+          ]}
         >
           <FlatList
             data={itemList}

@@ -1,12 +1,9 @@
+// React Component and Package
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, Animated, Dimensions, Text } from "react-native";
 import { useSelector } from "react-redux";
-import {
-  FlatList,
-  ScrollView,
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
-
+import { FlatList, ScrollView } from "react-native-gesture-handler";
+// Interfaces and Enums
 import {
   Region,
   Selecter,
@@ -16,7 +13,7 @@ import {
   disasterTypes,
   EarthquakeDataList,
 } from "./_layout";
-
+// Components
 import { WeatherDisplay } from "@/components/WeatherDisplay";
 import { ForecastDisplayWidget } from "@/components/ForecastDisplayWidget";
 import { IndicatorsDisplayWidget } from "@/components/IndicatorsDisplayWidget";
@@ -25,12 +22,13 @@ import { Background } from "@/components/Background";
 import { EarthquakesDisplayWidget } from "@/components/DisasterDisplayWidget";
 import { IndicatorInfoModal } from "@/components/IndicatorInfoModal";
 import { DisasterInfoModal } from "@/components/DisasterInfoModal";
+import { DynamicImage } from "@/components/DynamicImage";
+// Redux
 import store from "@/redux/store";
 import {
   setSelectedRegionIndex,
   setSelectedTargetRegionIndex,
 } from "@/redux/selecterSlice";
-import { DynamicImage } from "@/components/DynamicImage";
 
 export default function HomeScreen() {
   const selecter = useSelector(
@@ -138,7 +136,7 @@ export default function HomeScreen() {
         <View style={[styles.topSection]}>
           <View style={styles.regionNameDisplay}>
             <Text style={styles.regionNameText}>
-              {`${region?.city}, ${region?.district}` ?? null}
+              {`${region.city}, ${region.district}`}
             </Text>
             <DynamicImage
               style={styles.weatherIcon}
@@ -303,7 +301,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
   // Loading
   loadingText: {
     color: "white",
@@ -316,7 +313,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
   },
-
   // Top Section
   topSection: {
     marginTop: 40,
@@ -345,7 +341,6 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "flex-start",
   },
-
   // Body Section
   bodySection: {
     flexDirection: "row",

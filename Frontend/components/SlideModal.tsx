@@ -1,3 +1,4 @@
+// React Component and Package
 import { ReactNode, useEffect, useRef } from "react";
 import {
   Modal,
@@ -7,9 +8,9 @@ import {
   View,
   Animated,
 } from "react-native";
-
-import { SvgImage } from "@/components/Svg";
 import { ScrollView } from "react-native-gesture-handler";
+// Components
+import { SvgImage } from "@/components/Svg";
 
 interface SlideModalProps {
   title?: string;
@@ -81,7 +82,6 @@ export function SlideModal({
   );
 }
 
-// Default Style
 const styles = StyleSheet.create({
   // Modal
   modalBackground: {

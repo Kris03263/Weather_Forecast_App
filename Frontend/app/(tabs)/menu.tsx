@@ -1,3 +1,4 @@
+// React Component and Package
 import React, { ReactNode, useEffect, useState } from "react";
 import {
   View,
@@ -15,7 +16,7 @@ import {
   MenuOption,
   MenuTrigger,
 } from "react-native-popup-menu";
-
+// Interfaces and Enums
 import {
   WeatherDataList,
   RegionList,
@@ -24,10 +25,11 @@ import {
   getAllRegionList,
   userRemoveRegion,
 } from "./_layout";
-
+// Components
 import { Background } from "@/components/Background";
 import { SvgImage } from "@/components/Svg";
 import { PopupModal } from "@/components/PopupModal";
+// Redux
 import store from "@/redux/store";
 import { setSelectedTargetRegionIndex } from "@/redux/selecterSlice";
 
@@ -39,25 +41,23 @@ export default function MenuScreen() {
 
   // Modal control
   const [isModalVisible, setModalVisible] = useState(false);
-  const [modalHeader, setModalHeader] = useState("");
-  const [modalContent, setModalContent] = useState<ReactNode>();
-  const [modalFooter, setModalFooter] = useState<ReactNode>();
 
   // Temp data
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [allRegionList, setAllRegionList] = useState<RegionList>({ city: {} });
 
+  // Data from Redux
+  const regions = useSelector((state: { regions: Region[] }) => state.regions);
+  const weatherDataList = useSelector(
+    (state: { weatherData: WeatherDataList }) => state.weatherData
+  );
+
   useEffect(() => {
     getAllRegionList().then((data) => {
       setAllRegionList(data);
     });
   }, []);
-
-  const regions = useSelector((state: { regions: Region[] }) => state.regions);
-  const weatherDataList = useSelector(
-    (state: { weatherData: WeatherDataList }) => state.weatherData
-  );
 
   const handleCitySelect = (e: any) => {
     setSelectedCity(e.target.value);
@@ -68,84 +68,13 @@ export default function MenuScreen() {
     setSelectedDistrict(e.target.value);
   };
 
+  // Modal Control
   enum ModalType {
     SELECT = "選擇城市",
   }
 
   const openModal = (modalType: ModalType) => {
-    setModalHeader(modalType);
-    setModalContent(getModalContent(modalType));
-    setModalFooter(getModalFooter(modalType));
     setModalVisible(true);
-  };
-
-  useEffect(() => {
-    if (isModalVisible) {
-      openModal(ModalType.SELECT);
-    }
-  }, [selectedCity, selectedDistrict]);
-
-  const getModalContent = (modalType: ModalType) => {
-    switch (modalType) {
-      case ModalType.SELECT:
-        return (
-          <>
-            <Text style={styles.modalInputLabel}>縣市名稱: </Text>
-            <select
-              required
-              value={selectedCity}
-              onChange={handleCitySelect}
-              style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
-            >
-              <option key={null} value={""} />
-              {Object.keys(allRegionList.city).map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
-            <Text style={styles.modalInputLabel}>市區名稱: </Text>
-            <select
-              required
-              value={selectedDistrict}
-              onChange={handleDistrictSelect}
-              style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
-            >
-              <option key={null} value={""} />
-              {selectedCity &&
-                allRegionList.city[selectedCity].map((district) => (
-                  <option key={district} value={district}>
-                    {district}
-                  </option>
-                ))}
-            </select>
-          </>
-        );
-    }
-  };
-  const getModalFooter = (modalType: ModalType) => {
-    switch (modalType) {
-      case ModalType.SELECT:
-        return (
-          <>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => {
-                userAddRegion(selectedCity, selectedDistrict);
-                setModalVisible(false);
-              }}
-            >
-              <Text style={styles.modalButtonText}>確認</Text>
-            </Pressable>
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.modalButtonText}>關閉</Text>
-            </Pressable>
-          </>
-        );
-    }
   };
 
   return (
@@ -252,10 +181,56 @@ export default function MenuScreen() {
       <PopupModal
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
-        header={modalHeader}
-        content={modalContent}
-        footer={modalFooter}
-      />
+        header={ModalType.SELECT}
+      >
+        <Text style={styles.modalInputLabel}>縣市名稱: </Text>
+        <select
+          required
+          value={selectedCity}
+          onChange={handleCitySelect}
+          style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
+        >
+          <option key={null} value={""} />
+          {Object.keys(allRegionList.city).map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
+
+        <Text style={styles.modalInputLabel}>市區名稱: </Text>
+        <select
+          required
+          value={selectedDistrict}
+          onChange={handleDistrictSelect}
+          style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
+        >
+          <option key={null} value={""} />
+          {selectedCity &&
+            allRegionList.city[selectedCity].map((district) => (
+              <option key={district} value={district}>
+                {district}
+              </option>
+            ))}
+        </select>
+
+        <Pressable
+          style={styles.modalButton}
+          onPress={() => {
+            userAddRegion(selectedCity, selectedDistrict);
+            setModalVisible(false);
+          }}
+        >
+          <Text style={styles.modalButtonText}>確認</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.modalButton}
+          onPress={() => setModalVisible(false)}
+        >
+          <Text style={styles.modalButtonText}>關閉</Text>
+        </Pressable>
+      </PopupModal>
     </View>
   );
 }
@@ -288,7 +263,6 @@ const styles = StyleSheet.create({
     padding: "3%",
     paddingBottom: 80,
   },
-
   // Region Card
   regionCard: {
     margin: 5,
@@ -302,7 +276,6 @@ const styles = StyleSheet.create({
   regionCardSubText: { color: "#D3D3D3", fontSize: 12 },
   regionCardTemperatureText: { color: "white", fontSize: 36 },
   regionCardText: { color: "white", fontSize: 12 },
-
   // Modal
   modalButton: {
     backgroundColor: "#2196F3",

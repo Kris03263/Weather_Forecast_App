@@ -1,5 +1,6 @@
+// React Component and Package
 import { View } from "react-native";
-
+// Svg paths
 import WetIcon from "@/assets/svgs/wet-icon.svg";
 import RainRateIcon from "@/assets/svgs/rainRate-icon.svg";
 import WindSpeedIcon from "@/assets/svgs/windSpeed-icon.svg";

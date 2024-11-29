@@ -1,8 +1,9 @@
-import React from "react";
+// React Component and Package
 import { StyleSheet, Pressable, Text } from "react-native";
 import { useSelector } from "react-redux";
-
+// Components
 import { PopupModal } from "@/components/PopupModal";
+// Redux
 import store from "@/redux/store";
 import { setVisible } from "@/redux/globalMessageSlice";
 
@@ -15,24 +16,26 @@ export function MessageModal() {
     (state: { globalMessage: { isVisible: boolean } }) =>
       state.globalMessage.isVisible
   );
-  const onClose = () => store.dispatch(setVisible(false));
 
   return (
     <PopupModal
       isVisible={isVisible}
-      onClose={onClose}
+      onClose={() => store.dispatch(setVisible(false))}
       header="通知"
-      content={<Text>{message}</Text>}
-      footer={
-        <Pressable style={styles.modalButton} onPress={onClose}>
-          <Text style={styles.modalButtonText}>確認</Text>
-        </Pressable>
-      }
-    />
+    >
+      <Text>{message}</Text>
+      <Pressable
+        style={styles.modalButton}
+        onPress={() => store.dispatch(setVisible(false))}
+      >
+        <Text style={styles.modalButtonText}>確認</Text>
+      </Pressable>
+    </PopupModal>
   );
 }
 
 const styles = StyleSheet.create({
+  // Modal
   modalButton: {
     backgroundColor: "#2196F3",
     borderRadius: 10,

@@ -1,5 +1,6 @@
+// React Component and Package
 import { StyleSheet, View, Text } from "react-native";
-
+// Interfaces and Enums
 import { WeatherData, indicatorsDictionary } from "@/app/(tabs)/_layout";
 
 interface WeatherDisplayProps {
@@ -43,7 +44,6 @@ export function WeatherDisplay({
   );
 }
 
-// Default Style
 const styles = StyleSheet.create({
   layout: {
     width: "100%",

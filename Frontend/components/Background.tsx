@@ -10,6 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { WeatherData } from "@/app/(tabs)/_layout";
 // Components
 import { BackgroundGradient } from "@/constants/Colors";
+import { StyleSheet } from "react-native";
 
 interface BackgroundProps {
   weatherData: WeatherData | null;
@@ -46,16 +47,18 @@ export function Background({ weatherData, style }: BackgroundProps) {
   return (
     <LinearGradient
       colors={[backgroundColor[0], backgroundColor[1]]}
-      style={[
-        {
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          height: "100%",
-        },
-        style,
-      ]}
+      style={[styles.linearGradient, style]}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  // Linear Gradient
+  linearGradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: "100%",
+  },
+});

@@ -1,16 +1,17 @@
+// React Component and Package
 import { StyleSheet, Text, Pressable, View } from "react-native";
 
 interface RadioButtonProps {
   label: string;
-  selected: boolean;
-  onPress: () => void;
+  isSelected: boolean;
+  onSelect: () => void;
 }
 
-export function RadioButton({ label, selected, onPress }: RadioButtonProps) {
+export function RadioButton({ label, isSelected, onSelect }: RadioButtonProps) {
   return (
-    <Pressable style={styles.radioButtonLayout} onPress={onPress}>
+    <Pressable style={styles.radioButtonLayout} onPress={onSelect}>
       <View
-        style={[styles.radioButton, selected && styles.radioButtonSelected]}
+        style={[styles.radioButton, isSelected && styles.radioButtonSelected]}
       />
       <Text style={styles.radioLabel}>{label}</Text>
     </Pressable>
@@ -18,6 +19,7 @@ export function RadioButton({ label, selected, onPress }: RadioButtonProps) {
 }
 
 const styles = StyleSheet.create({
+  // RadioButton
   radioButtonLayout: {
     flexDirection: "row",
     alignItems: "center",

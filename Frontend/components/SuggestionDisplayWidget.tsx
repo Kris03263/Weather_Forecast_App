@@ -31,9 +31,9 @@ export function SuggestionDisplayWidget({
   );
 }
 
-// Default Style
 const styles = StyleSheet.create({
   customWidgetStyle: {},
+  // Content
   contentLayout: {
     flexDirection: "column",
     alignItems: "flex-start",

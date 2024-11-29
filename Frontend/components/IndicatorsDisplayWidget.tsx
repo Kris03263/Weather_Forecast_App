@@ -1,13 +1,13 @@
-import React from "react";
+// React Component and Package
 import { StyleSheet, View, Text } from "react-native";
-
-import { Widget } from "@/components/Widget";
-
+// Interfaces and Enums
 import {
   WeatherData,
   indicators,
   indicatorsDictionary,
 } from "@/app/(tabs)/_layout";
+// Components
+import { Widget } from "@/components/Widget";
 
 interface IndicatorsDisplayWidgetProps {
   weatherData: WeatherData;
@@ -40,9 +40,9 @@ export function IndicatorsDisplayWidget({
   );
 }
 
-// Default Style
 const styles = StyleSheet.create({
   customWidgetStyle: {},
+  // Content
   contentLayout: {
     flexDirection: "column",
     alignItems: "flex-start",

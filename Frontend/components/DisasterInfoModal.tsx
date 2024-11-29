@@ -1,3 +1,4 @@
+// React Component and Package
 import {
   View,
   Modal,
@@ -11,11 +12,15 @@ import {
   Image,
   FlatList,
 } from "react-native";
-import React, { useRef, useEffect } from "react";
-
+import { useRef, useEffect, useState } from "react";
+// Interfaces and Enums
+import {
+  EarthquakeDataList,
+  disasterTypes,
+  indicatorsDictionary,
+} from "@/app/(tabs)/_layout";
+// Components
 import { SvgImage } from "@/components/Svg";
-import { EarthquakeData, EarthquakeDataList } from "@/app/(tabs)/_layout";
-import { disasterTypes } from "@/app/(tabs)/_layout";
 
 interface DisasterInfoModalProps {
   disasterType: disasterTypes;

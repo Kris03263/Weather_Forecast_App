@@ -1,6 +1,6 @@
 // React Component and Package
 import { StyleSheet, View, Text } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
+import { ScrollView } from "react-native-gesture-handler";
 // Interfaces and Enums
 import { WeatherData } from "@/app/(tabs)/_layout";
 // Components
@@ -28,37 +28,37 @@ export function ForecastDisplayWidget({
       heightMultiplier={2}
     >
       <View style={styles.contentLayout}>
-        <FlatList
+        <ScrollView
           nestedScrollEnabled={true}
           contentContainerStyle={styles.weatherCardGroupLayout}
-          data={weatherDatas ?? []}
-          renderItem={({ item }) => (
-            <View style={styles.weatherCardLayout}>
-              <Text style={styles.weatherTimeText}>
-                {item.time.split(" ")[1].split(":")[0] + "時"}
-              </Text>
-              <DynamicImage
-                style={styles.weatherIcon}
-                path={
-                  item.time.split(" ")[1] < "18:00:00" &&
-                  item.time.split(" ")[1] >= "06:00:00"
-                    ? `day/${item.weatherCode}.png`
-                    : `night/${item.weatherCode}.png`
-                }
-              />
-              <Text style={styles.weatherTemperatureText}>
-                {item.temp + "°C"}
-              </Text>
-            </View>
-          )}
-          keyExtractor={(item) => item.time}
-        />
+        >
+          {weatherDatas?.map((item) => {
+            return (
+              <View style={styles.weatherCardLayout}>
+                <Text style={styles.weatherTimeText}>
+                  {item.time.split(" ")[1].split(":")[0] + "時"}
+                </Text>
+                <DynamicImage
+                  style={styles.weatherIcon}
+                  path={
+                    item.time.split(" ")[1] < "18:00:00" &&
+                    item.time.split(" ")[1] >= "06:00:00"
+                      ? `day/${item.weatherCode}.png`
+                      : `night/${item.weatherCode}.png`
+                  }
+                />
+                <Text style={styles.weatherTemperatureText}>
+                  {item.temp + "°C"}
+                </Text>
+              </View>
+            );
+          })}
+        </ScrollView>
       </View>
     </Widget>
   );
 }
 
-// Default Style
 const styles = StyleSheet.create({
   customWidgetStyle: {
     width: 310,

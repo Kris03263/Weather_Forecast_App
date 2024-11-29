@@ -1,20 +1,20 @@
+// React Component and Package
 import { Modal, StyleSheet, Text, View } from "react-native";
-import React, { ReactNode } from "react";
+import { Children, ReactNode } from "react";
 
+// TODO: Change content and footer to be ReactNode only
 export interface PopupModalProps {
   isVisible: boolean;
   onClose: () => void;
   header: string;
-  content: ReactNode;
-  footer: ReactNode;
+  children: ReactNode;
 }
 
 export function PopupModal({
   isVisible,
   onClose,
   header,
-  content,
-  footer,
+  children,
 }: PopupModalProps) {
   return (
     <Modal
@@ -28,8 +28,7 @@ export function PopupModal({
           <View style={styles.modalHeader}>
             <Text style={styles.modalHeaderText}>{header}</Text>
           </View>
-          <View style={styles.modalBody}>{content}</View>
-          <View style={styles.modalFooter}>{footer}</View>
+          <View style={styles.modalBody}>{children}</View>
         </View>
       </View>
     </Modal>
@@ -70,30 +69,5 @@ const styles = StyleSheet.create({
     width: "100%",
     marginVertical: 15,
     gap: 10,
-  },
-  modalFooter: {
-    width: "100%",
-    gap: 10,
-  },
-  modalButton: {
-    backgroundColor: "#2196F3",
-    borderRadius: 10,
-    alignItems: "center",
-    padding: 10,
-  },
-  modalInputLayout: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  modalInputSvg: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-  modalInput: {
-    padding: 5,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 5,
   },
 });
