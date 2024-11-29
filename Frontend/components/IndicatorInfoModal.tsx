@@ -108,8 +108,21 @@ export function IndicatorInfoModal({
                   keyExtractor={(_, index) => index.toString()}
                   renderItem={({ item, index }) => {
                     const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
-                    const day = dayNames[new Date().getDay() + index];
-                    const date = new Date().getDate();
+                    //自動換月份
+                    const day =
+                      dayNames[
+                        new Date(
+                          new Date().getFullYear(),
+                          new Date().getMonth(),
+                          new Date().getDate() + index
+                        ).getDay()
+                      ];
+                    //自動換月份
+                    const date = new Date(
+                      new Date().getFullYear(),
+                      new Date().getMonth(),
+                      new Date().getDate() + index
+                    ).getDate();
 
                     return (
                       <Pressable

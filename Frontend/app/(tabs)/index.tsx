@@ -13,6 +13,7 @@ import {
   WeatherDataList,
   DailySug,
   indicators,
+  disasterTypes,
   EarthquakeDataList,
 } from "./_layout";
 
@@ -103,9 +104,17 @@ export default function HomeScreen() {
   const [modalIndicatorType, setModalIndicatorType] = useState<indicators>(
     indicators.temp
   );
+  const [modalDisasterType, setModalDisasterType] = useState<disasterTypes>(
+    disasterTypes.earthquake
+  );
 
-  function openSlideModal(id: string, indicatorType?: indicators) {
+  function openSlideModal(
+    id: string,
+    indicatorType?: indicators,
+    disasterType?: disasterTypes
+  ) {
     if (indicatorType) setModalIndicatorType(indicatorType);
+    if (disasterType) setModalDisasterType(disasterType);
     setActiveModalId(id);
   }
 
@@ -246,9 +255,25 @@ export default function HomeScreen() {
                       type="transportation"
                     />
                     <EarthquakesDisplayWidget
+                      type={disasterTypes.earthquake}
                       earthquakeData={earthquakeDataList.recent ?? null}
                       onPress={() => {
-                        openSlideModal("disaster");
+                        openSlideModal(
+                          "disaster",
+                          undefined,
+                          disasterTypes.earthquake
+                        );
+                      }}
+                    />
+                    <EarthquakesDisplayWidget
+                      type={disasterTypes.typhoon}
+                      earthquakeData={earthquakeDataList.recent ?? null}
+                      onPress={() => {
+                        openSlideModal(
+                          "disaster",
+                          undefined,
+                          disasterTypes.typhoon
+                        );
                       }}
                     />
                   </>
@@ -261,6 +286,7 @@ export default function HomeScreen() {
                 onClose={() => setActiveModalId("-1")}
               />
               <DisasterInfoModal
+                disasterType={modalDisasterType}
                 earthquakeData={earthquakeDataList.recent ?? null}
                 isModalShow={activeModalId === "disaster"}
                 onClose={() => setActiveModalId("-1")}

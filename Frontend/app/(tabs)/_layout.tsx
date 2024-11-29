@@ -51,6 +51,10 @@ export enum indicators {
   windDirection = "windDirection",
   windSpeed = "windSpeed",
 }
+export enum disasterTypes {
+  earthquake = "earthquake",
+  typhoon = "typhoon",
+}
 export const indicatorsDictionary = {
   [indicators.aqi]: {
     title: "空氣品質",
