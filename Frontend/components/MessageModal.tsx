@@ -1,3 +1,4 @@
+import React from "react";
 import { StyleSheet, Pressable, Text } from "react-native";
 import { useSelector } from "react-redux";
 

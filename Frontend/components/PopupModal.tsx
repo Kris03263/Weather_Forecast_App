@@ -1,5 +1,5 @@
 import { Modal, StyleSheet, Text, View } from "react-native";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 
 export interface PopupModalProps {
   isVisible: boolean;

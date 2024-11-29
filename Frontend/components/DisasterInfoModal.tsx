@@ -9,35 +9,39 @@ import {
   Share,
   Alert,
   Image,
+  FlatList,
 } from "react-native";
 import React, { useRef, useEffect } from "react";
 
 import { SvgImage } from "@/components/Svg";
-import { EarthquakeData } from "@/app/(tabs)/_layout";
+import { EarthquakeData, EarthquakeDataList } from "@/app/(tabs)/_layout";
 import { disasterTypes } from "@/app/(tabs)/_layout";
 
 interface DisasterInfoModalProps {
   disasterType: disasterTypes;
   isModalShow: boolean;
-  earthquakeData: EarthquakeData;
+  earthquakeDataList: EarthquakeDataList;
   onClose: () => void;
 }
 
 export function DisasterInfoModal({
   disasterType,
   isModalShow,
-  earthquakeData,
+  earthquakeDataList,
   onClose,
 }: DisasterInfoModalProps) {
   const pan = useRef(new Animated.ValueXY()).current; // Initial off-screen position
+  const buttonRef = useRef<View>(null);
+  const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
 
   const shareContent = async () => {
     try {
       await Share.share(
         {
           title: "分享地震資訊",
-          message: `${earthquakeData?.content}\n`,
-          url: earthquakeData.shakeImg || "",
+          message: `${earthquakeDataList?.recent?.content}\n`,
+          url: earthquakeDataList?.recent?.shakeImg || "",
         },
         {
           dialogTitle: "分享地震資訊",
@@ -87,7 +91,7 @@ export function DisasterInfoModal({
               <Text style={styles.cardTitle}>地震示意圖</Text>
               <Text style={styles.cardText}>
                 <Image
-                  source={{ uri: earthquakeData?.shakeImg ?? "" }}
+                  source={{ uri: earthquakeDataList?.recent?.shakeImg ?? "" }}
                   style={{ width: "100%", height: 500 }}
                 />
               </Text>
@@ -96,28 +100,28 @@ export function DisasterInfoModal({
             <View style={styles.card}>
               <Text style={styles.cardTitle}>芮氏規模</Text>
               <Text style={styles.cardText}>
-                {earthquakeData?.magnitude ?? "未知"}
+                {earthquakeDataList?.recent?.magnitude ?? "未知"}
               </Text>
             </View>
 
             <View style={styles.card}>
               <Text style={styles.cardTitle}>震源深度</Text>
               <Text style={styles.cardText}>
-                {earthquakeData?.depth ?? "未知"} km
+                {earthquakeDataList?.recent?.depth ?? "未知"} km
               </Text>
             </View>
 
             <View style={styles.card}>
               <Text style={styles.cardTitle}>發生時間</Text>
               <Text style={styles.cardText}>
-                {earthquakeData?.time ?? "未知"}
+                {earthquakeDataList?.recent?.time ?? "未知"}
               </Text>
             </View>
 
             <View style={styles.card}>
               <Text style={styles.cardTitle}>與震源距離</Text>
               <Text style={styles.cardText}>
-                {earthquakeData?.distance ?? "未知"} km
+                {earthquakeDataList?.recent?.distance ?? "未知"} km
               </Text>
             </View>
           </>
@@ -127,6 +131,68 @@ export function DisasterInfoModal({
       default:
         return "未知災害";
     }
+  };
+  const getDropDownContent = (disasterType: disasterTypes) => {
+    return (
+      <>
+        <View style={styles.dropdownLayout}>
+          <Pressable
+            ref={buttonRef}
+            style={styles.dropdownBox}
+            onPress={() => {
+              buttonRef.current?.measure((fx, fy, width, height, px, py) => {
+                const popupWidth = styles.dropdown.width;
+                setPosition({
+                  top: py + height + styles.dropdown.padding + 10,
+                  left: px - popupWidth + width + styles.dropdown.padding,
+                });
+                setIsDropdownVisible(true);
+              });
+            }}
+          >
+            <Text>●</Text>
+            <SvgImage style={styles.svgImage} name="down" />
+          </Pressable>
+        </View>
+
+        <Modal
+          transparent={true}
+          visible={isDropdownVisible}
+          animationType="fade"
+        >
+          <View style={styles.modalBackground}></View>
+          <View
+            style={[
+              styles.dropdown,
+              { top: position.top, left: position.left },
+            ]}
+          >
+            <FlatList
+              data={Object.values(disasterTypes)}
+              renderItem={({ item, index }) => (
+                <>
+                  {index !== 0 && <View style={styles.separator} />}
+                  <Pressable
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setIsDropdownVisible(false);
+                    }}
+                  >
+                    <SvgImage
+                      style={styles.svgImage}
+                      name={indicatorsDictionary[item].svgName}
+                    ></SvgImage>
+                    <Text style={styles.dropdownText}>
+                      {indicatorsDictionary[item].title}
+                    </Text>
+                  </Pressable>
+                </>
+              )}
+            />
+          </View>
+        </Modal>
+      </>
+    );
   };
 
   return (
@@ -294,5 +360,36 @@ const styles = StyleSheet.create({
   shareButtonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  dropdownLayout: {
+    height: 40,
+    backgroundColor: "#333",
+    borderRadius: 20,
+    padding: 10,
+    alignItems: "center",
+  },
+  dropdownBox: {
+    gap: 5,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  dropdownItem: {
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: "#fff",
+  },
+  dropdown: {
+    width: 200,
+    position: "absolute",
+    padding: 10,
+    backgroundColor: "#333",
+    borderWidth: 1,
+    borderColor: "#9ca8b7",
+    borderRadius: 15,
   },
 });
