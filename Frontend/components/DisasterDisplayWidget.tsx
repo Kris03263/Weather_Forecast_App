@@ -1,11 +1,11 @@
 import { StyleSheet, View, Text } from "react-native";
 
-import { EarthquakeData } from "@/app/(tabs)/_layout";
+import { disasterTypes, EarthquakeData } from "@/app/(tabs)/_layout";
 
 import { Widget } from "@/components/Widget";
 
 interface EarthquakesDisplayWidgetProps {
-  type: string;
+  type: disasterTypes;
   earthquakeData: EarthquakeData;
   onPress: () => void;
 }
@@ -15,20 +15,22 @@ export function EarthquakesDisplayWidget({
   earthquakeData,
   onPress,
 }: EarthquakesDisplayWidgetProps) {
-  return (
-    <Widget
-      title={type === "earthquake" ? "最近地震資訊" : "最近颱風資訊"}
-      svgName={`${type}`}
-      style={styles.customWidgetStyle}
-      isVisible={true}
-      isPressable={true}
-      onPress={onPress}
-    >
-      <View style={styles.contentLayout}>
-        <Text style={styles.contentText}>
-          {type === "earthquake" ? earthquakeData?.content ?? "" : "--"}
-        </Text>
-        {/* <View style={styles.listLayout}>
+  switch (type) {
+    case disasterTypes.earthquake:
+      return (
+        <Widget
+          title={"最近地震資訊"}
+          svgName={`${type}`}
+          style={styles.customWidgetStyle}
+          isVisible={true}
+          isPressable={true}
+          onPress={onPress}
+        >
+          <View style={styles.contentLayout}>
+            <Text style={styles.contentText}>
+              {earthquakeData?.content ?? ""}
+            </Text>
+            {/* <View style={styles.listLayout}>
           <Text style={styles.listTitleText}>時間:</Text>
           <Text style={styles.listContentText}>
             {earthquakeData?.time ?? "--"}
@@ -58,11 +60,28 @@ export function EarthquakesDisplayWidget({
             {earthquakeData?.distance ?? "--"}公里
           </Text>
         </View> */}
-      </View>
-    </Widget>
-  );
+          </View>
+        </Widget>
+      );
+    case disasterTypes.typhoon:
+      return (
+        <Widget
+          title={"最近颱風資訊"}
+          svgName={`${type}`}
+          style={styles.customWidgetStyle}
+          isVisible={true}
+          isPressable={true}
+          onPress={onPress}
+        >
+          <View style={styles.contentLayout}>
+            <Text style={styles.contentText}>
+              {earthquakeData?.content ?? ""}
+            </Text>
+          </View>
+        </Widget>
+      );
+  }
 }
-
 const styles = StyleSheet.create({
   customWidgetStyle: {
     width: 310,

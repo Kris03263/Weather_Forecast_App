@@ -57,6 +57,77 @@ export function DisasterInfoModal({
     }
   }, [isModalShow]);
 
+  const getDisasterTitle = (disasterType: disasterTypes) => {
+    switch (disasterType) {
+      case disasterTypes.earthquake:
+        return (
+          <View style={styles.titleLayout}>
+            <SvgImage style={styles.svgImage} name={disasterTypes.earthquake} />
+            <Text style={styles.titleText}>地震資訊</Text>
+          </View>
+        );
+      case disasterTypes.typhoon:
+        return (
+          <View style={styles.titleLayout}>
+            <SvgImage style={styles.svgImage} name={disasterTypes.typhoon} />
+            <Text style={styles.titleText}>颱風資訊</Text>
+          </View>
+        );
+      default:
+        return "未知災害";
+    }
+  };
+  const getDisasterContent = (disasterType: disasterTypes) => {
+    switch (disasterType) {
+      case disasterTypes.earthquake:
+        return (
+          <>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>地震示意圖</Text>
+              <Text style={styles.cardText}>
+                <Image
+                  source={{ uri: earthquakeData?.shakeImg ?? "" }}
+                  style={{ width: "100%", height: 500 }}
+                />
+              </Text>
+            </View>
+
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>芮氏規模</Text>
+              <Text style={styles.cardText}>
+                {earthquakeData?.magnitude ?? "未知"}
+              </Text>
+            </View>
+
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>震源深度</Text>
+              <Text style={styles.cardText}>
+                {earthquakeData?.depth ?? "未知"} km
+              </Text>
+            </View>
+
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>發生時間</Text>
+              <Text style={styles.cardText}>
+                {earthquakeData?.time ?? "未知"}
+              </Text>
+            </View>
+
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>與震源距離</Text>
+              <Text style={styles.cardText}>
+                {earthquakeData?.distance ?? "未知"} km
+              </Text>
+            </View>
+          </>
+        );
+      case disasterTypes.typhoon:
+        return "data";
+      default:
+        return "未知災害";
+    }
+  };
+
   return (
     <>
       <View>
@@ -74,10 +145,7 @@ export function DisasterInfoModal({
               <View style={styles.headerLayout}>
                 <Pressable />
 
-                <View style={styles.titleLayout}>
-                  <SvgImage style={styles.svgImage} name="earthquake" />
-                  <Text style={styles.titleText}>地震資訊</Text>
-                </View>
+                {getDisasterTitle(disasterType)}
 
                 <Pressable style={styles.closeButton} onPress={() => onClose()}>
                   <SvgImage style={styles.svgImage} name="close" />
@@ -90,49 +158,14 @@ export function DisasterInfoModal({
               >
                 <View style={styles.separator} />
 
-                <View style={styles.card}>
-                  <Text style={styles.cardTitle}>地震示意圖</Text>
-                  <Text style={styles.cardText}>
-                    <Image
-                      source={{ uri: earthquakeData?.shakeImg ?? "" }}
-                      style={{ width: "100%", height: 500 }}
-                    />
-                  </Text>
-                </View>
+                {getDisasterContent(disasterType)}
 
-                <View style={styles.card}>
-                  <Text style={styles.cardTitle}>芮氏規模</Text>
-                  <Text style={styles.cardText}>
-                    {earthquakeData?.magnitude ?? "未知"}
-                  </Text>
-                </View>
-
-                <View style={styles.card}>
-                  <Text style={styles.cardTitle}>震源深度</Text>
-                  <Text style={styles.cardText}>
-                    {earthquakeData?.depth ?? "未知"} km
-                  </Text>
-                </View>
-
-                <View style={styles.card}>
-                  <Text style={styles.cardTitle}>發生時間</Text>
-                  <Text style={styles.cardText}>
-                    {earthquakeData?.time ?? "未知"}
-                  </Text>
-                </View>
-
-                <View style={styles.card}>
-                  <Text style={styles.cardTitle}>與震源距離</Text>
-                  <Text style={styles.cardText}>
-                    {earthquakeData?.distance ?? "未知"} km
-                  </Text>
-                </View>
-
-                {/* Share Button */}
-                <Pressable style={styles.shareButton} onPress={shareContent}>
-                  <SvgImage name="share" style={styles.svgImage} />
-                  <Text style={styles.shareButtonText}>分享</Text>
-                </Pressable>
+                {disasterType === disasterTypes.earthquake && (
+                  <Pressable style={styles.shareButton} onPress={shareContent}>
+                    <SvgImage name="share" style={styles.svgImage} />
+                    <Text style={styles.shareButtonText}>分享</Text>
+                  </Pressable>
+                )}
               </ScrollView>
             </Animated.View>
           </View>
