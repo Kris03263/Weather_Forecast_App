@@ -282,7 +282,7 @@ export default function HomeScreen() {
               <IndicatorInfoModal
                 indicatorType={modalIndicatorType}
                 weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
-                isModalShow={activeModalId === item.id}
+                isVisible={activeModalId === item.id}
                 onClose={() => setActiveModalId("-1")}
               />
               <DisasterInfoModal

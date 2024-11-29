@@ -37,6 +37,7 @@ export function PopupModal({
 }
 
 const styles = StyleSheet.create({
+  // Modal
   modalBackground: {
     flex: 1,
     justifyContent: "center",
