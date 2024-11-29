@@ -10,7 +10,8 @@ import {
   Alert,
   Image,
 } from "react-native";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
+
 import { SvgImage } from "@/components/Svg";
 import { EarthquakeData } from "@/app/(tabs)/_layout";
 import { disasterTypes } from "@/app/(tabs)/_layout";
@@ -23,7 +24,6 @@ interface DisasterInfoModalProps {
 }
 
 export function DisasterInfoModal({
-  disasterType,
   isModalShow,
   earthquakeData,
   onClose,
@@ -255,11 +255,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#238636",
     padding: 12,
     borderRadius: 10,
-    marginTop: 20,
+    gap: 10,
   },
   shareButtonText: {
     color: "#fff",
     fontSize: 16,
-    marginLeft: 10,
   },
 });

@@ -1,22 +1,15 @@
-import {
-  View,
-  Modal,
-  Pressable,
-  Animated,
-  Text,
-  StyleSheet,
-  ScrollView,
-  FlatList,
-} from "react-native";
-import React, { useState, useRef, useEffect } from "react";
-import { SvgImage } from "@/components/Svg";
-import { Dropdown } from "@/components/DropDown";
-import { Chart } from "@/components/Chart";
+import { View, Pressable, Text, StyleSheet, FlatList } from "react-native";
+import React, { useState, useEffect } from "react";
+
 import {
   indicators,
   indicatorsDictionary,
   WeatherData,
 } from "@/app/(tabs)/_layout";
+
+import { Dropdown } from "@/components/DropDown";
+import { Chart } from "@/components/Chart";
+import { SlideModal } from "@/components/SlideModal";
 
 export interface SelectedData {
   value: number;
@@ -28,14 +21,14 @@ export interface SelectedData {
 interface IndicatorInfoModalProps {
   indicatorType: indicators;
   weatherDatas: WeatherData[];
-  isModalShow: boolean;
+  isVisible: boolean;
   onClose: () => void;
 }
 
 export function IndicatorInfoModal({
   indicatorType,
   weatherDatas,
-  isModalShow,
+  isVisible,
   onClose,
 }: IndicatorInfoModalProps) {
   const [selectedIndicator, setSelectedIndicator] =
@@ -47,146 +40,143 @@ export function IndicatorInfoModal({
     unit: "",
   });
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
-  const pan = useRef(new Animated.ValueXY()).current;
-
-  useEffect(() => {
-    if (isModalShow) {
-      Animated.timing(pan, {
-        toValue: { x: 0, y: 0 },
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, [isModalShow]);
 
   useEffect(() => {
     setSelectedIndicator(indicatorType);
   }, [indicatorType]);
 
   return (
-    <View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalShow}
-        onRequestClose={() => onClose()}
-      >
-        <View style={styles.modalBackground}>
-          <Animated.View
-            style={[styles.modalView, { transform: [{ translateY: pan.y }] }]}
-          >
-            {/* Header */}
-            <View style={styles.headerLayout}>
-              <Pressable />
+    <SlideModal
+      title={indicatorsDictionary[selectedIndicator].title}
+      svgName={indicatorsDictionary[selectedIndicator].svgName}
+      isVisible={isVisible}
+      onClose={onClose}
+    >
+      {/* Date Selector */}
+      <View style={styles.dateSelecterLayout}>
+        <FlatList
+          horizontal
+          style={styles.dateSelectorContainer}
+          contentContainerStyle={styles.dateSelectorContentContainer}
+          data={Array.from({ length: 4 })}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={({ item, index }) => {
+            const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
+            //自動換月份
+            const day =
+              dayNames[
+                new Date(
+                  new Date().getFullYear(),
+                  new Date().getMonth(),
+                  new Date().getDate() + index
+                ).getDay()
+              ];
+            //自動換月份
+            const date = new Date(
+              new Date().getFullYear(),
+              new Date().getMonth(),
+              new Date().getDate() + index
+            ).getDate();
 
-              <View style={styles.titleLayout}>
-                <SvgImage
-                  style={styles.svgImage}
-                  name={indicatorsDictionary[selectedIndicator].svgName}
-                />
-                <Text style={styles.titleText}>
-                  {indicatorsDictionary[selectedIndicator].title}
-                </Text>
-              </View>
-
-              <Pressable style={styles.closeButton} onPress={() => onClose()}>
-                <SvgImage style={styles.svgImage} name="close" />
+            return (
+              <Pressable
+                key={index}
+                style={[
+                  styles.dateSelectorItem,
+                  selectedDateIndex === index &&
+                    styles.dateSelectorItem_Selected,
+                ]}
+                onPress={() => setSelectedDateIndex(index)}
+              >
+                <Text style={styles.dayText}>{`${day}`}</Text>
+                <Text style={styles.dateText}>{date}</Text>
               </Pressable>
-            </View>
+            );
+          }}
+        />
+      </View>
 
-            <ScrollView
-              style={{ width: "100%" }}
-              contentContainerStyle={styles.scrollViewContent}
-            >
-              {/* Date Selector */}
-              <View style={styles.dateSelecterLayout}>
-                <FlatList
-                  horizontal
-                  style={styles.dateSelectorContainer}
-                  contentContainerStyle={styles.dateSelectorContentContainer}
-                  data={Array.from({ length: 4 })}
-                  keyExtractor={(_, index) => index.toString()}
-                  renderItem={({ item, index }) => {
-                    const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
-                    //自動換月份
-                    const day =
-                      dayNames[
-                        new Date(
-                          new Date().getFullYear(),
-                          new Date().getMonth(),
-                          new Date().getDate() + index
-                        ).getDay()
-                      ];
-                    //自動換月份
-                    const date = new Date(
-                      new Date().getFullYear(),
-                      new Date().getMonth(),
-                      new Date().getDate() + index
-                    ).getDate();
+      <View style={styles.separator} />
 
-                    return (
-                      <Pressable
-                        key={index}
-                        style={[
-                          styles.dateSelectorItem,
-                          selectedDateIndex === index &&
-                            styles.dateSelectorItem_Selected,
-                        ]}
-                        onPress={() => setSelectedDateIndex(index)}
-                      >
-                        <Text style={styles.dayText}>{`${day}`}</Text>
-                        <Text style={styles.dateText}>{date}</Text>
-                      </Pressable>
-                    );
-                  }}
-                />
-              </View>
+      <View style={styles.row}>
+        {/* Indicator Text */}
+        <View style={styles.weatherInfoLayout}>
+          <Text style={styles.weatherInfoMainText}>
+            {selectedData.value || weatherDatas?.[0]?.[indicatorType]}
+            {selectedData.unit}
+          </Text>
 
-              <View style={styles.separator} />
-
-              <View style={styles.row}>
-                {/* Indicator Text */}
-                <View style={styles.weatherInfoLayout}>
-                  <Text style={styles.weatherInfoMainText}>
-                    {selectedData.value || weatherDatas?.[0]?.[indicatorType]}
-                    {selectedData.unit}
-                  </Text>
-
-                  <Text style={styles.weatherInfoSubText}>
-                    最高 {selectedData.maxValue}
-                    {selectedData.unit} 最低 {selectedData.minValue}
-                    {selectedData.unit}
-                  </Text>
-                </View>
-
-                {/* Indicator Type Selector */}
-                <Dropdown
-                  indicatorType={selectedIndicator}
-                  onIndicatorChange={(indicator: indicators) =>
-                    setSelectedIndicator(indicator)
-                  }
-                />
-              </View>
-
-              {/* Chart */}
-              <Chart
-                indicatorType={selectedIndicator}
-                weatherDatas={weatherDatas}
-                selectedDateIndex={selectedDateIndex}
-                onSelectDataChange={(newSelectData: SelectedData) =>
-                  setSelectedData(newSelectData)
-                }
-              />
-
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>當日小結</Text>
-                <Text style={styles.cardText}></Text>
-              </View>
-            </ScrollView>
-          </Animated.View>
+          <Text style={styles.weatherInfoSubText}>
+            最高 {selectedData.maxValue}
+            {selectedData.unit} 最低 {selectedData.minValue}
+            {selectedData.unit}
+          </Text>
         </View>
-      </Modal>
-    </View>
+
+        {/* Indicator Type Selector */}
+        <Dropdown
+          indicatorType={selectedIndicator}
+          onIndicatorChange={(indicator: indicators) =>
+            setSelectedIndicator(indicator)
+          }
+        />
+      </View>
+
+      {/* Chart */}
+      <Chart
+        indicatorType={selectedIndicator}
+        weatherDatas={weatherDatas}
+        selectedDateIndex={selectedDateIndex}
+        onSelectDataChange={(newSelectData: SelectedData) =>
+          setSelectedData(newSelectData)
+        }
+      />
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>當日小結</Text>
+        <Text style={styles.cardText}></Text>
+      </View>
+    </SlideModal>
+    // <View>
+    //   <Modal
+    //     animationType="slide"
+    //     transparent={true}
+    //     visible={isModalShow}
+    //     onRequestClose={() => onClose()}
+    //   >
+    //     <View style={styles.modalBackground}>
+    //       <Animated.View
+    //         style={[styles.modalView, { transform: [{ translateY: pan.y }] }]}
+    //       >
+    //         {/* Header */}
+    //         <View style={styles.headerLayout}>
+    //           <Pressable />
+
+    //           <View style={styles.titleLayout}>
+    //             <SvgImage
+    //               style={styles.svgImage}
+    //               name={indicatorsDictionary[selectedIndicator].svgName}
+    //             />
+    //             <Text style={styles.titleText}>
+    //               {indicatorsDictionary[selectedIndicator].title}
+    //             </Text>
+    //           </View>
+
+    //           <Pressable style={styles.closeButton} onPress={() => onClose()}>
+    //             <SvgImage style={styles.svgImage} name="close" />
+    //           </Pressable>
+    //         </View>
+
+    //         <ScrollView
+    //           style={{ width: "100%" }}
+    //           contentContainerStyle={styles.scrollViewContent}
+    //         >
+
+    //         </ScrollView>
+    //       </Animated.View>
+    //     </View>
+    //   </Modal>
+    // </View>
   );
 }
 

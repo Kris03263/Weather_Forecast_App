@@ -1,10 +1,11 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import Animated, {
+import {
   useDerivedValue,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+
 import { SvgImage } from "./Svg";
 
 interface WidgetProps {
@@ -89,6 +90,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
+  // Title
   titleLayout: {
     width: "100%",
     height: 25,
@@ -102,10 +104,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "left",
   },
+  // Svg
   svgImage: {
     width: 20,
     height: 20,
   },
+  // Separator
   separator: {
     height: 1,
     width: "100%",
