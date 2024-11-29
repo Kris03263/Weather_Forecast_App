@@ -1,16 +1,19 @@
+// React Component and Package
 import { StyleSheet, Image } from "react-native";
-
-const images = require.context("../assets/images", true, /\.(png|jpe?g|svg)$/);
 
 interface DynamicImageProps {
   style: object;
   path: string;
 }
 
-// example usage `../assets/images/day/01.png`
-
 export const DynamicImage = ({ style, path }: DynamicImageProps) => {
-  const imagePath = images(`./${path}`);
+  const images = require.context(
+    "../assets/images",
+    true,
+    /\.(png|jpe?g|svg)$/
+  );
+  const imagePath = images(`./${path}`); // example usage `../assets/images/day/01.png`
+
   return (
     <Image
       resizeMode="contain"
