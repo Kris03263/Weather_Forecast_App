@@ -1,3 +1,4 @@
+import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 
 import { disasterTypes, EarthquakeData } from "@/app/(tabs)/_layout";

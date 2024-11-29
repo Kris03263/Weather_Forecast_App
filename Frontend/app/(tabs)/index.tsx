@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, Animated, Dimensions, Text } from "react-native";
 import { useSelector } from "react-redux";
 import {
@@ -287,7 +287,7 @@ export default function HomeScreen() {
               />
               <DisasterInfoModal
                 disasterType={modalDisasterType}
-                earthquakeData={earthquakeDataList.recent ?? null}
+                earthquakeDataList={earthquakeDataList ?? null}
                 isModalShow={activeModalId === "disaster"}
                 onClose={() => setActiveModalId("-1")}
               />
