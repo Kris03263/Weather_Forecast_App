@@ -1,12 +1,14 @@
+// React Component and Package
 import React, { useEffect } from "react";
 import { View, StyleSheet, Dimensions, Text } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-
+// Interfaces and Enums
 import {
   indicatorsDictionary,
   indicators,
   WeatherData,
 } from "@/app/(tabs)/_layout";
+// Components
 import { SelectedData } from "./IndicatorInfoModal";
 
 interface ChartProps {
@@ -49,71 +51,68 @@ export function Chart({
 
   if (!segment || segment.length === 0) {
     return (
-      <View>
-        <Text style={{ color: "#fff", textAlign: "center", marginTop: 20 }}>
-          目前無可用資料
-        </Text>
-      </View>
+      <Text style={{ color: "#fff", textAlign: "center", marginTop: 20 }}>
+        目前無可用資料
+      </Text>
     );
   }
 
   return (
-    <View>
-      <LineChart
-        data={{
-          labels: labels,
-          datasets: [
-            {
-              data: values,
-              color: () => "#59c3ff",
-              strokeWidth: 4,
-            },
-          ],
-        }}
-        width={Dimensions.get("window").width - 40}
-        height={220}
-        yAxisSuffix={indicatorsDictionary[indicatorType].unit}
-        yLabelsOffset={20}
-        xAxisLabel="時"
-        fromZero
-        yAxisInterval={20}
-        chartConfig={{
-          backgroundGradientFrom: "#2c3136",
-          backgroundGradientTo: "#2c3136",
-          fillShadowGradient: "#3a95ff",
-          fillShadowGradientTo: "#423aff",
-          fillShadowGradientFromOpacity: 0.5,
-          fillShadowGradientToOpacity: 0.5,
-          decimalPlaces: 0,
-          color: (opacity = 0) => `rgba(255, 255, 255, 0)`,
-          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          style: {
-            backgroundColor: "#3a95ff",
-            borderRadius: 10,
+    <LineChart
+      data={{
+        labels: labels,
+        datasets: [
+          {
+            data: values,
+            color: () => "#59c3ff",
+            strokeWidth: 4,
           },
-          propsForDots: {
-            r: "4",
-            strokeWidth: "3",
-            stroke: "#2c3136",
-            fill: "white",
-          },
-        }}
-        style={styles.chart}
-        onDataPointClick={({ value, index }) => {
-          onSelectDataChange({
-            value: value,
-            maxValue: Math.max(...values),
-            minValue: Math.min(...values),
-            unit: indicatorsDictionary[indicatorType].unit,
-          });
-        }}
-        bezier
-      />
-    </View>
+        ],
+      }}
+      width={Dimensions.get("window").width - 40}
+      height={220}
+      yAxisSuffix={indicatorsDictionary[indicatorType].unit}
+      yLabelsOffset={20}
+      xAxisLabel="時"
+      fromZero
+      yAxisInterval={20}
+      chartConfig={{
+        backgroundGradientFrom: "#2c3136",
+        backgroundGradientTo: "#2c3136",
+        fillShadowGradient: "#3a95ff",
+        fillShadowGradientTo: "#423aff",
+        fillShadowGradientFromOpacity: 0.5,
+        fillShadowGradientToOpacity: 0.5,
+        decimalPlaces: 0,
+        color: (opacity = 0) => `rgba(255, 255, 255, 0)`,
+        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+        style: {
+          backgroundColor: "#3a95ff",
+          borderRadius: 10,
+        },
+        propsForDots: {
+          r: "4",
+          strokeWidth: "3",
+          stroke: "#2c3136",
+          fill: "white",
+        },
+      }}
+      style={styles.chart}
+      onDataPointClick={({ value }) => {
+        onSelectDataChange({
+          value: value,
+          maxValue: Math.max(...values),
+          minValue: Math.min(...values),
+          unit: indicatorsDictionary[indicatorType].unit,
+        });
+      }}
+      bezier
+    />
   );
 }
 
 const styles = StyleSheet.create({
+  // Chart
   chart: {
     borderRadius: 10,
     shadowColor: "#000",

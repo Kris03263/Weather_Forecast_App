@@ -1,12 +1,13 @@
+// React Component and Package
 import { View, Pressable, Text, StyleSheet, FlatList } from "react-native";
 import React, { useState, useEffect } from "react";
-
+// Interfaces and Enums
 import {
   indicators,
   indicatorsDictionary,
   WeatherData,
 } from "@/app/(tabs)/_layout";
-
+// Components
 import { Dropdown } from "@/components/DropDown";
 import { Chart } from "@/components/Chart";
 import { SlideModal } from "@/components/SlideModal";
@@ -40,6 +41,12 @@ export function IndicatorInfoModal({
     unit: "",
   });
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
+  const indicatorList = Object.keys(indicatorsDictionary)
+    .filter(
+      (key) =>
+        indicatorsDictionary[key as keyof typeof indicatorsDictionary].hasChart
+    )
+    .map((key) => key as indicators);
 
   useEffect(() => {
     setSelectedIndicator(indicatorType);
@@ -115,10 +122,11 @@ export function IndicatorInfoModal({
 
         {/* Indicator Type Selector */}
         <Dropdown
-          indicatorType={selectedIndicator}
-          onIndicatorChange={(indicator: indicators) =>
-            setSelectedIndicator(indicator)
-          }
+          itemList={indicatorList.map((key) => ({
+            title: indicatorsDictionary[key].title,
+            svgName: indicatorsDictionary[key].svgName,
+          }))}
+          onSelect={(index) => setSelectedIndicator(indicatorList[index])}
         />
       </View>
 
@@ -137,105 +145,16 @@ export function IndicatorInfoModal({
         <Text style={styles.cardText}></Text>
       </View>
     </SlideModal>
-    // <View>
-    //   <Modal
-    //     animationType="slide"
-    //     transparent={true}
-    //     visible={isModalShow}
-    //     onRequestClose={() => onClose()}
-    //   >
-    //     <View style={styles.modalBackground}>
-    //       <Animated.View
-    //         style={[styles.modalView, { transform: [{ translateY: pan.y }] }]}
-    //       >
-    //         {/* Header */}
-    //         <View style={styles.headerLayout}>
-    //           <Pressable />
-
-    //           <View style={styles.titleLayout}>
-    //             <SvgImage
-    //               style={styles.svgImage}
-    //               name={indicatorsDictionary[selectedIndicator].svgName}
-    //             />
-    //             <Text style={styles.titleText}>
-    //               {indicatorsDictionary[selectedIndicator].title}
-    //             </Text>
-    //           </View>
-
-    //           <Pressable style={styles.closeButton} onPress={() => onClose()}>
-    //             <SvgImage style={styles.svgImage} name="close" />
-    //           </Pressable>
-    //         </View>
-
-    //         <ScrollView
-    //           style={{ width: "100%" }}
-    //           contentContainerStyle={styles.scrollViewContent}
-    //         >
-
-    //         </ScrollView>
-    //       </Animated.View>
-    //     </View>
-    //   </Modal>
-    // </View>
   );
 }
 
 const styles = StyleSheet.create({
-  modalBackground: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  modalView: {
-    width: "100%",
-    height: "90%",
-    backgroundColor: "#21262c",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    alignItems: "center",
-    elevation: 5,
-  },
-  scrollViewContent: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    gap: 10,
-  },
-
   // Separator
   separator: {
     height: 1,
     width: "100%",
     backgroundColor: "#9ca8b7",
   },
-
-  // Header
-  headerLayout: {
-    width: "100%",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  // Title
-  titleLayout: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    gap: 10,
-  },
-  titleText: {
-    color: "white",
-    fontSize: 20,
-    textAlign: "left",
-  },
-
   // Date Selector
   dateSelecterLayout: {
     width: "100%",
@@ -263,7 +182,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 3,
   },
-
   // Weather Info
   weatherInfoLayout: {
     alignItems: "flex-start",
@@ -277,29 +195,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#aaa",
   },
-
-  // Close Button
-  closeButtonText: {
-    color: "#9ca8b7",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  closeButton: {
-    backgroundColor: "#2f363e",
-    borderRadius: 30,
-    width: 30,
-    height: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 2,
-  },
-
   // Svg
   svgImage: {
     width: 20,
     height: 20,
   },
-
   // Card
   card: {
     width: "100%",
@@ -322,7 +222,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#d1d5da",
   },
-
+  // Row
   row: {
     minWidth: "100%",
     flexDirection: "row",

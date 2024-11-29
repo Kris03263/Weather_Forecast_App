@@ -1,10 +1,11 @@
+// React Component and Package
 import { StyleSheet, View, Text } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-
+// Interfaces and Enums
+import { WeatherData } from "@/app/(tabs)/_layout";
+// Components
 import { Widget } from "@/components/Widget";
 import { DynamicImage } from "@/components/DynamicImage";
-
-import { WeatherData } from "@/app/(tabs)/_layout";
 
 interface ForecastDisplayWidgetProps {
   weatherDatas: WeatherData[];
@@ -63,10 +64,12 @@ const styles = StyleSheet.create({
     width: 310,
     overflow: "hidden",
   },
+  // Content
   contentLayout: {
     height: 100,
     gap: 10,
   },
+  // Weather Card
   weatherCardGroupLayout: {
     flexDirection: "row",
     alignItems: "center",

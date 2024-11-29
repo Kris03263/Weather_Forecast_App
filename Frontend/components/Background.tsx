@@ -1,3 +1,4 @@
+// React Component and Package
 import { useEffect, useState } from "react";
 import {
   useSharedValue,
@@ -5,9 +6,10 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
-
-import { BackgroundGradient } from "@/constants/Colors";
+// Interfaces and Enums
 import { WeatherData } from "@/app/(tabs)/_layout";
+// Components
+import { BackgroundGradient } from "@/constants/Colors";
 
 interface BackgroundProps {
   weatherData: WeatherData | null;
@@ -43,7 +45,7 @@ export function Background({ weatherData, style }: BackgroundProps) {
 
   return (
     <LinearGradient
-      colors={backgroundColor}
+      colors={[backgroundColor[0], backgroundColor[1]]}
       style={[
         {
           position: "absolute",

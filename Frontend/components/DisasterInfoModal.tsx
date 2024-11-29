@@ -26,6 +26,7 @@ interface DisasterInfoModalProps {
 }
 
 export function DisasterInfoModal({
+  disasterType,
   isModalShow,
   disasterType,
   earthquakeDataList,

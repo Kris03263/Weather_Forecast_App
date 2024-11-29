@@ -1,25 +1,21 @@
+// React Component and Package
 import React, { useRef, useState } from "react";
 import { View, Text, StyleSheet, Pressable, Modal } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-
-import { indicators, indicatorsDictionary } from "@/app/(tabs)/_layout";
-
+// Interfaces and Enums
+// Components
 import { SvgImage } from "@/components/Svg";
 
 interface DropdownProps {
-  indicatorType: indicators;
-  onIndicatorChange: (indicator: indicators) => void;
+  itemList: { title: string; svgName: string }[];
+  onSelect: (index: number) => void;
 }
 
-export function Dropdown({ indicatorType, onIndicatorChange }: DropdownProps) {
-  const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
+export function Dropdown({ itemList, onSelect }: DropdownProps) {
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<View>(null);
-  const ignoreList = [
-    indicators.windDirection,
-    indicators.pm2_5,
-    indicators.aqi,
-  ];
 
   return (
     <>
@@ -34,51 +30,42 @@ export function Dropdown({ indicatorType, onIndicatorChange }: DropdownProps) {
                 top: py + height + styles.dropdown.padding + 10,
                 left: px - popupWidth + width + styles.dropdown.padding,
               });
-              setIsDropdownVisible(true);
+              setIsVisible(true);
             });
           }}
         >
           <SvgImage
             style={styles.svgImage}
-            name={indicatorsDictionary[indicatorType].svgName}
+            name={itemList[selectedIndex].svgName}
           />
           <SvgImage style={styles.svgImage} name="down" />
         </Pressable>
       </View>
 
-      <Modal
-        transparent={true}
-        visible={isDropdownVisible}
-        animationType="fade"
-      >
+      <Modal transparent={true} visible={isVisible} animationType="fade">
         <View style={styles.modalBackground}></View>
         <View
           style={[styles.dropdown, { top: position.top, left: position.left }]}
         >
           <FlatList
-            data={Object.values(indicators)}
+            data={itemList}
             renderItem={({ item, index }) => (
               <>
-                {!ignoreList.includes(item) && index !== 0 && (
-                  <View style={styles.separator} />
-                )}
-                {!ignoreList.includes(item) && (
-                  <Pressable
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      onIndicatorChange(item);
-                      setIsDropdownVisible(false);
-                    }}
-                  >
-                    <SvgImage
-                      style={styles.svgImage}
-                      name={indicatorsDictionary[item].svgName}
-                    ></SvgImage>
-                    <Text style={styles.dropdownText}>
-                      {indicatorsDictionary[item].title}
-                    </Text>
-                  </Pressable>
-                )}
+                {index != 0 && <View style={styles.separator}></View>}
+                <Pressable
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    onSelect(index);
+                    setSelectedIndex(index);
+                    setIsVisible(false);
+                  }}
+                >
+                  <SvgImage
+                    style={styles.svgImage}
+                    name={item.svgName}
+                  ></SvgImage>
+                  <Text style={styles.dropdownText}>{item.title}</Text>
+                </Pressable>
               </>
             )}
           />
@@ -121,7 +108,6 @@ const styles = StyleSheet.create({
     borderColor: "#9ca8b7",
     borderRadius: 15,
   },
-
   // Separator
   separator: {
     height: 1,
@@ -129,13 +115,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#9ca8b7",
     marginVertical: 10,
   },
-
   // Svg
   svgImage: {
     width: 20,
     height: 20,
   },
-
+  // Modal
   modalBackground: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
