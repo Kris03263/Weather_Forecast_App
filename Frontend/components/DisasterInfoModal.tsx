@@ -18,6 +18,7 @@ import { EarthquakeData, EarthquakeDataList } from "@/app/(tabs)/_layout";
 import { disasterTypes } from "@/app/(tabs)/_layout";
 import { SlideModal } from "@/components/SlideModal";
 import { setRecentEarthquakeData } from "@/redux/earthquakeDataSlice";
+import { Dropdown } from "@/components/DropDown";
 interface DisasterInfoModalProps {
   disasterType: disasterTypes;
   isModalShow: boolean;
@@ -28,27 +29,26 @@ interface DisasterInfoModalProps {
 export function DisasterInfoModal({
   disasterType,
   isModalShow,
-  disasterType,
   earthquakeDataList,
   onClose,
 }: DisasterInfoModalProps) {
   const pan = useRef(new Animated.ValueXY()).current; // Initial off-screen position
   const buttonRef = useRef<View>(null);
-  const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
   const [title, setTitle] = useState<string>("地震資訊");
   const [svgName, setSvgName] = useState<string>("earthquake");
   const [selectedDisasterIndex, setSelectedDisasterIndex] = useState<number>(0);
-
-  console.log(earthquakeDataList);
 
   const shareContent = async () => {
     try {
       await Share.share(
         {
           title: "分享地震資訊",
-          message: `${earthquakeDataList?.recent?.content}\n`,
-          url: earthquakeDataList?.recent?.shakeImg || "",
+          message: `${
+            earthquakeDataList?.history?.[selectedDisasterIndex]?.content || ""
+          }\n`,
+          url:
+            earthquakeDataList?.history?.[selectedDisasterIndex]?.shakeImg ||
+            "",
         },
         {
           dialogTitle: "分享地震資訊",
@@ -68,6 +68,10 @@ export function DisasterInfoModal({
       }).start();
     }
   }, [isModalShow]);
+
+  useEffect(() => {
+    getDisasterTitle(disasterType);
+  });
 
   const getDisasterTitle = (disasterType: disasterTypes) => {
     switch (disasterType) {
@@ -92,7 +96,11 @@ export function DisasterInfoModal({
               <Text style={styles.cardTitle}>地震示意圖</Text>
               <Text style={styles.cardText}>
                 <Image
-                  source={{ uri: earthquakeDataList?.recent?.shakeImg ?? "" }}
+                  source={{
+                    uri:
+                      earthquakeDataList?.history?.[selectedDisasterIndex]
+                        ?.shakeImg ?? "",
+                  }}
                   style={{ width: "100%", height: 500 }}
                 />
               </Text>
@@ -101,28 +109,34 @@ export function DisasterInfoModal({
             <View style={styles.card}>
               <Text style={styles.cardTitle}>芮氏規模</Text>
               <Text style={styles.cardText}>
-                {earthquakeDataList?.recent?.magnitude ?? "未知"}
+                {earthquakeDataList?.history?.[selectedDisasterIndex]
+                  ?.magnitude ?? "未知"}
               </Text>
             </View>
 
             <View style={styles.card}>
               <Text style={styles.cardTitle}>震源深度</Text>
               <Text style={styles.cardText}>
-                {earthquakeDataList?.recent?.depth ?? "未知"} km
+                {earthquakeDataList?.history?.[selectedDisasterIndex]?.depth ??
+                  "未知"}{" "}
+                km
               </Text>
             </View>
 
             <View style={styles.card}>
               <Text style={styles.cardTitle}>發生時間</Text>
               <Text style={styles.cardText}>
-                {earthquakeDataList?.recent?.time ?? "未知"}
+                {earthquakeDataList?.history?.[selectedDisasterIndex]?.time ??
+                  "未知"}
               </Text>
             </View>
 
             <View style={styles.card}>
               <Text style={styles.cardTitle}>與震源距離</Text>
               <Text style={styles.cardText}>
-                {earthquakeDataList?.recent?.distance ?? "未知"} km
+                {earthquakeDataList?.history?.[selectedDisasterIndex]
+                  ?.distance ?? "未知"}{" "}
+                km
               </Text>
             </View>
           </>
@@ -133,76 +147,28 @@ export function DisasterInfoModal({
         return "未知災害";
     }
   };
-  const getcolor = () => {
-    switch (earthquakeDataList?.history?.[selectedDisasterIndex]?.color) {
-      case "綠色":
-        return "green";
-      case "黃色":
-        return "yellow";
-      case "紅色":
-        return "red";
-    }
-  };
-  const getDropDownContent = (disasterType: disasterTypes) => {
-    return (
-      <>
-        <View style={styles.dropdownLayout}>
-          <Pressable
-            ref={buttonRef}
-            style={styles.dropdownBox}
-            onPress={() => {
-              buttonRef.current?.measure((fx, fy, width, height, px, py) => {
-                const popupWidth = styles.dropdown.width;
-                setPosition({
-                  top: py + height + styles.dropdown.padding + 10,
-                  left: px - popupWidth + width + styles.dropdown.padding,
-                });
-                setIsDropdownVisible(true);
-              });
-            }}
-          >
-            <Text style={{ color: getcolor() }}>●</Text>
-            <SvgImage style={styles.svgImage} name="down" />
-          </Pressable>
-        </View>
-
-        <Modal
-          transparent={true}
-          visible={isDropdownVisible}
-          animationType="fade"
-        >
-          <View style={styles.modalBackground}></View>
-          <View
-            style={[
-              styles.dropdown,
-              { top: position.top, left: position.left },
-            ]}
-          >
-            <FlatList
-              data={Object.values(disasterTypes)}
-              renderItem={({ item, index }) => (
-                <>
-                  {index !== 0 && <View style={styles.separator} />}
-                  <Pressable
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setIsDropdownVisible(false);
-                    }}
-                  >
-                    <Text style={{ color: getcolor() }}>●</Text>
-                    <Text style={styles.dropdownText}>
-                      {earthquakeDataList?.history?.[index]?.content ?? "未知"}
-                    </Text>
-                  </Pressable>
-                </>
-              )}
-            />
-          </View>
-        </Modal>
-      </>
-    );
-  };
-
+  const earthquakeDataArray =
+    earthquakeDataList?.history?.map((data) => {
+      let svgName = "greenDot";
+      switch (data.color) {
+        case "yellow":
+          svgName = "yellowDot";
+          break;
+        case "red":
+          svgName = "redDot";
+          break;
+        case "green":
+          svgName = "greenDot";
+          break;
+        default:
+          svgName = "greenDot";
+          break;
+      }
+      return {
+        title: data.time,
+        svgName: svgName,
+      };
+    }) || [];
   return (
     <>
       <View>
@@ -213,7 +179,10 @@ export function DisasterInfoModal({
           onClose={() => onClose()}
         >
           <View style={styles.separator} />
-          <View style={styles.row}>{getDropDownContent(disasterType)}</View>
+          <Dropdown
+            itemList={earthquakeDataArray}
+            onSelect={(index) => setSelectedDisasterIndex(index)}
+          ></Dropdown>
           {getDisasterContent(disasterType)}
 
           {disasterType === disasterTypes.earthquake && (
