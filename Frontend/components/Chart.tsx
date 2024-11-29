@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, Dimensions, Text } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-import { useSelector } from "react-redux";
 
 import {
-  WeatherDataList,
-  Selecter,
   indicatorsDictionary,
-  Region,
   indicators,
   WeatherData,
 } from "@/app/(tabs)/_layout";
