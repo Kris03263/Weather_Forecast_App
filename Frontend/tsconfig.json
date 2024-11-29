@@ -5,8 +5,7 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "typeRoots": ["./node_modules/@types", "./declarations.d.ts"],
-    "jsx": "react"
+    "typeRoots": ["./node_modules/@types", "./declarations.d.ts"]
   },
   "include": [
     "**/*.ts",

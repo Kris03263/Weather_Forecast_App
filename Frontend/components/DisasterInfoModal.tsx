@@ -11,12 +11,13 @@ import {
   Image,
   FlatList,
 } from "react-native";
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 import { SvgImage } from "@/components/Svg";
 import { EarthquakeData, EarthquakeDataList } from "@/app/(tabs)/_layout";
 import { disasterTypes } from "@/app/(tabs)/_layout";
-
+import { SlideModal } from "@/components/SlideModal";
+import { setRecentEarthquakeData } from "@/redux/earthquakeDataSlice";
 interface DisasterInfoModalProps {
   disasterType: disasterTypes;
   isModalShow: boolean;
@@ -26,6 +27,7 @@ interface DisasterInfoModalProps {
 
 export function DisasterInfoModal({
   isModalShow,
+  disasterType,
   earthquakeDataList,
   onClose,
 }: DisasterInfoModalProps) {
@@ -33,6 +35,11 @@ export function DisasterInfoModal({
   const buttonRef = useRef<View>(null);
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [title, setTitle] = useState<string>("地震資訊");
+  const [svgName, setSvgName] = useState<string>("earthquake");
+  const [selectedDisasterIndex, setSelectedDisasterIndex] = useState<number>(0);
+
+  console.log(earthquakeDataList);
 
   const shareContent = async () => {
     try {
@@ -64,19 +71,13 @@ export function DisasterInfoModal({
   const getDisasterTitle = (disasterType: disasterTypes) => {
     switch (disasterType) {
       case disasterTypes.earthquake:
-        return (
-          <View style={styles.titleLayout}>
-            <SvgImage style={styles.svgImage} name={disasterTypes.earthquake} />
-            <Text style={styles.titleText}>地震資訊</Text>
-          </View>
-        );
+        setTitle("地震資訊");
+        setSvgName("earthquake");
+        break;
       case disasterTypes.typhoon:
-        return (
-          <View style={styles.titleLayout}>
-            <SvgImage style={styles.svgImage} name={disasterTypes.typhoon} />
-            <Text style={styles.titleText}>颱風資訊</Text>
-          </View>
-        );
+        setTitle("颱風資訊");
+        setSvgName("typhoon");
+        break;
       default:
         return "未知災害";
     }
@@ -131,6 +132,16 @@ export function DisasterInfoModal({
         return "未知災害";
     }
   };
+  const getcolor = () => {
+    switch (earthquakeDataList?.history?.[selectedDisasterIndex]?.color) {
+      case "綠色":
+        return "green";
+      case "黃色":
+        return "yellow";
+      case "紅色":
+        return "red";
+    }
+  };
   const getDropDownContent = (disasterType: disasterTypes) => {
     return (
       <>
@@ -149,7 +160,7 @@ export function DisasterInfoModal({
               });
             }}
           >
-            <Text>●</Text>
+            <Text style={{ color: getcolor() }}>●</Text>
             <SvgImage style={styles.svgImage} name="down" />
           </Pressable>
         </View>
@@ -177,12 +188,9 @@ export function DisasterInfoModal({
                       setIsDropdownVisible(false);
                     }}
                   >
-                    <SvgImage
-                      style={styles.svgImage}
-                      name={indicatorsDictionary[item].svgName}
-                    ></SvgImage>
+                    <Text style={{ color: getcolor() }}>●</Text>
                     <Text style={styles.dropdownText}>
-                      {indicatorsDictionary[item].title}
+                      {earthquakeDataList?.history?.[index]?.content ?? "未知"}
                     </Text>
                   </Pressable>
                 </>
@@ -197,45 +205,23 @@ export function DisasterInfoModal({
   return (
     <>
       <View>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={isModalShow}
-          onRequestClose={() => onClose()}
+        <SlideModal
+          title={title}
+          svgName={svgName}
+          isVisible={isModalShow}
+          onClose={() => onClose()}
         >
-          <View style={styles.modalBackground}>
-            <Animated.View
-              style={[styles.modalView, { transform: [{ translateY: pan.y }] }]}
-            >
-              {/* Header */}
-              <View style={styles.headerLayout}>
-                <Pressable />
+          <View style={styles.separator} />
+          <View style={styles.row}>{getDropDownContent(disasterType)}</View>
+          {getDisasterContent(disasterType)}
 
-                {getDisasterTitle(disasterType)}
-
-                <Pressable style={styles.closeButton} onPress={() => onClose()}>
-                  <SvgImage style={styles.svgImage} name="close" />
-                </Pressable>
-              </View>
-
-              <ScrollView
-                style={{ width: "100%" }}
-                contentContainerStyle={styles.scrollViewContent}
-              >
-                <View style={styles.separator} />
-
-                {getDisasterContent(disasterType)}
-
-                {disasterType === disasterTypes.earthquake && (
-                  <Pressable style={styles.shareButton} onPress={shareContent}>
-                    <SvgImage name="share" style={styles.svgImage} />
-                    <Text style={styles.shareButtonText}>分享</Text>
-                  </Pressable>
-                )}
-              </ScrollView>
-            </Animated.View>
-          </View>
-        </Modal>
+          {disasterType === disasterTypes.earthquake && (
+            <Pressable style={styles.shareButton} onPress={shareContent}>
+              <SvgImage name="share" style={styles.svgImage} />
+              <Text style={styles.shareButtonText}>分享</Text>
+            </Pressable>
+          )}
+        </SlideModal>
       </View>
     </>
   );
