@@ -23,6 +23,9 @@ import TempIcon from "@/assets/svgs/temp-icon.svg";
 import Pm2_5Icon from "@/assets/svgs/pm2_5-icon.svg";
 import ShareIcon from "@/assets/svgs/share.svg";
 import TyphoonIcon from "@/assets/svgs/typhoon-icon.svg";
+import YellowDotIcon from "@/assets/svgs/yellowDot-icon.svg";
+import RedDotIcon from "@/assets/svgs/redDot-icon.svg";
+import GreenDotIcon from "@/assets/svgs/greenDot-icon.svg";
 
 interface SvgProps {
   style?: object;
@@ -53,6 +56,9 @@ export function SvgImage({ style = {}, name = "" }: SvgProps) {
     pm2_5: Pm2_5Icon,
     share: ShareIcon,
     typhoon: TyphoonIcon,
+    yellowDot: YellowDotIcon,
+    redDot: RedDotIcon,
+    greenDot: GreenDotIcon,
   }[name];
 
   return (
