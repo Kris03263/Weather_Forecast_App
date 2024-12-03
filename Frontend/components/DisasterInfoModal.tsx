@@ -132,7 +132,7 @@ export function DisasterInfoModal({
             </View>
 
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>與震源距離</Text>
+              <Text style={styles.cardTitle}>與震央距離</Text>
               <Text style={styles.cardText}>
                 {earthquakeDataList?.history?.[selectedDisasterIndex]
                   ?.distance ?? "未知"}{" "}
@@ -164,8 +164,16 @@ export function DisasterInfoModal({
           svgName = "greenDot";
           break;
       }
+      const timeString = `${new Date(data.time).getFullYear()}年${
+        new Date(data.time).getMonth() + 1
+      }月${new Date(data.time).getDate()}日 ${new Date(
+        data.time
+      ).getHours()}:${new Date(data.time).getMinutes()}:${new Date(
+        data.time
+      ).getSeconds()}`;
+      //getmonth() is 0-11
       return {
-        title: data.time,
+        title: timeString,
         svgName: svgName,
       };
     }) || [];
@@ -182,6 +190,7 @@ export function DisasterInfoModal({
           <Dropdown
             itemList={earthquakeDataArray}
             onSelect={(index) => setSelectedDisasterIndex(index)}
+            style={{ width: 220 }}
           ></Dropdown>
           {getDisasterContent(disasterType)}
 
