@@ -2,7 +2,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, Animated, Dimensions, Text } from "react-native";
 import { useSelector } from "react-redux";
-import { FlatList, ScrollView } from "react-native-gesture-handler";
+import {
+  FlatList,
+  GestureHandlerRootView,
+  ScrollView,
+} from "react-native-gesture-handler";
 // Interfaces and Enums
 import {
   Region,
@@ -172,133 +176,138 @@ export default function HomeScreen() {
         </View>
       )}
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        nestedScrollEnabled={true}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-        scrollEventThrottle={16}
-      >
-        <FlatList
-          ref={flatListRef}
+      <GestureHandlerRootView>
+        <ScrollView
           showsVerticalScrollIndicator={false}
-          initialScrollIndex={selecter.regionIndex}
-          horizontal
-          data={regions}
-          onScroll={async (event) => {
-            const offsetX = event.nativeEvent.contentOffset.x;
-            const currentIndex = Math.round(offsetX / screenWidth);
-            store.dispatch(setSelectedRegionIndex(currentIndex));
-          }}
-          pagingEnabled={true}
           nestedScrollEnabled={true}
-          renderItem={({ item, index }) => (
-            <>
-              {/* Body Section */}
-              <View style={[styles.bodySection, { width: screenWidth }]}>
-                <ForecastDisplayWidget
-                  weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
-                  onPress={() => openSlideModal(item.id, indicators.temp)}
-                />
-                <IndicatorsDisplayWidget
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  indicatorType={indicators.wet}
-                  onPress={() => openSlideModal(item.id, indicators.wet)}
-                />
-                <IndicatorsDisplayWidget
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  indicatorType={indicators.rainRate}
-                  onPress={() => openSlideModal(item.id, indicators.rainRate)}
-                />
-                <IndicatorsDisplayWidget
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  indicatorType={indicators.windSpeed}
-                  onPress={() => openSlideModal(item.id, indicators.windSpeed)}
-                />
-                <IndicatorsDisplayWidget
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  indicatorType={indicators.bodyTemp}
-                  onPress={() => openSlideModal(item.id, indicators.bodyTemp)}
-                />
-                <IndicatorsDisplayWidget
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  indicatorType={indicators.windDirection}
-                  onPress={() => {}}
-                />
-                <IndicatorsDisplayWidget
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  indicatorType={indicators.pm2_5}
-                  onPress={() => {}}
-                />
-                <IndicatorsDisplayWidget
-                  weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
-                  indicatorType={indicators.aqi}
-                  onPress={() => {}}
-                />
-                {index == 0 && (
-                  <>
-                    <SuggestionDisplayWidget
-                      dailySug={dailySug}
-                      type="activity"
-                    />
-                    <SuggestionDisplayWidget
-                      dailySug={dailySug}
-                      type="dressing"
-                    />
-                    <SuggestionDisplayWidget
-                      dailySug={dailySug}
-                      type="health"
-                    />
-                    <SuggestionDisplayWidget dailySug={dailySug} type="sport" />
-                    <SuggestionDisplayWidget
-                      dailySug={dailySug}
-                      type="transportation"
-                    />
-                    <EarthquakesDisplayWidget
-                      type={disasterTypes.earthquake}
-                      earthquakeData={earthquakeDataList.recent ?? null}
-                      onPress={() => {
-                        openSlideModal(
-                          "disaster",
-                          undefined,
-                          disasterTypes.earthquake
-                        );
-                      }}
-                    />
-                    <EarthquakesDisplayWidget
-                      type={disasterTypes.typhoon}
-                      earthquakeData={earthquakeDataList.recent ?? null}
-                      typhoonData={typhoonData ?? null}
-                      onPress={() => {
-                        openSlideModal(
-                          "disaster",
-                          undefined,
-                          disasterTypes.typhoon
-                        );
-                      }}
-                    />
-                  </>
-                )}
-              </View>
-              <IndicatorInfoModal
-                indicatorType={modalIndicatorType}
-                weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
-                isVisible={activeModalId === item.id}
-                onClose={() => setActiveModalId("-1")}
-              />
-              <DisasterInfoModal
-                disasterType={modalDisasterType}
-                earthquakeDataList={earthquakeDataList ?? null}
-                typhoonData={typhoonData ?? null}
-                isModalShow={activeModalId === "disaster"}
-                onClose={() => setActiveModalId("-1")}
-              />
-            </>
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
           )}
-        />
-      </ScrollView>
+          scrollEventThrottle={16}
+        >
+          <FlatList
+            ref={flatListRef}
+            showsVerticalScrollIndicator={false}
+            initialScrollIndex={selecter.regionIndex}
+            horizontal
+            data={regions}
+            onScroll={async (event) => {
+              const offsetX = event.nativeEvent.contentOffset.x;
+              const currentIndex = Math.round(offsetX / screenWidth);
+              store.dispatch(setSelectedRegionIndex(currentIndex));
+            }}
+            pagingEnabled={true}
+            nestedScrollEnabled={true}
+            renderItem={({ item, index }) => (
+              <>
+                {/* Body Section */}
+                <View style={[styles.bodySection, { width: screenWidth }]}>
+                  <ForecastDisplayWidget
+                    weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
+                    onPress={() => openSlideModal(item.id, indicators.temp)}
+                  />
+                  <IndicatorsDisplayWidget
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.wet}
+                    onPress={() => openSlideModal(item.id, indicators.wet)}
+                  />
+                  <IndicatorsDisplayWidget
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.rainRate}
+                    onPress={() => openSlideModal(item.id, indicators.rainRate)}
+                  />
+                  <IndicatorsDisplayWidget
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.windSpeed}
+                    onPress={() =>
+                      openSlideModal(item.id, indicators.windSpeed)
+                    }
+                  />
+                  <IndicatorsDisplayWidget
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.bodyTemp}
+                    onPress={() => openSlideModal(item.id, indicators.bodyTemp)}
+                  />
+                  <IndicatorsDisplayWidget
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.windDirection}
+                    onPress={() => {}}
+                  />
+                  <IndicatorsDisplayWidget
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.pm2_5}
+                    onPress={() => {}}
+                  />
+                  <IndicatorsDisplayWidget
+                    weatherData={weatherDataList?.[item.id]?.[0]?.[0] ?? null}
+                    indicatorType={indicators.aqi}
+                    onPress={() => {}}
+                  />
+                  {index == 0 && (
+                    <>
+                      <SuggestionDisplayWidget
+                        dailySug={dailySug}
+                        type="activity"
+                      />
+                      <SuggestionDisplayWidget
+                        dailySug={dailySug}
+                        type="dressing"
+                      />
+                      <SuggestionDisplayWidget
+                        dailySug={dailySug}
+                        type="health"
+                      />
+                      <SuggestionDisplayWidget
+                        dailySug={dailySug}
+                        type="sport"
+                      />
+                      <SuggestionDisplayWidget
+                        dailySug={dailySug}
+                        type="transportation"
+                      />
+                      <EarthquakesDisplayWidget
+                        type={disasterTypes.earthquake}
+                        earthquakeData={earthquakeDataList.recent ?? null}
+                        onPress={() => {
+                          openSlideModal(
+                            "disaster",
+                            undefined,
+                            disasterTypes.earthquake
+                          );
+                        }}
+                      />
+                      <EarthquakesDisplayWidget
+                        type={disasterTypes.typhoon}
+                        earthquakeData={earthquakeDataList.recent ?? null}
+                        onPress={() => {
+                          openSlideModal(
+                            "disaster",
+                            undefined,
+                            disasterTypes.typhoon
+                          );
+                        }}
+                      />
+                    </>
+                  )}
+                </View>
+                <IndicatorInfoModal
+                  indicatorType={modalIndicatorType}
+                  weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
+                  isVisible={activeModalId === item.id}
+                  onClose={() => setActiveModalId("-1")}
+                />
+                <DisasterInfoModal
+                  disasterType={modalDisasterType}
+                  earthquakeDataList={earthquakeDataList ?? null}
+                  isModalShow={activeModalId === "disaster"}
+                  onClose={() => setActiveModalId("-1")}
+                />
+              </>
+            )}
+          />
+        </ScrollView>
+      </GestureHandlerRootView>
     </View>
   );
 }
