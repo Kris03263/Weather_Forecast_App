@@ -59,7 +59,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  modalHeader: {},
+  modalHeader: {
+    marginBottom: 15,
+  },
   modalHeaderText: {
     fontWeight: "bold",
     fontSize: 20,
@@ -67,7 +69,6 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     width: "100%",
-    marginVertical: 15,
     gap: 10,
   },
 });

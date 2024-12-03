@@ -137,7 +137,7 @@ export default function SettingsScreen() {
                   : openModal(ModalType.LOGIN);
               }}
             >
-              <Text style={styles.buttonText}>
+              <Text style={styles.modalButtonText}>
                 {user.id && user.id !== "-1" ? "使用者資訊" : "登入"}
               </Text>
             </Pressable>
@@ -239,14 +239,14 @@ export default function SettingsScreen() {
             setLoginModalVisible(false);
           }}
         >
-          <Text style={styles.buttonText}>登入</Text>
+          <Text style={styles.modalButtonText}>登入</Text>
         </Pressable>
 
         <Pressable
           style={styles.modalButton}
           onPress={() => setLoginModalVisible(false)}
         >
-          <Text style={styles.buttonText}>關閉</Text>
+          <Text style={styles.modalButtonText}>關閉</Text>
         </Pressable>
       </PopupModal>
       {/* Regis Modal */}
@@ -287,14 +287,14 @@ export default function SettingsScreen() {
             setRegisterModalVisible(false);
           }}
         >
-          <Text style={styles.buttonText}>提交</Text>
+          <Text style={styles.modalButtonText}>提交</Text>
         </Pressable>
 
         <Pressable
           style={styles.modalButton}
           onPress={() => setRegisterModalVisible(false)}
         >
-          <Text style={styles.buttonText}>關閉</Text>
+          <Text style={styles.modalButtonText}>關閉</Text>
         </Pressable>
       </PopupModal>
       {/* User info Modal */}
@@ -314,7 +314,7 @@ export default function SettingsScreen() {
           }}
           style={styles.modalButton}
         >
-          <Text style={styles.buttonText}>刪除使用者</Text>
+          <Text style={styles.modalButtonText}>刪除使用者</Text>
         </Pressable>
 
         <Pressable
@@ -324,14 +324,14 @@ export default function SettingsScreen() {
           }}
           style={styles.modalButton}
         >
-          <Text style={styles.buttonText}>登出</Text>
+          <Text style={styles.modalButtonText}>登出</Text>
         </Pressable>
 
         <Pressable
           style={styles.modalButton}
           onPress={() => setUserModalVisible(false)}
         >
-          <Text style={styles.buttonText}>關閉</Text>
+          <Text style={styles.modalButtonText}>關閉</Text>
         </Pressable>
       </PopupModal>
       {/* Sport Modal */}
@@ -361,7 +361,7 @@ export default function SettingsScreen() {
             setSportModalVisible(false);
           }}
         >
-          <Text style={styles.buttonText}>儲存</Text>
+          <Text style={styles.modalButtonText}>儲存</Text>
         </Pressable>
       </PopupModal>
       {/* Habit Modal */}
@@ -391,7 +391,7 @@ export default function SettingsScreen() {
             setHabitModalVisible(false);
           }}
         >
-          <Text style={styles.buttonText}>儲存</Text>
+          <Text style={styles.modalButtonText}>儲存</Text>
         </Pressable>
       </PopupModal>
     </View>
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
   userInfoButton: {
     height: 30,
     backgroundColor: "#2196F3",
-    borderRadius: 5,
+    borderRadius: 10,
     justifyContent: "center",
     padding: 10,
   },
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     color: "gray",
     textDecorationLine: "underline",
   },
-  buttonText: {
+  modalButtonText: {
     color: "white",
     textAlign: "center",
   },

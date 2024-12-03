@@ -25,8 +25,6 @@ export const Colors = {
   },
 };
 
-// ["rgba(51, 51, 51, 1)", "rgba(51, 51, 51, 1)"];
-
 export const BackgroundGradient = {
   default: ["rgba(3, 132, 226, 1)", "rgba(104, 181, 238, 1)"],
   day: {
