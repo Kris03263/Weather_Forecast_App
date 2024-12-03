@@ -32,9 +32,9 @@ export function ForecastDisplayWidget({
           nestedScrollEnabled={true}
           contentContainerStyle={styles.weatherCardGroupLayout}
         >
-          {weatherDatas?.map((item) => {
+          {weatherDatas?.map((item, index) => {
             return (
-              <View style={styles.weatherCardLayout}>
+              <View style={styles.weatherCardLayout} key={index}>
                 <Text style={styles.weatherTimeText}>
                   {item.time.split(" ")[1].split(":")[0] + "時"}
                 </Text>
