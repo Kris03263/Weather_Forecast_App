@@ -15,14 +15,15 @@ import { useRef, useEffect, useState } from "react";
 
 import { SvgImage } from "@/components/Svg";
 import { EarthquakeData, EarthquakeDataList } from "@/app/(tabs)/_layout";
+import { TyphoonData } from "@/app/(tabs)/_layout";
 import { disasterTypes } from "@/app/(tabs)/_layout";
 import { SlideModal } from "@/components/SlideModal";
-import { setRecentEarthquakeData } from "@/redux/earthquakeDataSlice";
 import { Dropdown } from "@/components/DropDown";
 interface DisasterInfoModalProps {
   disasterType: disasterTypes;
   isModalShow: boolean;
-  earthquakeDataList: EarthquakeDataList;
+  earthquakeDataList?: EarthquakeDataList;
+  typhoonData?: TyphoonData[];
   onClose: () => void;
 }
 
@@ -30,6 +31,7 @@ export function DisasterInfoModal({
   disasterType,
   isModalShow,
   earthquakeDataList,
+  typhoonData,
   onClose,
 }: DisasterInfoModalProps) {
   const pan = useRef(new Animated.ValueXY()).current; // Initial off-screen position
@@ -58,7 +60,6 @@ export function DisasterInfoModal({
       Alert.alert("分享失敗", error.message || "發生未知错误");
     }
   };
-
   useEffect(() => {
     if (isModalShow) {
       Animated.timing(pan, {
@@ -142,11 +143,80 @@ export function DisasterInfoModal({
           </>
         );
       case disasterTypes.typhoon:
-        return "data";
+        return (
+          <>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>颱風名稱</Text>
+              <Text style={styles.cardText}>
+                {typhoonData?.[0]?.cname ?? "未知"}
+              </Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>國際名稱</Text>
+              <Text style={styles.cardText}>
+                {typhoonData?.[0]?.name ?? "未知"}
+              </Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>未來時間</Text>
+              <Text style={styles.cardText}>
+                {typhoonData?.[0]?.futurePosition?.[selectedDisasterIndex]
+                  ?.futureTime ?? "未知"}
+              </Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>移動方向</Text>
+              <Text style={styles.cardText}>
+                {typhoonData?.[0]?.futurePosition?.[selectedDisasterIndex]
+                  ?.movingDirection ?? "未知"}
+              </Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>最大陣風速</Text>
+              <Text style={styles.cardText}>
+                {typhoonData?.[0]?.futurePosition?.[selectedDisasterIndex]
+                  ?.maxGustSpeed ?? "未知"}{" "}
+                m/s
+              </Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>最大風速</Text>
+              <Text style={styles.cardText}>
+                {typhoonData?.[0]?.futurePosition?.[selectedDisasterIndex]
+                  ?.maxWindSpeed ?? "未知"}{" "}
+                m/s
+              </Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>颱風移動速度</Text>
+              <Text style={styles.cardText}>
+                {typhoonData?.[0]?.futurePosition?.[selectedDisasterIndex]
+                  ?.movingSpeed ?? "未知"}{" "}
+                m/s
+              </Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>氣壓</Text>
+              <Text style={styles.cardText}>
+                {typhoonData?.[0]?.futurePosition?.[selectedDisasterIndex]
+                  ?.pressure ?? "未知"}{" "}
+                hPa
+              </Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>颱風狀態</Text>
+              <Text style={styles.cardText}>
+                {typhoonData?.[0]?.futurePosition?.[selectedDisasterIndex]
+                  ?.stateTransfers?.[0]?.value ?? "颱風沒有任何轉變"}
+              </Text>
+            </View>
+          </>
+        );
       default:
         return "未知災害";
     }
   };
+
   const earthquakeDataArray =
     earthquakeDataList?.history?.map((data) => {
       let svgName = "greenDot";
@@ -177,6 +247,21 @@ export function DisasterInfoModal({
         svgName: svgName,
       };
     }) || [];
+
+  const typhoonDataArray =
+    typhoonData?.[0]?.futurePosition?.map((data, index) => {
+      const timeString = `${new Date(data?.futureTime).getFullYear()}年${
+        new Date(data?.futureTime).getMonth() + 1
+      }月${new Date(data?.futureTime).getDate()}日 ${new Date(
+        data?.futureTime
+      ).getHours()}:${new Date(data?.futureTime).getMinutes()}:${new Date(
+        data?.futureTime
+      ).getSeconds()}`;
+      return {
+        title: timeString,
+        svgName: "typhoon",
+      };
+    }) || [];
   return (
     <>
       <View>
@@ -188,7 +273,11 @@ export function DisasterInfoModal({
         >
           <View style={styles.separator} />
           <Dropdown
-            itemList={earthquakeDataArray}
+            itemList={
+              disasterType === disasterTypes.earthquake
+                ? earthquakeDataArray
+                : typhoonDataArray
+            }
             onSelect={(index) => setSelectedDisasterIndex(index)}
             style={{ width: 220 }}
           ></Dropdown>

@@ -29,6 +29,7 @@ import {
   setHistoryEarthquakeData,
   setRecentEarthquakeData,
 } from "@/redux/earthquakeDataSlice";
+import { setTyphoonData } from "@/redux/typhoonDataSlice";
 
 // TODO list:
 // - [V] Add weather data API
@@ -139,6 +140,60 @@ export interface EarthquakeData {
   reportImg: string;
   shakeImg: string;
   time: string;
+}
+export interface TyphoonData {
+  cname: string;
+  futurePosition: {
+    circleOf15Ms: {
+      radius: string;
+    };
+    circleOf25Ms: {
+      radius: string;
+    };
+    coordinate: string;
+    futureTime: string;
+    maxGustSpeed: string;
+    maxWindSpeed: string;
+    movingDirection: string;
+    movingSpeed: string;
+    pressure: string;
+    stateTransfers: {
+      lang: string;
+      value: string;
+    }[];
+  }[];
+  name: string;
+  pastPosition: {
+    circleOf15Ms: {
+      quadrantRadii: {
+        radius: {
+          dir: string;
+          value: string;
+        }[];
+      };
+      radius: string;
+    };
+    circleOf25Ms: {
+      quadrantRadii: {
+        radius: {
+          dir: string;
+          value: string;
+        }[];
+      };
+      radius: string;
+    };
+    coordinate: string;
+    fixTime: string;
+    maxGustSpeed: string;
+    maxWindSpeed: string;
+    movingDirection: string;
+    movingPrediction: {
+      lang: string;
+      value: string;
+    }[];
+    movingSpeed: string;
+    pressure: string;
+  };
 }
 export interface Region {
   id: string; // md5
@@ -370,6 +425,14 @@ export const updateEarthquakeData = async () => {
 
   store.dispatch(setRecentEarthquakeData(data[0]));
   store.dispatch(setHistoryEarthquakeData(data));
+};
+export const updateTyphoonData = async (): Promise<void> => {
+  const data = await HandleGetTyphoonData();
+  if (!data) {
+    showNotification("更新颱風資料失敗");
+    return;
+  }
+  store.dispatch(setTyphoonData(data));
 };
 export const updateRegion0 = async () => {
   const regions = store.getState().regions;
@@ -1084,6 +1147,25 @@ const HandleGetEarthquakeData = async (
   }
 };
 
+const HandleGetTyphoonData = async () => {
+  try {
+    const data = await fetch(`${hostURL}/Disaster/GetTyphoonData`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data as TyphoonData[];
+      });
+    return data;
+  } catch (e) {
+    console.log("HandleGetEarthquakeData failed! \n" + "Error: \n" + String(e));
+    return null;
+  }
+};
+
 export default function TabLayout() {
   const [socketInstance, setSocketInstance] = useState<Socket>();
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -1106,6 +1188,7 @@ export default function TabLayout() {
         updateRegions(),
         updateUser(),
         updateEarthquakeData(),
+        updateTyphoonData(),
       ]);
 
       console.log(`${new Date()}: 

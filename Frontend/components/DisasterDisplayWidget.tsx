@@ -1,19 +1,25 @@
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 
-import { disasterTypes, EarthquakeData } from "@/app/(tabs)/_layout";
+import {
+  disasterTypes,
+  EarthquakeData,
+  TyphoonData,
+} from "@/app/(tabs)/_layout";
 
 import { Widget } from "@/components/Widget";
 
 interface EarthquakesDisplayWidgetProps {
   type: disasterTypes;
-  earthquakeData: EarthquakeData;
+  earthquakeData?: EarthquakeData;
+  typhoonData?: TyphoonData[];
   onPress: () => void;
 }
 
 export function EarthquakesDisplayWidget({
   type,
   earthquakeData,
+  typhoonData,
   onPress,
 }: EarthquakesDisplayWidgetProps) {
   switch (type) {
@@ -76,7 +82,19 @@ export function EarthquakesDisplayWidget({
         >
           <View style={styles.contentLayout}>
             <Text style={styles.contentText}>
-              {earthquakeData?.content ?? ""}
+              {typhoonData?.[0]?.cname ?? ""}
+              {"在"}
+              {typhoonData?.[0]?.futurePosition?.[0]?.futureTime ?? ""}
+              {"有\n"}
+              {"最大陣風速度"}
+              {typhoonData?.[0]?.futurePosition?.[0]?.maxGustSpeed ?? ""}
+              {"公里/小時\n"}
+              {"最大持續風速"}
+              {typhoonData?.[0]?.futurePosition?.[0]?.maxWindSpeed ?? ""}
+              {"公里/小時\n"}
+              {"中心氣壓"}
+              {typhoonData?.[0]?.futurePosition?.[0]?.pressure ?? ""}
+              {"百帕\n"}
             </Text>
           </View>
         </Widget>
