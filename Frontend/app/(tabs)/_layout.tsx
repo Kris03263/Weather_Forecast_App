@@ -1267,6 +1267,7 @@ export default function TabLayout() {
       showNotification(`收到地震資料: ${JSON.stringify(data)}`); // 更新 UI 或顯示地震通知
     });
     socket.on("earthquake_update_fake", (data) => {
+      console.log(data);
       showNotification(`收到地震資料(測試用): ${JSON.stringify(data)}`);
     });
   }, []);

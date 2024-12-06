@@ -82,19 +82,17 @@ export function EarthquakesDisplayWidget({
         >
           <View style={styles.contentLayout}>
             <Text style={styles.contentText}>
-              {typhoonData?.[0]?.cname ?? ""}
-              {"在"}
-              {typhoonData?.[0]?.futurePosition?.[0]?.futureTime ?? ""}
-              {"有\n"}
-              {"最大陣風速度"}
-              {typhoonData?.[0]?.futurePosition?.[0]?.maxGustSpeed ?? ""}
-              {"公里/小時\n"}
-              {"最大持續風速"}
-              {typhoonData?.[0]?.futurePosition?.[0]?.maxWindSpeed ?? ""}
-              {"公里/小時\n"}
-              {"中心氣壓"}
-              {typhoonData?.[0]?.futurePosition?.[0]?.pressure ?? ""}
-              {"百帕\n"}
+              {typhoonData !== undefined
+                ? `${typhoonData?.[0]?.cname ?? ""}在${
+                    typhoonData?.[0]?.futurePosition?.[0]?.futureTime ?? ""
+                  }有\n最大陣風速度${
+                    typhoonData?.[0]?.futurePosition?.[0]?.maxGustSpeed ?? ""
+                  }m/s\n最大持續風速${
+                    typhoonData?.[0]?.futurePosition?.[0]?.maxWindSpeed ?? ""
+                  }m/s\n中心氣壓${
+                    typhoonData?.[0]?.futurePosition?.[0]?.pressure ?? ""
+                  }百帕\n`
+                : "目前無颱風資訊"}
             </Text>
           </View>
         </Widget>
