@@ -129,16 +129,17 @@ export function IndicatorInfoModal({
           onSelect={(index) => setSelectedIndicator(indicatorList[index])}
         />
       </View>
-
-      {/* Chart */}
-      <Chart
-        indicatorType={selectedIndicator}
-        weatherDatas={weatherDatas}
-        selectedDateIndex={selectedDateIndex}
-        onSelectDataChange={(newSelectData: SelectedData) =>
-          setSelectedData(newSelectData)
-        }
-      />
+      <View onStartShouldSetResponder={() => false}>
+        {/* Chart */}
+        <Chart
+          indicatorType={selectedIndicator}
+          weatherDatas={weatherDatas}
+          selectedDateIndex={selectedDateIndex}
+          onSelectDataChange={(newSelectData: SelectedData) =>
+            setSelectedData(newSelectData)
+          }
+        />
+      </View>
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>當日小結</Text>
@@ -162,12 +163,17 @@ const styles = StyleSheet.create({
   },
   dateSelectorContainer: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
+    paddingLeft: 20,
   },
-  dateSelectorContentContainer: {},
-  dateSelectorItem: {
-    padding: 10,
+  dateSelectorContentContainer: {
     alignItems: "center",
+  },
+  dateSelectorItem: {
+    width: 60, // 固定寬度
+    alignItems: "center",
+    padding: 10,
+    marginTop: 15,
+    marginHorizontal: 10,
   },
   dateSelectorItem_Selected: {
     backgroundColor: "#3a95ff",

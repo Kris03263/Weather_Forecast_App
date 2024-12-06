@@ -1237,11 +1237,11 @@ export default function TabLayout() {
       console.log(`Connect WebSocket (id: ${socket.id}) success`);
       setIsConnected(true);
       // 設置位置（選擇真實或假資料）
-      // socket.emit("set_location", {
-      //   userID: 1,
-      //   longitude: "120.62343304881064",
-      //   latitude: "24.21694034808",
-      // });
+      socket.emit("set_location", {
+        userID: 1,
+        longitude: "120.62343304881064",
+        latitude: "24.21694034808",
+      });
       socket.emit("set_location_fake", {
         userID: store.getState().user?.id ?? "-1",
         longitude: store.getState().regions[0]?.longitude ?? "-1",
@@ -1264,11 +1264,10 @@ export default function TabLayout() {
       console.log(data.message);
     });
     socket.on("earthquake_update", (data) => {
-      showNotification(`收到地震資料: ${JSON.stringify(data)}`); // 更新 UI 或顯示地震通知
+      showNotification(`${JSON.stringify(data)}`); // 更新 UI 或顯示地震通知 // 收到地震資料: ${JSON.stringify(data)}
     });
     socket.on("earthquake_update_fake", (data) => {
-      console.log(data);
-      showNotification(`收到地震資料(測試用): ${JSON.stringify(data)}`);
+      showNotification(`${JSON.stringify(data)}`); //收到地震資料(測試用): ${JSON.stringify(data)}
     });
   }, []);
 

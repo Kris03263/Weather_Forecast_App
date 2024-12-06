@@ -429,11 +429,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   userInfoButton: {
-    height: 30,
+    height: 40,
     backgroundColor: "#2196F3",
     borderRadius: 10,
     justifyContent: "center",
-    padding: 10,
+    paddingHorizontal: 10,
   },
   bodySection: {
     flexDirection: "row",

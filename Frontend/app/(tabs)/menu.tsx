@@ -191,8 +191,8 @@ export default function MenuScreen() {
           style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
         >
           <Picker.Item label="" value="" />
-          {Object.keys(allRegionList.city).map((city) => (
-            <Picker.Item key={city} label={city} value={city} />
+          {Object.keys(allRegionList.city).map((city, index) => (
+            <Picker.Item key={index} label={city} value={city} />
           ))}
         </Picker>
 
@@ -203,8 +203,8 @@ export default function MenuScreen() {
           style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
         >
           <Picker.Item label="" value="" />
-          {allRegionList.city[selectedCity]?.map((district) => (
-            <Picker.Item key={district} label={district} value={district} />
+          {allRegionList.city[selectedCity]?.map((district, index) => (
+            <Picker.Item key={index} label={district} value={district} />
           ))}
         </Picker>
 
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   // Region Card
   regionCard: {
     margin: 5,
-    padding: 10,
+    paddingHorizontal: 8,
     flexDirection: "column",
     justifyContent: "space-between",
     gap: 10,

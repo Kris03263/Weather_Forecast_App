@@ -58,8 +58,6 @@ export function SlideModal({
         >
           {/* Header */}
           <View style={styles.headerLayout}>
-            <Pressable />
-
             <View style={styles.titleLayout}>
               <SvgImage style={styles.svgImage} name={svgName} />
               <Text style={styles.titleText}>{title}</Text>
@@ -73,6 +71,9 @@ export function SlideModal({
           <ScrollView
             style={{ width: "100%" }}
             contentContainerStyle={styles.scrollViewContent}
+            scrollEnabled={true}
+            scrollEventThrottle={16}
+            showsVerticalScrollIndicator={true}
           >
             {children}
           </ScrollView>
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
   // ScrollView
   scrollViewContent: {
     flex: 1,
+    flexGrow: 1,
     width: "100%",
     height: "100%",
     justifyContent: "flex-start",

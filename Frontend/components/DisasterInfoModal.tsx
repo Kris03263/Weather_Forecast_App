@@ -34,8 +34,6 @@ export function DisasterInfoModal({
   typhoonData,
   onClose,
 }: DisasterInfoModalProps) {
-  const pan = useRef(new Animated.ValueXY()).current; // Initial off-screen position
-  const buttonRef = useRef<View>(null);
   const [title, setTitle] = useState<string>("地震資訊");
   const [svgName, setSvgName] = useState<string>("earthquake");
   const [selectedDisasterIndex, setSelectedDisasterIndex] = useState<number>(0);
@@ -60,19 +58,10 @@ export function DisasterInfoModal({
       Alert.alert("分享失敗", error.message || "發生未知错误");
     }
   };
-  useEffect(() => {
-    if (isModalShow) {
-      Animated.timing(pan, {
-        toValue: { x: 0, y: 0 },
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, [isModalShow]);
 
   useEffect(() => {
     getDisasterTitle(disasterType);
-  });
+  }, [disasterType]);
 
   const getDisasterTitle = (disasterType: disasterTypes) => {
     switch (disasterType) {
@@ -297,7 +286,7 @@ export function DisasterInfoModal({
 
 const styles = StyleSheet.create({
   modalBackground: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
     alignItems: "center",
