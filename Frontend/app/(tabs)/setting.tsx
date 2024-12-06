@@ -37,8 +37,10 @@ export default function SettingsScreen() {
   const [isHabitModalVisible, setHabitModalVisible] = useState(false);
 
   // Temp data
-  const [account, setAccount] = useState("");
-  const [password, setPassword] = useState("");
+  const [accountLogin, setAccountLogin] = useState("");
+  const [passwordLogin, setPasswordLogin] = useState("");
+  const [accountRegister, setAccountRegister] = useState("");
+  const [passwordRegister, setPasswordRegister] = useState("");
   const [sport, setSport] = useState<number[]>([]); // Start from 1
   const [habit, setHabit] = useState<number[]>([]); // Start from 1
   const [sportList, setSportList] = useState<Sport[]>([]);
@@ -180,7 +182,7 @@ export default function SettingsScreen() {
         <View style={styles.bodySection}>
           <Widget
             title="登入以使用設定"
-            svgName="userAccount"
+            svgName="userAccount2"
             isVisible={true}
             style={styles.customWidgetStyle}
             isPressable={true}
@@ -207,7 +209,8 @@ export default function SettingsScreen() {
           style={styles.modalInput}
           ref={usernameLoginInputRef}
           placeholder="輸入名稱"
-          onChangeText={setAccount}
+          onChangeText={setAccountLogin}
+          value={accountLogin}
         />
 
         <View style={styles.modalInputLayout}>
@@ -219,11 +222,13 @@ export default function SettingsScreen() {
           ref={passwordLoginInputRef}
           placeholder="輸入密碼"
           secureTextEntry={true}
-          onChangeText={setPassword}
+          onChangeText={setPasswordLogin}
+          value={passwordLogin}
         />
 
         <Pressable
           onPress={() => {
+            setLoginModalVisible(false);
             openModal(ModalType.REGISTER);
           }}
         >
@@ -235,7 +240,7 @@ export default function SettingsScreen() {
           onPress={() => {
             usernameInput?.clear();
             passwordInput?.clear();
-            userLogin(account, password);
+            userLogin(accountLogin, passwordLogin);
             setLoginModalVisible(false);
           }}
         >
@@ -263,7 +268,8 @@ export default function SettingsScreen() {
           style={styles.modalInput}
           placeholder="輸入名稱"
           ref={usernameRegisterInputRef}
-          onChangeText={setAccount}
+          onChangeText={setAccountRegister}
+          value={accountRegister}
         />
 
         <View style={styles.modalInputLayout}>
@@ -274,8 +280,9 @@ export default function SettingsScreen() {
           style={styles.modalInput}
           placeholder="輸入密碼"
           ref={passwordRegisterInputRef}
-          onChangeText={setPassword}
+          onChangeText={setPasswordRegister}
           secureTextEntry={true}
+          value={passwordRegister}
         />
 
         <Pressable
@@ -283,7 +290,7 @@ export default function SettingsScreen() {
           onPress={() => {
             usernameRegisterInput?.clear();
             passwordRegisterInput?.clear();
-            userRegister(account, password);
+            userRegister(accountRegister, passwordRegister);
             setRegisterModalVisible(false);
           }}
         >

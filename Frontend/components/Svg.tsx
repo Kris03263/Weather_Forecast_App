@@ -14,6 +14,7 @@ import PlusIcon from "@/assets/svgs/plus-icon.svg";
 import WeatherIcon from "@/assets/svgs/weather-icon.svg";
 import UserAccountIcon from "@/assets/svgs/userAccount-icon.svg";
 import UserPasswordIcon from "@/assets/svgs/userPassword-icon.svg";
+import UserAccount2Icon from "@/assets/svgs/userAccount2-icon.svg";
 import ListIcon from "@/assets/svgs/list-icon.svg";
 import CloseIcon from "@/assets/svgs/close-icon.svg";
 import EarthQuakeIcon from "@/assets/svgs/earthquake-icon.svg";
@@ -46,6 +47,7 @@ export function SvgImage({ style = {}, name = "" }: SvgProps) {
     plus: PlusIcon,
     weather: WeatherIcon,
     userAccount: UserAccountIcon,
+    userAccount2: UserAccount2Icon,
     userPassword: UserPasswordIcon,
     list: ListIcon,
     close: CloseIcon,

@@ -279,6 +279,14 @@ export const userDelete = async (_userID: string) => {
   console.log("Delete with response: " + response.status);
 };
 export const userRegister = async (_account: string, _password: string) => {
+  if (_account === "") {
+    showNotification("帳號不可為空");
+    return;
+  }
+  if (_password === "") {
+    showNotification("請設定一個密碼");
+  }
+
   const user = await HandleSetUser(_account, _password);
 
   if (!user) {
