@@ -370,6 +370,8 @@ export const updateEarthquakeData = async () => {
 
   store.dispatch(setRecentEarthquakeData(data[0]));
   store.dispatch(setHistoryEarthquakeData(data));
+
+  console.log("Updated earthquake data");
 };
 export const updateRegion0 = async () => {
   const regions = store.getState().regions;
@@ -527,10 +529,10 @@ export const syncLocalDataToGlobal = async () => {
 };
 
 //////////////////
-// API fetching // (Return null & set global err msg if catch error)
+// API fetching //
 //////////////////
 
-const hostURL = "https://420269.xyz/"; //`https://weather-2-10.onrender.com/` `http://34.49.99.63/` `http://34.110.138.136/`
+const hostURL = "https://420269.xyz/";
 
 const HandleSetUser = async (
   _account: string,
