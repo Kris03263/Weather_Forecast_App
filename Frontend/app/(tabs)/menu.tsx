@@ -16,6 +16,7 @@ import {
   MenuOption,
   MenuTrigger,
 } from "react-native-popup-menu";
+import { Picker } from "@react-native-picker/picker";
 // Interfaces and Enums
 import {
   WeatherDataList,
@@ -59,13 +60,13 @@ export default function MenuScreen() {
     });
   }, []);
 
-  const handleCitySelect = (e: any) => {
-    setSelectedCity(e.target.value);
+  const handleCitySelect = (value: string) => {
+    setSelectedCity(value);
     setSelectedDistrict("");
   };
 
-  const handleDistrictSelect = (e: any) => {
-    setSelectedDistrict(e.target.value);
+  const handleDistrictSelect = (value: string) => {
+    setSelectedDistrict(value);
   };
 
   // Modal Control
@@ -184,35 +185,28 @@ export default function MenuScreen() {
         header={ModalType.SELECT}
       >
         <Text style={styles.modalInputLabel}>縣市名稱: </Text>
-        <select
-          required
-          value={selectedCity}
-          onChange={handleCitySelect}
+        <Picker
+          selectedValue={selectedCity}
+          onValueChange={handleCitySelect}
           style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
         >
-          <option key={null} value={""} />
+          <Picker.Item label="" value="" />
           {Object.keys(allRegionList.city).map((city) => (
-            <option key={city} value={city}>
-              {city}
-            </option>
+            <Picker.Item key={city} label={city} value={city} />
           ))}
-        </select>
+        </Picker>
 
         <Text style={styles.modalInputLabel}>市區名稱: </Text>
-        <select
-          required
-          value={selectedDistrict}
-          onChange={handleDistrictSelect}
+        <Picker
+          selectedValue={selectedDistrict}
+          onValueChange={handleDistrictSelect}
           style={StyleSheet.flatten([styles.modalInput, { width: "100%" }])}
         >
-          <option key={null} value={""} />
-          {selectedCity &&
-            allRegionList.city[selectedCity].map((district) => (
-              <option key={district} value={district}>
-                {district}
-              </option>
-            ))}
-        </select>
+          <Picker.Item label="" value="" />
+          {allRegionList.city[selectedCity]?.map((district) => (
+            <Picker.Item key={district} label={district} value={district} />
+          ))}
+        </Picker>
 
         <Pressable
           style={styles.modalButton}
