@@ -16,6 +16,7 @@ import {
   indicators,
   disasterTypes,
   EarthquakeDataList,
+  TyphoonData,
 } from "./_layout";
 // Components
 import { WeatherDisplay } from "@/components/WeatherDisplay";
@@ -44,6 +45,9 @@ export default function HomeScreen() {
   );
   const earthquakeDataList = useSelector(
     (state: { earthquakeData: EarthquakeDataList }) => state.earthquakeData
+  );
+  const typhoonData = useSelector(
+    (state: { typhoonData: TyphoonData[] }) => state.typhoonData
   );
   const dailySug = useSelector(
     (state: { dailySug: DailySug }) => state.dailySug
@@ -276,6 +280,7 @@ export default function HomeScreen() {
                       <EarthquakesDisplayWidget
                         type={disasterTypes.typhoon}
                         earthquakeData={earthquakeDataList.recent ?? null}
+                        typhoonData={typhoonData ?? null}
                         onPress={() => {
                           openSlideModal(
                             "disaster",
@@ -296,6 +301,7 @@ export default function HomeScreen() {
                 <DisasterInfoModal
                   disasterType={modalDisasterType}
                   earthquakeDataList={earthquakeDataList ?? null}
+                  typhoonData={typhoonData ?? null}
                   isModalShow={activeModalId === "disaster"}
                   onClose={() => setActiveModalId("-1")}
                 />
