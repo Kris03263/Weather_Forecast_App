@@ -4,6 +4,7 @@ import {
   useSharedValue,
   useDerivedValue,
   withTiming,
+  runOnJS,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 // Interfaces and Enums
@@ -41,7 +42,8 @@ export function Background({ weatherData, style }: BackgroundProps) {
   }, [newBackgroundColor]);
 
   useDerivedValue(() => {
-    setBackgroundColor([color1.value, color2.value]);
+    "worklet";
+    runOnJS(setBackgroundColor)([color1.value, color2.value]);
   }, []);
 
   return (

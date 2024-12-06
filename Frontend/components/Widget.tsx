@@ -2,6 +2,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
+  runOnJS,
   useDerivedValue,
   useSharedValue,
   withTiming,
@@ -46,7 +47,8 @@ export function Widget({
   }, [isVisible]);
 
   useDerivedValue(() => {
-    setOpacityValue_page(opacity.value);
+    "worklet";
+    runOnJS(setOpacityValue_page)(opacity.value);
   }, []);
 
   if (isPressable)
