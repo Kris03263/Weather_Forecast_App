@@ -1,8 +1,7 @@
 // React Component and Package
 import { Modal, StyleSheet, Text, View } from "react-native";
-import { Children, ReactNode } from "react";
+import { ReactNode } from "react";
 
-// TODO: Change content and footer to be ReactNode only
 export interface PopupModalProps {
   isVisible: boolean;
   onClose: () => void;

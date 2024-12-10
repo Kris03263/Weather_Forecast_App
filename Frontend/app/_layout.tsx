@@ -8,7 +8,6 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import "react-native-reanimated";
-import { NavigationContainer } from "@react-navigation/native";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 
