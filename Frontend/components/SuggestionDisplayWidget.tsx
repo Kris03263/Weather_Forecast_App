@@ -1,8 +1,9 @@
+// React Component and Package
 import { StyleSheet, View, Text } from "react-native";
-
-import { Widget } from "@/components/Widget";
-
+// Interfaces and Enums
 import { DailySug } from "@/app/(tabs)/_layout";
+// Components
+import { Widget } from "@/components/Widget";
 
 interface SuggestionDisplayWidgetProps {
   dailySug: DailySug;

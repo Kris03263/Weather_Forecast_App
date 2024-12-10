@@ -100,8 +100,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#238636",
-    padding: 12,
     borderRadius: 10,
+    padding: 10,
     gap: 10,
   },
   shareButtonText: {

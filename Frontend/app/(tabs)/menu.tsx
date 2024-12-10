@@ -1,5 +1,5 @@
 // React Component and Package
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   // Region Card
   regionCard: {
     margin: 5,
-    paddingHorizontal: 8,
+    padding: 10,
     flexDirection: "column",
     justifyContent: "space-between",
     gap: 10,

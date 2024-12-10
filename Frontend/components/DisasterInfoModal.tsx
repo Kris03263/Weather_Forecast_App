@@ -1,24 +1,22 @@
+// React Component and Package
 import {
   View,
-  Modal,
   Pressable,
-  Animated,
   Text,
   StyleSheet,
-  ScrollView,
   Share,
   Alert,
   Image,
-  FlatList,
 } from "react-native";
-import { useRef, useEffect, useState } from "react";
-
+import { useEffect, useState } from "react";
+// Components
 import { SvgImage } from "@/components/Svg";
-import { EarthquakeData, EarthquakeDataList } from "@/app/(tabs)/_layout";
+import { EarthquakeDataList } from "@/app/(tabs)/_layout";
 import { TyphoonData } from "@/app/(tabs)/_layout";
 import { disasterTypes } from "@/app/(tabs)/_layout";
 import { SlideModal } from "@/components/SlideModal";
 import { Dropdown } from "@/components/DropDown";
+
 interface DisasterInfoModalProps {
   disasterType: disasterTypes;
   isModalShow: boolean;

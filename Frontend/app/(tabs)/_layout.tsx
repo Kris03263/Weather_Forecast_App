@@ -31,17 +31,7 @@ import {
 } from "@/redux/earthquakeDataSlice";
 import { setTyphoonData } from "@/redux/typhoonDataSlice";
 
-// TODO list:
-// - [V] Add weather data API
-// - [V] Add weather image
-// - [X] Fix muti-day weather forecast view (Cancel)
-// - [V] Switch to use region name to fetch weather data
-// - [V] Switch to use Redux for global state management
-// - [V] Move weatherDataList, region, currentTime to index.tsx
-// - [V] Use a global variable to save wrong msg
-// - [X] Move background color control to _layout.tsx (Instead moving to Background.tsx)
-// - [V] Change region-selector to number
-
+// Enums
 export enum indicators {
   bodyTemp = "bodyTemp",
   aqi = "aqi",
@@ -56,6 +46,8 @@ export enum disasterTypes {
   earthquake = "earthquake",
   typhoon = "typhoon",
 }
+
+// Dictionary
 export const indicatorsDictionary = {
   [indicators.aqi]: {
     title: "空氣品質",
@@ -114,6 +106,8 @@ export const indicatorsDictionary = {
     hasChart: true,
   },
 };
+
+// Interfaces
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
 }
@@ -1234,9 +1228,6 @@ export default function TabLayout() {
     setSocketInstance(socket);
 
     socket.on("connect", () => {
-      console.log(`Connect WebSocket (id: ${socket.id}) success`);
-      setIsConnected(true);
-      // 設置位置（選擇真實或假資料）
       socket.emit("set_location", {
         userID: 1,
         longitude: "120.62343304881064",
@@ -1247,6 +1238,8 @@ export default function TabLayout() {
         longitude: store.getState().regions[0]?.longitude ?? "-1",
         latitude: store.getState().regions[0]?.latitude ?? "-1",
       });
+      console.log(`Connect WebSocket (id: ${socket.id}) success`);
+      setIsConnected(true);
     });
     socket.on("connect_error", () => {
       console.log(`Connect WebSocket (id: ${socket.id}) failed`);
@@ -1264,14 +1257,12 @@ export default function TabLayout() {
       console.log(data.message);
     });
     socket.on("earthquake_update", (data) => {
-      showNotification(`${JSON.stringify(data)}`); // 更新 UI 或顯示地震通知 // 收到地震資料: ${JSON.stringify(data)}
+      showNotification(`${JSON.stringify(data)}`);
     });
     socket.on("earthquake_update_fake", (data) => {
-      showNotification(`${JSON.stringify(data)}`); //收到地震資料(測試用): ${JSON.stringify(data)}
+      showNotification(`${JSON.stringify(data)}`);
     });
   }, []);
-
-  const colorScheme = useColorScheme();
 
   return (
     <Provider store={store}>

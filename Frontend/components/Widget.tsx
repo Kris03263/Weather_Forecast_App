@@ -81,8 +81,8 @@ export function Widget({
 // Default Style
 const styles = StyleSheet.create({
   emptyWidget: {
-    height: 150,
-    width: 150,
+    height: 140,
+    width: 140,
     alignItems: "flex-start",
     padding: 10,
     margin: 10,

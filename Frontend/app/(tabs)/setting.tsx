@@ -1,5 +1,5 @@
 // React Component and Package
-import { useState, useEffect, useRef, ReactNode } from "react";
+import { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
 // Interfaces and Enums

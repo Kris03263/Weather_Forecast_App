@@ -1,12 +1,13 @@
+// React Component and Package
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
-
+// Enums and Interfaces
 import {
   disasterTypes,
   EarthquakeData,
   TyphoonData,
 } from "@/app/(tabs)/_layout";
-
+// Components
 import { Widget } from "@/components/Widget";
 
 interface EarthquakesDisplayWidgetProps {
@@ -37,36 +38,6 @@ export function EarthquakesDisplayWidget({
             <Text style={styles.contentText}>
               {earthquakeData?.content ?? ""}
             </Text>
-            {/* <View style={styles.listLayout}>
-          <Text style={styles.listTitleText}>時間:</Text>
-          <Text style={styles.listContentText}>
-            {earthquakeData?.time ?? "--"}
-          </Text>
-        </View>
-        <View style={styles.listLayout}>
-          <Text style={styles.listTitleText}>規模:</Text>
-          <Text style={styles.listContentText}>
-            {earthquakeData?.magnitude ?? "--"}
-          </Text>
-        </View>
-        <View style={styles.listLayout}>
-          <Text style={styles.listTitleText}>所在地區震度:</Text>
-          <Text style={styles.listContentText}>
-            {earthquakeData?.nowLocationIntensity ?? "--"}
-          </Text>
-        </View>
-        <View style={styles.listLayout}>
-          <Text style={styles.listTitleText}>深度:</Text>
-          <Text style={styles.listContentText}>
-            {earthquakeData?.depth ?? "--"}公里
-          </Text>
-        </View>
-        <View style={styles.listLayout}>
-          <Text style={styles.listTitleText}>距離:</Text>
-          <Text style={styles.listContentText}>
-            {earthquakeData?.distance ?? "--"}公里
-          </Text>
-        </View> */}
           </View>
         </Widget>
       );

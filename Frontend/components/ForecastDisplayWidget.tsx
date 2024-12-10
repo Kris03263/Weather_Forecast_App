@@ -61,7 +61,7 @@ export function ForecastDisplayWidget({
 
 const styles = StyleSheet.create({
   customWidgetStyle: {
-    width: 310,
+    width: 300,
     overflow: "hidden",
   },
   // Content
