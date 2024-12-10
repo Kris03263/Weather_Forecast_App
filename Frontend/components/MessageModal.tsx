@@ -1,5 +1,13 @@
 // React Component and Package
-import { StyleSheet, Pressable, Text, Share, Alert, Image } from "react-native";
+import {
+  StyleSheet,
+  Pressable,
+  Text,
+  Share,
+  Alert,
+  Image,
+  View,
+} from "react-native";
 import { useSelector } from "react-redux";
 // Components
 import { PopupModal } from "@/components/PopupModal";
@@ -19,11 +27,12 @@ export function MessageModal() {
   );
 
   const shareContent = async (messageString: string, urlString?: string) => {
+    console.log(urlString);
     try {
       await Share.share(
         {
-          title: "分享地震資訊",
-          message: `${messageString || ""}\n`,
+          title: `分享地震資訊$`,
+          message: `${messageString || ""}\n${urlString || ""}`,
           url: urlString || "",
         },
         {
@@ -37,9 +46,19 @@ export function MessageModal() {
 
   try {
     const messageObj = JSON.parse(message);
+    console.log(messageObj);
     const time = new Date(messageObj.時間);
-    const urlTime = `${time.getFullYear()}-${time.getMonth()}-${time.getDate()}_${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
-    console.log(urlTime);
+    const urlTime = encodeURIComponent(
+      `${time.getFullYear()}-${(time.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}-${time.getDate().toString().padStart(2, "0")}_${time
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${time
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}:${time.getSeconds().toString().padStart(2, "0")}`
+    );
     const url = `https://420269.xyz/Disaster/getImage?time=${urlTime}`;
     return (
       <PopupModal
@@ -48,10 +67,17 @@ export function MessageModal() {
         header="通知"
       >
         <Text>{messageObj.地震資訊}</Text>
-        <Image
-          source={{ uri: `${url}` }}
-          style={{ width: "100%", height: 500 }}
-        ></Image>
+        <View style={{ width: "100%", aspectRatio: 0.75 }}>
+          <Image
+            source={{ uri: url }}
+            style={{
+              width: "100%",
+              height: "100%",
+              resizeMode: "contain",
+              borderRadius: 20,
+            }}
+          />
+        </View>
         <Pressable
           style={styles.shareButton}
           onPress={() => shareContent(messageObj.地震資訊, url)}
