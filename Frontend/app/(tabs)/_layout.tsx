@@ -247,7 +247,7 @@ export const userLogin = async (_account: string, _password: string) => {
   }
 
   store.dispatch(setUser(user));
-  AsyncStorage.setItem("userID", user.id);
+  AsyncStorage.setItem("userID", JSON.stringify(user.id));
 
   await Promise.all([updateUserSettings(), updateDailySuggestions()]);
 
@@ -279,6 +279,7 @@ export const userRegister = async (_account: string, _password: string) => {
   }
   if (_password === "") {
     showNotification("請設定一個密碼");
+    return;
   }
 
   const user = await HandleSetUser(_account, _password);
@@ -289,7 +290,7 @@ export const userRegister = async (_account: string, _password: string) => {
   }
 
   store.dispatch(setUser(user));
-  AsyncStorage.setItem("userID", user.id);
+  AsyncStorage.setItem("userID", JSON.stringify(user.id));
 
   await Promise.all([userLogin(_account, _password)]);
 
@@ -1328,8 +1329,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     height: 60,
     paddingHorizontal: 120,
-    paddingBottom: 30,
-    paddingTop: 10,
+    paddingBottom: 20,
     borderTopWidth: 0,
   },
 });
