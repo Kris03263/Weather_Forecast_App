@@ -1,5 +1,5 @@
 // React Component and Package
-import { StyleSheet, Pressable, Text, Share, Alert } from "react-native";
+import { StyleSheet, Pressable, Text, Share, Alert, Image } from "react-native";
 import { useSelector } from "react-redux";
 // Components
 import { PopupModal } from "@/components/PopupModal";
@@ -37,6 +37,10 @@ export function MessageModal() {
 
   try {
     const messageObj = JSON.parse(message);
+    const time = new Date(messageObj.時間);
+    const urlTime = `${time.getFullYear()}-${time.getMonth()}-${time.getDate()}_${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+    console.log(urlTime);
+    const url = `https://420269.xyz/Disaster/getImage?time=${urlTime}`;
     return (
       <PopupModal
         isVisible={isVisible}
@@ -44,11 +48,13 @@ export function MessageModal() {
         header="通知"
       >
         <Text>{messageObj.地震資訊}</Text>
+        <Image
+          source={{ uri: `${url}` }}
+          style={{ width: "100%", height: 500 }}
+        ></Image>
         <Pressable
           style={styles.shareButton}
-          onPress={() =>
-            shareContent(messageObj.地震資訊, messageObj.社交連結url)
-          }
+          onPress={() => shareContent(messageObj.地震資訊, url)}
         >
           <SvgImage name="share" style={styles.svgImage} />
           <Text style={styles.shareButtonText}>分享</Text>
