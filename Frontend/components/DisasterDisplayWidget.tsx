@@ -105,23 +105,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "left",
   },
-  listLayout: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  listTitleText: {
-    color: "white",
-    fontSize: 16,
-    textAlign: "left",
-  },
-  listContentText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "left",
-  },
   svgImage: {
     width: 30,
     height: 30,

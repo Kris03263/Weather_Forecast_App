@@ -64,7 +64,6 @@ export default function MenuScreen() {
     setSelectedCity(value);
     setSelectedDistrict("");
   };
-
   const handleDistrictSelect = (value: string) => {
     setSelectedDistrict(value);
   };
@@ -233,6 +232,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  // Top Section
   topSection: {
     flexDirection: "row",
     justifyContent: "center",
@@ -252,6 +252,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     width: "100%",
   },
+  // Body Section
   bodySection: {
     backgroundColor: "#FFFFFF01",
     padding: "3%",

@@ -1,3 +1,4 @@
+// React Components and Packages
 import React, { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import { StyleSheet } from "react-native";
@@ -7,10 +8,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuProvider } from "react-native-popup-menu";
 import io, { Socket } from "socket.io-client";
 import md5 from "md5";
-
-import { useColorScheme } from "@/hooks/useColorScheme";
+// Components
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { MessageModal } from "@/components/MessageModal";
+// Redux
 import store from "@/redux/store";
 import {
   updateWeatherData3h,
@@ -46,7 +47,6 @@ export enum disasterTypes {
   earthquake = "earthquake",
   typhoon = "typhoon",
 }
-
 // Dictionary
 export const indicatorsDictionary = {
   [indicators.aqi]: {
@@ -106,7 +106,6 @@ export const indicatorsDictionary = {
     hasChart: true,
   },
 };
-
 // Interfaces
 export interface WeatherDataList {
   [key: string]: WeatherData[][];
@@ -235,7 +234,6 @@ export interface GlobalMessage {
 //////////////////////
 // Define functions //
 //////////////////////
-
 export const userLogin = async (_account: string, _password: string) => {
   await userLogout();
 
@@ -597,9 +595,7 @@ export const syncLocalDataToGlobal = async () => {
 //////////////////
 // API fetching //
 //////////////////
-
 const hostURL = "https://420269.xyz/";
-
 const HandleSetUser = async (
   _account: string,
   _password: string
@@ -1151,7 +1147,6 @@ const HandleGetEarthquakeData = async (
     return null;
   }
 };
-
 const HandleGetTyphoonData = async () => {
   try {
     const data = await fetch(`${hostURL}/Disaster/GetTyphoonData`, {
