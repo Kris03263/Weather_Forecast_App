@@ -409,6 +409,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  // Top Section
   topSection: {
     flexDirection: "row",
     justifyContent: "center",
@@ -435,6 +436,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 10,
   },
+  // Body Section
   bodySection: {
     flexDirection: "row",
     backgroundColor: "#FFFFFF01",

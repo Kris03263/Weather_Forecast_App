@@ -72,7 +72,8 @@ export function DisasterInfoModal({
         setSvgName("typhoon");
         break;
       default:
-        return "未知災害";
+        setTitle("未知災害");
+        setSvgName("");
     }
   };
   const getDisasterContent = (disasterType: disasterTypes) => {
@@ -80,6 +81,11 @@ export function DisasterInfoModal({
       case disasterTypes.earthquake:
         return (
           <>
+            <Dropdown
+              itemList={earthquakeDataArray}
+              onSelect={(index) => setSelectedDisasterIndex(index)}
+              style={{ width: 220 }}
+            />
             <View style={styles.card}>
               <Text style={styles.cardTitle}>地震示意圖</Text>
               <Text style={styles.cardText}>
@@ -93,7 +99,6 @@ export function DisasterInfoModal({
                 />
               </Text>
             </View>
-
             <View style={styles.card}>
               <Text style={styles.cardTitle}>芮氏規模</Text>
               <Text style={styles.cardText}>
@@ -101,16 +106,14 @@ export function DisasterInfoModal({
                   ?.magnitude ?? "未知"}
               </Text>
             </View>
-
             <View style={styles.card}>
               <Text style={styles.cardTitle}>震源深度</Text>
               <Text style={styles.cardText}>
                 {earthquakeDataList?.history?.[selectedDisasterIndex]?.depth ??
-                  "未知"}{" "}
-                km
+                  "未知"}
+                {" km"}
               </Text>
             </View>
-
             <View style={styles.card}>
               <Text style={styles.cardTitle}>發生時間</Text>
               <Text style={styles.cardText}>
@@ -118,7 +121,6 @@ export function DisasterInfoModal({
                   "未知"}
               </Text>
             </View>
-
             <View style={styles.card}>
               <Text style={styles.cardTitle}>與震央距離</Text>
               <Text style={styles.cardText}>
@@ -127,11 +129,20 @@ export function DisasterInfoModal({
                 km
               </Text>
             </View>
+            <Pressable style={styles.shareButton} onPress={shareContent}>
+              <SvgImage name="share" style={styles.svgImage} />
+              <Text style={styles.shareButtonText}>分享</Text>
+            </Pressable>
           </>
         );
       case disasterTypes.typhoon:
         return (
           <>
+            <Dropdown
+              itemList={typhoonDataArray}
+              onSelect={(index) => setSelectedDisasterIndex(index)}
+              style={{ width: 220 }}
+            />
             <View style={styles.card}>
               <Text style={styles.cardTitle}>颱風名稱</Text>
               <Text style={styles.cardText}>
@@ -249,40 +260,56 @@ export function DisasterInfoModal({
         svgName: "typhoon",
       };
     }) || [];
-  return (
-    <>
-      <View>
-        <SlideModal
-          title={title}
-          svgName={svgName}
-          isVisible={isModalShow}
-          onClose={() => onClose()}
-        >
-          <View style={styles.separator} />
-          <Dropdown
-            itemList={
-              disasterType === disasterTypes.earthquake
-                ? earthquakeDataArray
-                : typhoonDataArray
-            }
-            onSelect={(index) => setSelectedDisasterIndex(index)}
-            style={{ width: 220 }}
-          ></Dropdown>
-          {getDisasterContent(disasterType)}
 
-          {disasterType === disasterTypes.earthquake && (
-            <Pressable style={styles.shareButton} onPress={shareContent}>
-              <SvgImage name="share" style={styles.svgImage} />
-              <Text style={styles.shareButtonText}>分享</Text>
-            </Pressable>
-          )}
-        </SlideModal>
-      </View>
-    </>
+  if (
+    (disasterType === disasterTypes.earthquake &&
+      earthquakeDataArray.length === 0) ||
+    (disasterType === disasterTypes.typhoon && typhoonDataArray.length === 0)
+  ) {
+    return (
+      <SlideModal
+        title={title}
+        svgName={svgName}
+        isVisible={isModalShow}
+        onClose={() => onClose()}
+      >
+        <View style={styles.separator} />
+
+        <Text style={styles.loadingText}>載入資料中...</Text>
+        <Text style={styles.hintText}>
+          (若長時間無法載入，請檢查網路連線或聯絡開發者)
+        </Text>
+      </SlideModal>
+    );
+  }
+  return (
+    <SlideModal
+      title={title}
+      svgName={svgName}
+      isVisible={isModalShow}
+      onClose={() => onClose()}
+    >
+      <View style={styles.separator} />
+
+      {getDisasterContent(disasterType)}
+    </SlideModal>
   );
 }
 
 const styles = StyleSheet.create({
+  // Loading
+  loadingText: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  hintText: {
+    color: "white",
+    fontSize: 12,
+    textAlign: "center",
+  },
+  // Modal
   modalBackground: {
     flexGrow: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -313,7 +340,6 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#9ca8b7",
   },
-
   // Header
   headerLayout: {
     width: "100%",
@@ -324,7 +350,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: 10,
   },
-
   // Title
   titleLayout: {
     flexDirection: "row",
@@ -338,11 +363,6 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   // Close Button
-  closeButtonText: {
-    color: "#9ca8b7",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
   closeButton: {
     backgroundColor: "#2f363e",
     borderRadius: 30,
@@ -352,7 +372,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 2,
   },
-
+  closeButtonText: {
+    color: "#9ca8b7",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  // Share Button
+  shareButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#238636",
+    padding: 12,
+    borderRadius: 10,
+    gap: 10,
+  },
+  shareButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
   // Svg
   svgImage: {
     width: 20,
@@ -380,7 +418,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#d1d5da",
   },
-
+  // Layout
   row: {
     minWidth: "100%",
     flexDirection: "row",
@@ -388,19 +426,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
   },
-  shareButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#238636",
-    padding: 12,
-    borderRadius: 10,
-    gap: 10,
-  },
-  shareButtonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
+  // Dropdown
   dropdownLayout: {
     height: 40,
     backgroundColor: "#333",

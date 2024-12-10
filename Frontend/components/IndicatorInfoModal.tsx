@@ -52,6 +52,23 @@ export function IndicatorInfoModal({
     setSelectedIndicator(indicatorType);
   }, [indicatorType]);
 
+  if (!weatherDatas || weatherDatas.length === 0) {
+    return (
+      <SlideModal
+        title={indicatorsDictionary[selectedIndicator].title}
+        svgName={indicatorsDictionary[selectedIndicator].svgName}
+        isVisible={isVisible}
+        onClose={onClose}
+      >
+        <View style={styles.separator} />
+
+        <Text style={styles.loadingText}>載入資料中...</Text>
+        <Text style={styles.hintText}>
+          (若長時間無法載入，請檢查網路連線或聯絡開發者)
+        </Text>
+      </SlideModal>
+    );
+  }
   return (
     <SlideModal
       title={indicatorsDictionary[selectedIndicator].title}
@@ -150,6 +167,18 @@ export function IndicatorInfoModal({
 }
 
 const styles = StyleSheet.create({
+  // Loading
+  loadingText: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  hintText: {
+    color: "white",
+    fontSize: 12,
+    textAlign: "center",
+  },
   // Separator
   separator: {
     height: 1,

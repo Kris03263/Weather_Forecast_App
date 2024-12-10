@@ -114,16 +114,12 @@ export default function HomeScreen() {
     disasterTypes.earthquake
   );
 
-  function openSlideModal(
-    id: string,
-    indicatorType?: indicators,
-    disasterType?: disasterTypes
-  ) {
-    if (indicatorType) setModalIndicatorType(indicatorType);
-    if (disasterType) setModalDisasterType(disasterType);
+  function openSlideModal(id: string, type: indicators | disasterTypes) {
+    console.log("openSlideModal", id, type);
+    if (type in indicators) setModalIndicatorType(type as indicators);
+    else if (type in disasterTypes) setModalDisasterType(type as disasterTypes);
     setActiveModalId(id);
   }
-
   return (
     <View style={styles.container}>
       {/* Gradiant */}
@@ -270,11 +266,7 @@ export default function HomeScreen() {
                         type={disasterTypes.earthquake}
                         earthquakeData={earthquakeDataList.recent ?? null}
                         onPress={() => {
-                          openSlideModal(
-                            "disaster",
-                            undefined,
-                            disasterTypes.earthquake
-                          );
+                          openSlideModal("disaster", disasterTypes.earthquake);
                         }}
                       />
                       <EarthquakesDisplayWidget
@@ -282,24 +274,20 @@ export default function HomeScreen() {
                         earthquakeData={earthquakeDataList.recent ?? null}
                         typhoonData={typhoonData ?? null}
                         onPress={() => {
-                          openSlideModal(
-                            "disaster",
-                            undefined,
-                            disasterTypes.typhoon
-                          );
+                          openSlideModal("disaster", disasterTypes.typhoon);
                         }}
                       />
                     </>
                   )}
                 </View>
                 <IndicatorInfoModal
-                  indicatorType={modalIndicatorType}
+                  indicatorType={modalIndicatorType as indicators}
                   weatherDatas={weatherDataList?.[item.id]?.[0] ?? null}
                   isVisible={activeModalId === item.id}
                   onClose={() => setActiveModalId("-1")}
                 />
                 <DisasterInfoModal
-                  disasterType={modalDisasterType}
+                  disasterType={modalDisasterType as disasterTypes}
                   earthquakeDataList={earthquakeDataList ?? null}
                   typhoonData={typhoonData ?? null}
                   isModalShow={activeModalId === "disaster"}
@@ -367,6 +355,7 @@ const styles = StyleSheet.create({
     padding: "3%",
     paddingBottom: 80,
   },
+  // Layout
   rowLayout: {
     minWidth: "100%",
     flexDirection: "row",
