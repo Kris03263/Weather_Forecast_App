@@ -129,17 +129,15 @@ export function IndicatorInfoModal({
           onSelect={(index) => setSelectedIndicator(indicatorList[index])}
         />
       </View>
-      <View onStartShouldSetResponder={() => false}>
-        {/* Chart */}
-        <Chart
-          indicatorType={selectedIndicator}
-          weatherDatas={weatherDatas}
-          selectedDateIndex={selectedDateIndex}
-          onSelectDataChange={(newSelectData: SelectedData) =>
-            setSelectedData(newSelectData)
-          }
-        />
-      </View>
+      {/* Chart */}
+      <Chart
+        indicatorType={selectedIndicator}
+        weatherDatas={weatherDatas}
+        selectedDateIndex={selectedDateIndex}
+        onSelectDataChange={(newSelectData: SelectedData) =>
+          setSelectedData(newSelectData)
+        }
+      />
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>當日小結</Text>
