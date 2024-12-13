@@ -63,7 +63,8 @@ def get3hData(cusloc):
     weatherData = requests.get(url('3h', loc["city"], loc["district"], offsetTime)).json()[
         "records"]["Locations"][0]["Location"][0]["WeatherElement"]
     resultElement = []  # 初始化陣列
-    timeOffset = 3-datetime.strptime(weatherData[0]["Time"][0]["DataTime"],"%Y-%m-%dT%H:%M:%S%z").hour % 3
+    nowTime = datetime.strptime(weatherData[8]["Time"][0]["StartTime"], "%Y-%m-%dT%H:%M:%S%z")
+    timeOffset = 3-nowTime.hour % 3
     airData = getAirData(axis["lon"], axis["lat"])
 
     for time in range(len(weatherData[8]["Time"])):
@@ -77,7 +78,7 @@ def get3hData(cusloc):
             "rainRate": weatherData[7]["Time"][time]["ElementValue"][0]["ProbabilityOfPrecipitation"],
             "windSpeed": weatherData[5]["Time"][time]["ElementValue"][0]["WindSpeed"],
             "windDirection": weatherData[6]["Time"][time]["ElementValue"][0]["WindDirection"],
-            "time": weatherData[8]["Time"][time]["StartTime"],
+            "time": nowTime.strftime("%Y-%m-%d %H:%M:%S"),
             "city": loc["city"],
             "district": loc["district"]
         }, **(airData if time == 0 else {
@@ -109,8 +110,8 @@ def get12hData(cusloc):
     weatherData = requests.get(url('12h', loc["city"], loc["district"], offsetTime)).json()[
         "records"]["Locations"][0]["Location"][0]["WeatherElement"]
     resultElement = []  # 初始化陣列
-    dayOffset = 0 if datetime.strptime(
-        weatherData[0]["Time"][0]["StartTime"], "%Y-%m-%dT%H:%M:%S%z").hour < 18 else 1  # 調整數據為白天
+    nowTime = datetime.strptime(weatherData[0]["Time"][0]["StartTime"], "%Y-%m-%dT%H:%M:%S%z")
+    dayOffset = 0 if nowTime.hour < 18 else 1  # 調整數據為白天
     if dayOffset:
         resultElement.append(get3hData(cusloc)[0])
 
@@ -127,7 +128,7 @@ def get12hData(cusloc):
             "rainRate":      rainRateDataNow if rainRateDataNow != "-" else "尚無資料",
             "windSpeed":     weatherData[9]["Time"][time+dayOffset]["ElementValue"][0]["WindSpeed"],
             "windDirection": weatherData[10]["Time"][time+dayOffset]["ElementValue"][0]["WindDirection"],
-            "time":          weatherData[0]["Time"][time+dayOffset]["StartTime"],
+            "time":          nowTime.strftime("%Y-%m-%d %H:%M:%S"),
             "city":          loc["city"],
             "district":      loc["district"],
             "sitename": None,
