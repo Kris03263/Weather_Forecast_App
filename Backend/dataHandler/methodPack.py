@@ -1,5 +1,5 @@
 from geopy.geocoders import Nominatim
-import geopy.geocoders,certifi,ssl,math
+import geopy.geocoders,certifi,ssl,math,json
 ctx = ssl.create_default_context(cafile=certifi.where())
 geopy.geocoders.options.default_ssl_context = ctx
 
@@ -38,3 +38,10 @@ def haversine(lat1, lon1, lat2, lon2):
     distance = R * c
 
     return f"{distance:.2f}"
+
+def transToAxis(loc):
+    citycode = None
+    with open('axisCode.json') as f:
+        citycode = json.load(f)
+
+    return citycode["city"][loc["city"]][loc["district"]]

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from .airData import getAirData
-from .locationToAxis import transToAxis
+from .methodPack import transToAxis
 from datetime import datetime
 import requests
 import json
@@ -63,7 +63,7 @@ def get3hData(cusloc):
     weatherData = requests.get(url('3h', loc["city"], loc["district"], offsetTime)).json()[
         "records"]["Locations"][0]["Location"][0]["WeatherElement"]
     resultElement = []  # 初始化陣列
-    timeOffset = 3-datetime.strptime(weatherData[0]["Time"][0]["DataTime"],"%Y-%m-%d %H:%M:%S").hour % 3
+    timeOffset = 3-datetime.strptime(weatherData[0]["Time"][0]["DataTime"],"%Y-%m-%dT%H:%M:%S%z").hour % 3
     airData = getAirData(axis["lon"], axis["lat"])
 
     for time in range(len(weatherData[8]["Time"])):
@@ -110,7 +110,7 @@ def get12hData(cusloc):
         "records"]["Locations"][0]["Location"][0]["WeatherElement"]
     resultElement = []  # 初始化陣列
     dayOffset = 0 if datetime.strptime(
-        weatherData[0]["Time"][0]["StartTime"], "%Y-%m-%d %H:%M:%S").hour < 18 else 1  # 調整數據為白天
+        weatherData[0]["Time"][0]["StartTime"], "%Y-%m-%dT%H:%M:%S%z").hour < 18 else 1  # 調整數據為白天
     if dayOffset:
         resultElement.append(get3hData(cusloc)[0])
 
