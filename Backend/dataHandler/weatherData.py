@@ -78,7 +78,7 @@ def get3hData(cusloc):
             "rainRate": weatherData[7]["Time"][time]["ElementValue"][0]["ProbabilityOfPrecipitation"],
             "windSpeed": weatherData[5]["Time"][time]["ElementValue"][0]["WindSpeed"],
             "windDirection": weatherData[6]["Time"][time]["ElementValue"][0]["WindDirection"],
-            "time": nowTime.strftime("%Y-%m-%d %H:%M:%S"),
+            "time": datetime.strptime(weatherData[8]["Time"][time]["StartTime"], "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%d %H:%M:%S"),
             "city": loc["city"],
             "district": loc["district"]
         }, **(airData if time == 0 else {
@@ -128,7 +128,7 @@ def get12hData(cusloc):
             "rainRate":      rainRateDataNow if rainRateDataNow != "-" else "尚無資料",
             "windSpeed":     weatherData[9]["Time"][time+dayOffset]["ElementValue"][0]["WindSpeed"],
             "windDirection": weatherData[10]["Time"][time+dayOffset]["ElementValue"][0]["WindDirection"],
-            "time":          nowTime.strftime("%Y-%m-%d %H:%M:%S"),
+            "time":          datetime.strptime(weatherData[8]["Time"][time+dayOffset]["StartTime"], "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%d %H:%M:%S"),
             "city":          loc["city"],
             "district":      loc["district"],
             "sitename": None,
