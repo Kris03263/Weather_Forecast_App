@@ -232,13 +232,23 @@ export function DisasterInfoModal({
           svgName = "greenDot";
           break;
       }
-      const timeString = `${new Date(data.time).getFullYear()}年${
+      const timeString = `${new Date(data.time).getFullYear()}年${(
         new Date(data.time).getMonth() + 1
-      }月${new Date(data.time).getDate()}日 ${new Date(
-        data.time
-      ).getHours()}:${new Date(data.time).getMinutes()}:${new Date(
-        data.time
-      ).getSeconds()}`;
+      )
+        .toString()
+        .padStart(2, "0")}月${new Date(data.time)
+        .getDate()
+        .toString()
+        .padStart(2, "0")}日 ${new Date(data.time)
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${new Date(data.time)
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}:${new Date(data.time)
+        .getSeconds()
+        .toString()
+        .padStart(2, "0")}`;
       //getmonth() is 0-11
       return {
         title: timeString,
@@ -248,13 +258,23 @@ export function DisasterInfoModal({
 
   const typhoonDataArray =
     typhoonData?.[0]?.futurePosition?.map((data, index) => {
-      const timeString = `${new Date(data?.futureTime).getFullYear()}年${
+      const timeString = `${new Date(data?.futureTime).getFullYear()}年${(
         new Date(data?.futureTime).getMonth() + 1
-      }月${new Date(data?.futureTime).getDate()}日 ${new Date(
-        data?.futureTime
-      ).getHours()}:${new Date(data?.futureTime).getMinutes()}:${new Date(
-        data?.futureTime
-      ).getSeconds()}`;
+      )
+        .toString()
+        .padStart(2, "0")}月${new Date(data?.futureTime)
+        .getDate()
+        .toString()
+        .padStart(2, "0")}日 ${new Date(data?.futureTime)
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${new Date(data?.futureTime)
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}:${new Date(data?.futureTime)
+        .getSeconds()
+        .toString()
+        .padStart(2, "0")}`;
       return {
         title: timeString,
         svgName: "typhoon",
